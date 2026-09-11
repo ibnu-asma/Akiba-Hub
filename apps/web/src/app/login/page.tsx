@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Icon } from '@/components/icon';
+import { OutlinedInput } from '@/components/form/field';
 
 interface LoginResponse {
   user?: { name: string };
@@ -46,50 +48,38 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-slate-50 px-4">
+    <div className="grid min-h-screen place-items-center bg-white px-4">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
-          <span className="inline-grid h-14 w-14 place-items-center rounded-2xl bg-a2sv-500 text-xl font-bold text-white">
-            H
+          <span className="inline-grid h-14 w-14 place-items-center rounded-2xl bg-a2sv-500 text-white shadow-[0_12px_22px_-10px_rgba(15,169,88,0.6)]">
+            <Icon name="code" className="h-7 w-7" />
           </span>
           <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">Sign in to A2SV Hub</h1>
           <p className="mt-1 text-sm text-slate-500">Access is invite-only (SPEC §12.1).</p>
         </div>
 
-        <form onSubmit={submit} className="card space-y-4 p-6">
-          <div>
-            <label htmlFor="email" className="field-label">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              className="field-input"
-              placeholder="you@a2sv.org"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="field-label">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="field-input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+        <form onSubmit={submit} className="card space-y-5 p-6 sm:p-8">
+          <OutlinedInput
+            label="Email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="type your email here…"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <OutlinedInput
+            label="Password"
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
           {error && (
-            <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+            <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
               {error}
             </p>
           )}

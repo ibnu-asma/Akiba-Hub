@@ -25,6 +25,17 @@ const PATHS: Record<AllIconName, string> = {
   logout: 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9',
   sliders: 'M4 7h9m4 0h3M15 5v4M4 12h3m4 0h9M9 10v4M4 17h11m4 0h1M17 15v4',
   check: 'm5 13 4 4L19 7',
+  checkCircle: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Zm-3.8 9.2 2.6 2.6 5-5.2',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  chevronDown: 'm6 9 6 6 6-6',
+  chevronRight: 'm9 6 6 6-6 6',
+  x: 'M18 6 6 18M6 6l12 12',
+  trend: 'm7 7 10 10M17 7v10H7',
+  user: 'M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-6 10v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2',
+  dots: 'M12 6h.01M12 12h.01M12 18h.01',
+  mail: 'M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Zm0 1.5 8 5.5 8-5.5',
+  clock: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Zm0 4.5V12l3 2.5',
+  upload: 'M12 16V4m0 0L7 9m5-5 5 5M5 20h14',
 };
 
 export function Icon({ name, className = 'h-5 w-5' }: { name: AllIconName; className?: string }) {

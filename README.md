@@ -51,6 +51,18 @@ bash scripts/web-smoke.sh       # 23 checks: auth, RBAC nav sections, guards
 bash scripts/api-smoke.sh 2>/dev/null || true   # (api checks live in repo history)
 ```
 
+## Design language
+
+The UI follows the A2SV Hub design language extracted from the reference app —
+see `docs/a2sv-ui-design-language.md` for the full contract (Poppins, `#0FA958`
+primary green, flat hairline cards, outlined floating-label fields, searchable
+user picker, 1/2/3-section sidebar, locked status colors).
+
+Shared primitives: `apps/web/src/components/form/field.tsx` (`OutlinedInput`,
+`OutlinedSelect`, `Checkbox`), `apps/web/src/components/form/select-user.tsx`
+(`SelectUser` combobox), `apps/web/src/components/sparkline.tsx` (stat-card
+bars). New screens must use these instead of hand-rolled inputs.
+
 ## Conventions
 
 - pnpm 11 build-script policy lives in `pnpm-workspace.yaml` (`allowBuilds`).

@@ -1,54 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
-/* ─── Design tokens (SPEC §4) ─────────────────────────────────────────────
-   A2SV green primary + the locked status semantics:
-   green = present/solved · red = absent/unsolved · yellow = excused · blue = late */
+/* ─── A2SV Hub design language (docs/a2sv-ui-design-language.md) ──────────────
+   - Font: Poppins (400/500/600/700), geometric sans throughout
+   - Primary green #0FA958 (hover #0C9149), tint #ECF9F0, banner #C8F5D4→#A9ECC0
+   - Surfaces: white, 1px hairline border, 20px radius, flat (no elevation)
+   - Forms: outlined floating-label fields, green focus, full-width green submit
+     with glow (grey when disabled)
+   - Status semantics (locked): green=present/solved · red=absent/unsolved ·
+     yellow=excused · blue=late */
 @theme {
-  --color-a2sv-50: #e7f9f1;
-  --color-a2sv-100: #c9f1de;
-  --color-a2sv-200: #97e2c0;
-  --color-a2sv-300: #62d0a1;
-  --color-a2sv-400: #2fbd85;
-  --color-a2sv-500: #00b366;
-  --color-a2sv-600: #009957;
-  --color-a2sv-700: #007b46;
-  --color-a2sv-800: #005d35;
-  --color-a2sv-900: #014024;
+  --color-a2sv-50: #ecf9f0;
+  --color-a2sv-100: #d8f3e3;
+  --color-a2sv-200: #b7e8cc;
+  --color-a2sv-300: #7fd4a6;
+  --color-a2sv-400: #3fbe7d;
+  --color-a2sv-500: #0fa958;
+  --color-a2sv-600: #0c9149;
+  --color-a2sv-700: #0a773c;
+  --color-a2sv-800: #075c2e;
+  --color-a2sv-900: #05431f;
+
+  --color-banner-from: #c8f5d4;
+  --color-banner-to: #a9ecc0;
 
   --color-status-present: #16a34a;
   --color-status-absent: #dc2626;
   --color-status-excused: #d97706;
   --color-status-late: #2563eb;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-slate-50 font-sans text-slate-900 antialiased;
+    @apply bg-white font-sans text-slate-800 antialiased;
   }
 }
 
 @layer components {
+  /* Surfaces — flat hairline cards, 20px radius */
   .card {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+    @apply rounded-[1.25rem] border border-slate-200 bg-white;
   }
+  .card-tint {
+    @apply rounded-[1.25rem] border border-a2sv-100 bg-a2sv-50;
+  }
+
+  /* Legacy field helpers (login pre-refresh used these; new screens use <Field/>) */
   .field-label {
     @apply mb-1.5 block text-sm font-medium text-slate-700;
   }
   .field-input {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100;
+    @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100;
   }
+  .field-error {
+    @apply mt-1 text-xs font-medium text-red-500;
+  }
+
+  /* Buttons — green primary with soft glow; disabled = flat grey */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-a2sv-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-a2sv-600 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-a2sv-500 px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_22px_-10px_rgba(15,169,88,0.6)] transition hover:bg-a2sv-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100;
   }
   .icon-btn {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700;
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-800;
   }
+
+  /* Small elements */
   .chip {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  .delta-pill {
+    @apply inline-flex items-center gap-1 rounded-full bg-a2sv-100 px-2 py-0.5 text-[11px] font-semibold text-a2sv-700;
+  }
+  .avatar {
+    @apply relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-slate-600 text-white;
+  }
+  .checkbox {
+    @apply h-4.5 w-4.5 rounded-md border-slate-300 accent-a2sv-500;
+  }
+  .nav-section-title {
+    @apply px-6 pb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400;
   }
 }

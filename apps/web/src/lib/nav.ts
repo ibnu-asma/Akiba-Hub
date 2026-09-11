@@ -15,7 +15,25 @@ export type IconName =
   | 'clipboard'
   | 'file';
 
-export type AllIconName = IconName | 'search' | 'bell' | 'sparkles' | 'logout' | 'sliders' | 'check';
+export type AllIconName =
+  | IconName
+  | 'search'
+  | 'bell'
+  | 'sparkles'
+  | 'logout'
+  | 'sliders'
+  | 'check'
+  | 'checkCircle'
+  | 'menu'
+  | 'chevronDown'
+  | 'chevronRight'
+  | 'x'
+  | 'trend'
+  | 'user'
+  | 'dots'
+  | 'mail'
+  | 'clock'
+  | 'upload';
 
 export interface NavItem {
   label: string;

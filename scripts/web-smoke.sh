@@ -31,7 +31,8 @@ chk "hoe-welcome" "$(grep -c 'Welcome back' /tmp/hoe-dash.html)" 1
 # 4) Student dashboard: 1 section, no privileged leaks
 curl -s -c /tmp/stu.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"student@a2sv.org","password":"a2sv-demo"}' -o /dev/null
 chk "stu-dash-200" "$(curl -s -b /tmp/stu.jar $B/dashboard -o /tmp/stu-dash.html -w '%{http_code}')" 200
-chk "stu-has-student" "$(grep -o '>Student<' /tmp/stu-dash.html | wc -l)" 2
+# 3 = sidebar section title + role badge + quote-banner role watermark
+chk "stu-has-student" "$(grep -o '>Student<' /tmp/stu-dash.html | wc -l)" 3
 chk "stu-no-attendance" "$(grep -o 'Take attendance' /tmp/stu-dash.html | wc -l)" 0
 chk "stu-no-invite" "$(grep -o 'Generate Invite' /tmp/stu-dash.html | wc -l)" 0
 

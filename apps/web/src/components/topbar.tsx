@@ -12,8 +12,16 @@ function initials(name: string): string {
     .join('');
 }
 
-/** Right-aligned utility bar: search · AI assist · notifications · avatar · logout (SPEC §4.2). */
-export function Topbar({ name, notifications = 0 }: { name: string; notifications?: number }) {
+/** Utility bar: search left · AI assist / notifications / avatar+dot / logout right (SPEC §4.2). */
+export function Topbar({
+  name,
+  onMenu,
+  notifications = 0,
+}: {
+  name: string;
+  onMenu?: () => void;
+  notifications?: number;
+}) {
   const router = useRouter();
 
   async function logout() {
@@ -23,31 +31,31 @@ export function Topbar({ name, notifications = 0 }: { name: string; notification
   }
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-end gap-1 border-b border-slate-200 bg-white/90 px-6 py-3 backdrop-blur">
-      <button className="icon-btn" aria-label="Search">
-        <Icon name="search" />
+    <header className="sticky top-0 z-30 flex items-center gap-1.5 border-b border-slate-200 bg-white px-4 py-3 lg:px-6">
+      <button className="icon-btn lg:hidden" aria-label="Open menu" onClick={onMenu}>
+        <Icon name="menu" />
       </button>
-      <button className="icon-btn" aria-label="AI assist">
-        <Icon name="sparkles" />
-      </button>
-      <button className="icon-btn relative" aria-label="Notifications">
-        <Icon name="bell" />
-        {notifications > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-            {notifications > 99 ? '99+' : notifications}
-          </span>
-        )}
-      </button>
-      <div className="relative ml-1.5" title={name}>
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-a2sv-100 text-xs font-bold text-a2sv-700">
-          {initials(name)}
-        </span>
-        <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-status-present" />
+      <div className="relative hidden w-full max-w-sm sm:block">
+        <Icon name="search" className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400" />
+        <input placeholder="Search..." aria-label="Search" className="field-input py-2.5 pl-10" />
       </div>
-      <span className="mx-2 h-6 w-px bg-slate-200" />
-      <button className="icon-btn" aria-label="Log out" onClick={logout}>
-        <Icon name="logout" />
-      </button>
+      <div className="ml-auto flex items-center gap-1">
+        <button className="icon-btn" aria-label="AI assist">
+          <Icon name="sparkles" />
+        </button>
+        <button className="icon-btn relative" aria-label="Notifications">
+          <Icon name="bell" />
+          {notifications > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />}
+        </button>
+        <span className="relative ml-1.5" title={name}>
+          <span className="avatar h-9 w-9 text-[11px] font-semibold">{initials(name)}</span>
+          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-status-present" />
+        </span>
+        <span className="mx-1.5 h-6 w-px bg-slate-200" />
+        <button className="icon-btn" aria-label="Log out" onClick={logout}>
+          <Icon name="logout" />
+        </button>
+      </div>
     </header>
   );
 }

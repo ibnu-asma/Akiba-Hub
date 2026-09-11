@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { ROLE_LEVEL, type Role } from '@hub/shared';
+import { ROLE_LEVEL, ROLE_NAMES, type Role } from '@hub/shared';
 import { getMe, hubFetch, safe, type Activity, type Group, type SessionDto, type SuperGroup, type UserDto } from '@/lib/api';
 import { minutesToDays } from '@/lib/format';
 import { ActivityFeed, EventsPanel, QuickLink, QuoteBanner, StatCard } from '@/components/dashboard-widgets';
@@ -10,6 +10,7 @@ export default async function DashboardPage() {
 
   const level = ROLE_LEVEL[me.role as Role] ?? 1;
   const firstName = me.name.split(' ')[0] ?? me.name;
+  const roleLabel = ROLE_NAMES[me.role as keyof typeof ROLE_NAMES] ?? me.role;
 
   // Scope-gated fetches — each degrades to null on failure (dashboard never crashes).
   if (level >= 3) {
@@ -26,14 +27,14 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <QuoteBanner firstName={firstName} />
+            <QuoteBanner firstName={firstName} watermark={roleLabel} />
           </div>
           <EventsPanel sessions={sessions} scopeHint="Academy-wide schedule" />
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <StatCard label="Super Groups" value={String(superGroups?.length ?? '—')} accent="bg-a2sv-500" />
-          <StatCard label="Groups" value={String(groups?.length ?? '—')} accent="bg-blue-500" />
-          <StatCard label="Students" value={students !== null ? String(students) : '—'} accent="bg-amber-500" />
+          <StatCard label="SuperGroup Solutions" value="—" delta={0} spark={[4, 6, 5, 7, 6, 8]} accent="green" hint="Submissions land with the Exercises module" />
+          <StatCard label="SuperGroup Time Spent (min)" value="—" delta={0} spark={[3, 5, 4, 6, 5, 7]} accent="blue" hint={minutesToDays(0)} />
+          <StatCard label="SuperGroup Rating" value="—" delta={0} spark={[5, 4, 6, 5, 7, 6]} accent="orange" hint="Contest module lands next milestone" />
         </div>
         {activities && <ActivityFeed activities={activities} />}
       </div>
@@ -52,14 +53,14 @@ export default async function DashboardPage() {
       <div className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <QuoteBanner firstName={firstName} />
+            <QuoteBanner firstName={firstName} watermark={roleLabel} />
           </div>
           <EventsPanel sessions={sessions} scopeHint="Sessions for your groups" />
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <StatCard label="Groups" value={String(groups?.length ?? '—')} accent="bg-a2sv-500" />
-          <StatCard label="Students" value={students !== null ? String(students) : '—'} accent="bg-blue-500" />
-          <StatCard label="Sessions" value={String(sessions?.length ?? '—')} accent="bg-amber-500" />
+          <StatCard label="Team Solutions" value="—" delta={0} spark={[4, 6, 5, 7, 6, 8]} accent="green" hint="Submissions land with the Exercises module" />
+          <StatCard label="Team Time Spent (min)" value="—" delta={0} spark={[3, 5, 4, 6, 5, 7]} accent="blue" hint={minutesToDays(0)} />
+          <StatCard label="Team Rating" value="—" delta={0} spark={[5, 4, 6, 5, 7, 6]} accent="orange" hint="Contest module lands next milestone" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <QuickLink href="/attendance" icon="calendar" label="Take attendance" sub="Mark today's roster" />
@@ -75,14 +76,14 @@ export default async function DashboardPage() {
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <QuoteBanner firstName={firstName} />
+          <QuoteBanner firstName={firstName} watermark={roleLabel} />
         </div>
         <EventsPanel sessions={null} scopeHint="Events appear once your head schedules a session" />
       </div>
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Solutions" value="—" hint="Submissions module lands next milestone" accent="bg-a2sv-500" />
-        <StatCard label="Time Spent" value="—" hint={minutesToDays(0)} accent="bg-blue-500" />
-        <StatCard label="Rating" value="—" hint="Contest module lands next milestone" accent="bg-amber-500" />
+        <StatCard label="Solutions" value="—" delta={0} spark={[4, 6, 5, 7, 6, 8]} accent="green" hint="Submissions land with the Exercises module" />
+        <StatCard label="Time Spent (min)" value="—" delta={0} spark={[3, 5, 4, 6, 5, 7]} accent="blue" hint={minutesToDays(0)} />
+        <StatCard label="Rating" value="—" delta={0} spark={[5, 4, 6, 5, 7, 6]} accent="orange" hint="Contest module lands next milestone" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <QuickLink href="/problems" icon="list" label="Problems" sub="Solve and submit" />
