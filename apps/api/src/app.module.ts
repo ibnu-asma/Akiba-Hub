@@ -28,6 +28,12 @@ import { InvitationsService } from './modules/invitations/invitations.service.js
 
 import { ActivitiesController } from './modules/activities/activities.controller.js';
 
+import { ProblemsController } from './modules/problems/problems.controller.js';
+import { ProblemsService } from './modules/problems/problems.service.js';
+
+import { TracksController } from './modules/tracks/tracks.controller.js';
+import { TracksService } from './modules/tracks/tracks.service.js';
+
 /**
  * Root composition root. Shared singletons are provided once at module root;
  * feature modules are controllers + their service graph only.
@@ -41,6 +47,8 @@ import { ActivitiesController } from './modules/activities/activities.controller
     SessionsController,
     InvitationsController,
     ActivitiesController,
+    ProblemsController,
+    TracksController,
   ],
   providers: [
     // shared infra
@@ -59,6 +67,8 @@ import { ActivitiesController } from './modules/activities/activities.controller
     GroupsService,
     SessionsService,
     InvitationsService,
+    ProblemsService,
+    TracksService,
   ],
 })
 export class AppModule {}

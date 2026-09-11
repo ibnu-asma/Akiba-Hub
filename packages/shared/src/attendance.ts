@@ -31,3 +31,29 @@ export const TRACK_PHASES = {
   campII: 'CAMP_II',
 } as const;
 export type TrackPhase = (typeof TRACK_PHASES)[keyof typeof TRACK_PHASES];
+
+/** Problem platforms the Hub links out to (spec §6.3 sources). */
+export const PROBLEM_PLATFORMS = {
+  leetcode: 'leetcode',
+  codeforces: 'codeforces',
+  hackerrank: 'hackerrank',
+  other: 'other',
+} as const;
+export type ProblemPlatform = (typeof PROBLEM_PLATFORMS)[keyof typeof PROBLEM_PLATFORMS];
+
+/** Difficulty tiers — the Easy/Medium/Hard badges (spec §6.3). */
+export const PROBLEM_DIFFICULTIES = {
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard',
+} as const;
+export type ProblemDifficulty = (typeof PROBLEM_DIFFICULTIES)[keyof typeof PROBLEM_DIFFICULTIES];
+
+/** Human labels for the five program phases (spec §Summary C). */
+export const TRACK_PHASE_LABELS: Record<TrackPhase, string> = {
+  PYTHON: 'Python Track',
+  PHASE_I: 'Education Phase I',
+  CAMP_I: 'Camp I',
+  PHASE_II: 'Education Phase II',
+  CAMP_II: 'Camp II',
+};

@@ -103,6 +103,27 @@ export interface SessionDto {
   createdAt: string;
 }
 
+export interface ProblemDto {
+  id: string;
+  name: string;
+  platform: string;
+  difficulty: string;
+  tags: string[];
+  link: string;
+  addedBy: string;
+  createdAt: string;
+}
+
+export interface TrackDto {
+  id: string;
+  superGroupId: string;
+  superGroupName: string;
+  phase: string;
+  name: string;
+  sortOrder: number;
+  createdAt: string;
+}
+
 /** Non-throwing wrapper — dashboards degrade to empty states, never crash. */
 export async function safe<T>(promise: Promise<T>): Promise<T | null> {
   try {
