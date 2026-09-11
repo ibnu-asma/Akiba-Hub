@@ -31,7 +31,7 @@ export class TracksController {
   @UseGuards(new MockRulesGuard(2))
   async create(@Body() body: unknown, @CurrentPrincipal() principal: Principal) {
     const parsed = createDto.parse(body);
-    return this.tracks.create(parsed, { id: principal.id, name: 'HoE', role: principal.role });
+    return this.tracks.create(parsed, { id: principal.id, name: principal.name, role: principal.role });
   }
 
   @Get(':id/problems')
@@ -44,6 +44,6 @@ export class TracksController {
   @UseGuards(new MockRulesGuard(2))
   async addProblems(@Param('id') id: string, @Body() body: unknown, @CurrentPrincipal() principal: Principal) {
     const parsed = addProblemsDto.parse(body);
-    return this.tracks.addProblems(id, parsed.problemIds, { id: principal.id, name: 'HoE', role: principal.role });
+    return this.tracks.addProblems(id, parsed.problemIds, { id: principal.id, name: principal.name, role: principal.role });
   }
 }

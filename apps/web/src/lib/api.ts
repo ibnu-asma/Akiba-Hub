@@ -124,6 +124,30 @@ export interface TrackDto {
   createdAt: string;
 }
 
+export interface ContestDto {
+  id: string;
+  name: string;
+  number: number | null;
+  type: string;
+  unrated: boolean;
+  date: string;
+  standingsLink: string | null;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface DailyProblemDto {
+  id: string;
+  superGroupId: string;
+  problemId: string;
+  date: string;
+  active: boolean;
+  problemName: string;
+  platform: string;
+  difficulty: string;
+  link: string;
+}
+
 /** Non-throwing wrapper — dashboards degrade to empty states, never crash. */
 export async function safe<T>(promise: Promise<T>): Promise<T | null> {
   try {

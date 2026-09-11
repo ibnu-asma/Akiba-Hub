@@ -39,7 +39,7 @@ export class ProblemsController {
         tags: parsed.tags,
         link: parsed.link,
       },
-      { id: principal.id, name: 'HoE', role: principal.role },
+      { id: principal.id, name: principal.name, role: principal.role },
     );
   }
 }

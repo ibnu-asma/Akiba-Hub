@@ -55,7 +55,7 @@ export class AuthService {
   }
 
   private buildSession(user: { id: string; name: string; email: string; role: string }): AuthSession {
-    const accessToken = this.jwt.sign({ sub: user.id, role: user.role, session: 1 });
+    const accessToken = this.jwt.sign({ sub: user.id, role: user.role, session: 1, name: user.name });
     return {
       accessToken,
       refreshToken: 'refresh:issued-later', // opaque refresh tokens: phase-2

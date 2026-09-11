@@ -62,7 +62,7 @@ export class SessionsController {
         calendarInvite: parsed.calendarInvite,
         groupIds: parsed.groupIds,
       },
-      { id: principal.id, name: 'HoE', role: principal.role },
+      { id: principal.id, name: principal.name, role: principal.role },
     );
   }
 

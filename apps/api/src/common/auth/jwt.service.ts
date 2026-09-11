@@ -6,6 +6,7 @@ export interface AccessTokenPayload {
   sub: string;        // user id
   role: string;
   session: number;    // allows token invalidation on role change
+  name?: string;      // display name for audit trails (optional for old tokens)
 }
 
 /**

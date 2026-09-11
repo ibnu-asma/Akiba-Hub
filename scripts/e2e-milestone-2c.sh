@@ -66,7 +66,7 @@ chk "exercise-dup-0" "$(pyid /tmp/e2c-attach2.json added)" 0
 # 7) track problems contain the exercise, ordered; audit trail recorded
 curl -sm 5 -H "Authorization: Bearer $TOK" $A/tracks/$TID/problems -o /tmp/e2c-tp.json
 chk "track-problems" "$(python3 -c "import json;print(any(p['id']=='$PID' for p in json.load(open('/tmp/e2c-tp.json'))))")" True
-curl -sm 5 -H "Authorization: Bearer $TOK" "$A/activities?limit=5" -o /tmp/e2c-act.json
+curl -sm 5 -H "Authorization: Bearer $TOK" "$A/activities?limit=20" -o /tmp/e2c-act.json
 chk "audit-exercise" "$(python3 -c "import json;acts=json.load(open('/tmp/e2c-act.json'));print(any('exercises to track' in a['description'] for a in acts))")" True
 chk "audit-problem" "$(python3 -c "import json;acts=json.load(open('/tmp/e2c-act.json'));print(any(\"problem called '$PNAME'\" in a['description'] for a in acts))")" True
 
