@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get(HUB_COOKIE)?.value;
   const { pathname } = req.nextUrl;
 
-  if (!token && pathname !== '/login') {
+  if (!token && pathname !== '/login' && pathname !== '/register-invite') {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

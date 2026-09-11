@@ -55,6 +55,21 @@ export class ErrorFilter implements ExceptionFilter {
       return undefined;
     }
 
+    // Postgres constraint violations → meaningful HTTP errors instead of 500s.
+    // drizzle wraps the driver error in DrizzleQueryError, so walk .cause too.
+    const dbError = exception as { code?: string; cause?: { code?: string } };
+    const pgCode = dbError?.code ?? dbError?.cause?.code;
+    if (pgCode === '23505') {
+      response.status(409).json({ error: { code: ERROR_CODES.CONFLICT, message: 'Already exists' } });
+      return undefined;
+    }
+    if (pgCode === '23503') {
+      response.status(400).json({
+        error: { code: ERROR_CODES.VALIDATION, message: 'Referenced resource does not exist' },
+      });
+      return undefined;
+    }
+
     console.error('[error]', exception);
     response.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Something went wrong' } });
     return undefined;
