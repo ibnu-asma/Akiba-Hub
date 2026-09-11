@@ -1,0 +1,23 @@
+# deps & builds
+node_modules/
+dist/
+.next/
+out/
+*.tsbuildinfo
+*.log
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# drizzle meta (migrations are tracked)
+drizzle/meta/
+
+# misc
+.DS_Store
+coverage/
+
+# turbo
+.turbo/
