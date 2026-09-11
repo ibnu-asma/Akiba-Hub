@@ -1,0 +1,54 @@
+@import 'tailwindcss';
+
+/* ─── Design tokens (SPEC §4) ─────────────────────────────────────────────
+   A2SV green primary + the locked status semantics:
+   green = present/solved · red = absent/unsolved · yellow = excused · blue = late */
+@theme {
+  --color-a2sv-50: #e7f9f1;
+  --color-a2sv-100: #c9f1de;
+  --color-a2sv-200: #97e2c0;
+  --color-a2sv-300: #62d0a1;
+  --color-a2sv-400: #2fbd85;
+  --color-a2sv-500: #00b366;
+  --color-a2sv-600: #009957;
+  --color-a2sv-700: #007b46;
+  --color-a2sv-800: #005d35;
+  --color-a2sv-900: #014024;
+
+  --color-status-present: #16a34a;
+  --color-status-absent: #dc2626;
+  --color-status-excused: #d97706;
+  --color-status-late: #2563eb;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 font-sans text-slate-900 antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-sm;
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+  .field-input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-a2sv-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-a2sv-600 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100;
+  }
+  .icon-btn {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+}

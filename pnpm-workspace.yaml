@@ -1,7 +1,13 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Dependency build scripts (pnpm 11 `allowBuilds` map — the v10 keys are removed).
+# esbuild's postinstall only validates a binary that already ships via platform
+# optional deps, so running it is unnecessary — explicitly denied, not ignored.
 allowBuilds:
-  esbuild: set this to true or false
+  esbuild: false
+
+# Supply-chain policy exemption (auto-managed by pnpm during bootstrap).
 minimumReleaseAgeExclude:
   - zod@4.6.1
