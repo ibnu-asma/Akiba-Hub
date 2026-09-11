@@ -33,7 +33,7 @@ const attendanceDto = z.object({
 });
 
 @Controller('sessions')
-@UseGuards(AuthGuard, new MockRulesGuard(2))
+@UseGuards(AuthGuard)
 export class SessionsController {
   constructor(private readonly sessions: SessionsService, private readonly scopes: ScopeService) {}
 
@@ -44,6 +44,7 @@ export class SessionsController {
   }
 
   @Post()
+  @UseGuards(new MockRulesGuard(2))
   async create(@Body() body: unknown, @CurrentPrincipal() principal: Principal) {
     const parsed = createDto.parse(body);
     return this.sessions.create(
@@ -71,6 +72,7 @@ export class SessionsController {
   }
 
   @Post(':id/attendance')
+  @UseGuards(new MockRulesGuard(2))
   @HttpCode(204)
   async markAttendance(@Param('id') id: string, @Body() body: unknown, @CurrentPrincipal() principal: Principal) {
     const parsed = attendanceDto.parse(body);

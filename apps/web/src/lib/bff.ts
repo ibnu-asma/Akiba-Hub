@@ -30,3 +30,22 @@ export async function proxyAction(path: string, body: unknown, method: 'POST' | 
   }
   return NextResponse.json(payload, { status: upstream.status === 201 ? 201 : 200 });
 }
+
+/** BFF GET — forwards an authenticated read using the session cookie. */
+export async function proxyGet(path: string) {
+  const jar = await cookies();
+  const token = jar.get(HUB_COOKIE)?.value;
+
+  const upstream = await fetch(new URL(path, env.apiUrl), {
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    cache: 'no-store',
+  });
+
+  const payload = await upstream.json().catch(() => null);
+
+  if (!upstream.ok) {
+    const err = payload?.error ?? { code: 'INTERNAL_ERROR', message: upstream.statusText };
+    return NextResponse.json({ error: err }, { status: upstream.status });
+  }
+  return NextResponse.json(payload);
+}

@@ -72,13 +72,15 @@ export default async function DashboardPage() {
     );
   }
 
+  const [sessions] = await Promise.all([safe(hubFetch<SessionDto[]>('/sessions'))]);
+
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <QuoteBanner firstName={firstName} watermark={roleLabel} />
         </div>
-        <EventsPanel sessions={null} scopeHint="Events appear once your head schedules a session" />
+        <EventsPanel sessions={sessions} scopeHint="Scheduled by your head of education" />
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Solutions" value="—" delta={0} spark={[4, 6, 5, 7, 6, 8]} accent="green" hint="Submissions land with the Exercises module" />
