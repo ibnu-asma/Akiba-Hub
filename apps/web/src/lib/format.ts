@@ -32,15 +32,3 @@ export function timeAgo(iso: string): string {
 export function minutesToDays(minutes: number): string {
   return `That's ${(minutes / 1440).toFixed(0)} days`;
 }
-
-/** Quote-of-the-day — deterministic per calendar day (SPEC §6.1/§7.2/§8.1). */
-const QUOTES = [
-  { text: 'Only the educated are free.', author: 'Epictetus' },
-  { text: 'Persistence is very important. You should not give up unless you are forced to give up.', author: 'Elon Musk' },
-  { text: 'On the other side of the clouds is a bright blue sky.', author: 'Unknown' },
-];
-
-export function quoteOfTheDay(): { text: string; author: string } {
-  const dayOfYear = Math.floor(Date.now() / 86_400_000);
-  return QUOTES[dayOfYear % QUOTES.length]!;
-}

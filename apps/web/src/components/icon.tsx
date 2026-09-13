@@ -36,6 +36,8 @@ const PATHS: Record<AllIconName, string> = {
   mail: 'M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Zm0 1.5 8 5.5 8-5.5',
   clock: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Zm0 4.5V12l3 2.5',
   upload: 'M12 16V4m0 0L7 9m5-5 5 5M5 20h14',
+  externalLink: 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6m4-3h6v6m-11 5L21 3',
+  bookmark: 'M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z',
 };
 
 export function Icon({ name, className = 'h-5 w-5' }: { name: AllIconName; className?: string }) {

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Param, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Param, Query, UseGuards, Patch, Delete } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -27,12 +27,24 @@ export class ContestsController {
 
   /** Contest feed — every role sees the cards + "Standing" badge (spec §6.8). */
   @Get()
-  async list(@Query('limit') limit?: string) {
-    const parsed = Number.parseInt(limit ?? '', 10);
-    return this.contests.list(Number.isNaN(parsed) ? 50 : parsed);
+  async list(@Query('q') q?: string, @Query('type') type?: string, @Query('limit') limit?: string, @Query('offset') offset?: string) {
+    const parsedLimit = Number.parseInt(limit ?? '', 10);
+    const parsedOffset = Number.parseInt(offset ?? '', 10);
+    return this.contests.list({
+      q,
+      type,
+      limit: Number.isNaN(parsedLimit) ? undefined : parsedLimit,
+      offset: Number.isNaN(parsedOffset) ? 0 : parsedOffset,
+    });
   }
 
-  /** HoE/HoA: schedule an A2SV contest and assign participating groups (spec §7.6). */
+  /** Single contest read — every role can view details. */
+  @Get(':id')
+  async getOne(@Param('id') id: string) {
+    return this.contests.findById(id);
+  }
+
+  /** HoE/HoA: schedule a contest and assign participating groups (spec §7.7). */
   @Post()
   @UseGuards(new MockRulesGuard(2))
   async create(@Body() body: unknown, @CurrentPrincipal() principal: Principal) {
@@ -51,17 +63,59 @@ export class ContestsController {
     );
   }
 
-  /** HoE/HoA: attach contest questions — pseudo letters A, B, C… (spec §7.6). */
+  /** HoE/HoA: edit a contest (spec §7.7). */
+  @Patch(':id')
+  @UseGuards(new MockRulesGuard(2))
+  async update(@Param('id') id: string, @Body() body: unknown, @CurrentPrincipal() principal: Principal) {
+    const parsed = createDto.parse(body);
+    return this.contests.update(
+      id,
+      {
+        name: parsed.name,
+        number: parsed.number ?? null,
+        type: parsed.type,
+        unrated: parsed.unrated,
+        date: parsed.date,
+        standingsLink: parsed.standingsLink ?? null,
+        groupIds: parsed.groupIds,
+      },
+      { id: principal.id, name: principal.name, role: principal.role },
+    );
+  }
+
+  /** HoE/HoA: soft-delete a contest (spec §7.7). */
+  @Delete(':id')
+  @UseGuards(new MockRulesGuard(2))
+  async remove(@Param('id') id: string, @CurrentPrincipal() principal: Principal) {
+    await this.contests.softDelete(id, { id: principal.id, name: principal.name, role: principal.role });
+    return { ok: true };
+  }
+
+  /** HoE/HoA: attach contest questions — pseudo letters A, B, C… (spec §7.7). */
   @Post(':id/problems')
   @UseGuards(new MockRulesGuard(2))
   async attach(@Param('id') id: string, @Body() body: unknown, @CurrentPrincipal() principal: Principal) {
     const parsed = attachDto.parse(body);
-    const contest = await this.contests.list(200);
-    const name = contest.find((row) => row.id === id)?.name ?? 'contest';
+    const contests = await this.contests.list({});
+    const name = (contests as { id: string; name: string }[]).find((row) => row.id === id)?.name ?? 'contest';
     return this.contests.attachProblems(id, name, parsed.problemIds, {
       id: principal.id,
       name: principal.name,
       role: principal.role,
     });
+  }
+
+  /** List a contest's problems (with pseudo letters + details). */
+  @Get(':id/problems')
+  async listProblems(@Param('id') id: string) {
+    return this.contests.listProblems(id);
+  }
+
+  /** HoE/HoA: remove one problem from a contest (spec §7.7). */
+  @Delete(':id/problems/:problemId')
+  @UseGuards(new MockRulesGuard(2))
+  async removeProblem(@Param('id') id: string, @Param('problemId') problemId: string, @CurrentPrincipal() principal: Principal) {
+    await this.contests.removeProblem(id, problemId, { id: principal.id, name: principal.name, role: principal.role });
+    return { ok: true };
   }
 }

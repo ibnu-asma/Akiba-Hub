@@ -146,6 +146,15 @@ export function RegisterInviteForm({ token, initialEmail }: { token: string; ini
         </div>
 
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <OutlinedInput
+              label="Email"
+              value={initialEmail ?? ''}
+              readOnly
+              onChange={() => undefined}
+              hint="Your Akiba login email — set from the invite."
+            />
+          </div>
           <OutlinedInput label="Name" required placeholder="Your full name" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} />
           <OutlinedInput label="Password" type="password" required placeholder="At least 6 characters" value={password} onChange={(e) => setPassword(e.target.value)} error={errors.password} />
           <OutlinedSelect label="Select your country" required options={COUNTRIES.map((c) => ({ value: c, label: c }))} value={country} onChange={setCountry} error={errors.country} placeholder="Choose…" />

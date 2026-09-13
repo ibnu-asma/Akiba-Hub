@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../../config/database.provider.js';
-import { users, invitations, eq } from '@hub/database';
+import { users, groups, invitations, eq } from '@hub/database';
 
 export interface PublicUser {
   id: string;
@@ -19,6 +19,21 @@ interface UserRow {
   role: string;
   groupId: string | null;
   avatarUrl: string | null;
+  rating: number;
+  country: string | null;
+  university: string | null;
+}
+
+interface InviteRow {
+  id: string;
+  role: string;
+  groupId: string | null;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  usedAt: Date | null;
+  revokedAt: Date | null;
+  expiresAt: Date;
 }
 
 /** Storage contract for the auth aggregate (infrastructure layer). */
@@ -38,6 +53,22 @@ export class AuthRepository {
   async findById(id: string): Promise<UserRow | undefined> {
     const rows = await this.db.db.select().from(users).where(eq(users.id, id)).execute();
     return rows[0] as UserRow | undefined;
+  }
+
+  /** Full profile for /auth/me — the user row plus their group's super group. */
+  async findProfileById(id: string): Promise<(UserRow & { superGroupId: string | null }) | undefined> {
+    const usersRows = await this.db.db.select().from(users).where(eq(users.id, id)).limit(1).execute();
+    const user = usersRows[0] as UserRow | undefined;
+    if (!user) return undefined;
+    if (!user.groupId) return { ...user, superGroupId: null };
+
+    const groupRows = await this.db.db
+      .select({ superGroupId: groups.superGroupId })
+      .from(groups)
+      .where(eq(groups.id, user.groupId))
+      .limit(1)
+      .execute();
+    return { ...user, superGroupId: groupRows[0]?.superGroupId ?? null };
   }
 
   async create(input: {
@@ -67,13 +98,23 @@ export class AuthRepository {
     return rows[0] as PublicUser;
   }
 
-  async findInviteByHash(tokenHash: string): Promise<{ id: string; role: string; groupId: string | null; usedAt: Date | null; expiresAt: Date } | undefined> {
+  async findInviteByHash(tokenHash: string): Promise<InviteRow | undefined> {
     const rows = await this.db.db
-      .select({ id: invitations.id, role: invitations.role, groupId: invitations.groupId, usedAt: invitations.usedAt, expiresAt: invitations.expiresAt })
+      .select({
+        id: invitations.id,
+        role: invitations.role,
+        groupId: invitations.groupId,
+        email: invitations.email,
+        firstName: invitations.firstName,
+        lastName: invitations.lastName,
+        usedAt: invitations.usedAt,
+        revokedAt: invitations.revokedAt,
+        expiresAt: invitations.expiresAt,
+      })
       .from(invitations)
       .where(eq(invitations.tokenHash, tokenHash))
       .execute();
-    return rows[0] as { id: string; role: string; groupId: string | null; usedAt: Date | null; expiresAt: Date } | undefined;
+    return rows[0] as InviteRow | undefined;
   }
 
   async markInviteUsed(id: string, takenOverByUserId: string): Promise<void> {

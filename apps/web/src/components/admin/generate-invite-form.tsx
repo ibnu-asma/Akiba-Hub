@@ -1,41 +1,56 @@
 'use client';
 
 import { useState } from 'react';
-import { OutlinedInput, OutlinedSelect } from '@/components/form/field';
+import { useRouter } from 'next/navigation';
+import { OutlinedSelect } from '@/components/form/field';
 
-interface InviteLink {
-  token: string;
-  email: string | null;
+interface InviteResult {
+  id: string;
+  orgEmail: string | null;
+  personalEmail: string | null;
+  firstName: string | null;
+  lastName: string | null;
   role: string;
+  inviteUrl: string;
 }
-
 interface MassResponse {
-  invitations?: InviteLink[];
+  invitations?: InviteResult[];
   error?: { message: string };
 }
 
-/** Bulk-emails → invite links form (SPEC §8.5), with one-tap copy. */
-export function GenerateInviteForm() {
-  const [emails, setEmails] = useState('');
-  const [role, setRole] = useState('student');
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [created, setCreated] = useState<InviteLink[] | null>(null);
-  const [copied, setCopied] = useState<string | null>(null);
+const ROLES = [
+  { value: 'student', label: 'Student' },
+  { value: 'head_of_education', label: 'Head of Education' },
+  { value: 'head_of_academy', label: 'Head of Academy' },
+];
 
-  function parseEmails(raw: string): string[] {
+/** CSV paste → org-email + invite-email form (SPEC §8.5, Akiba flow). */
+export function GenerateInviteForm() {
+  const router = useRouter();
+  const [csv, setCsv] = useState('');
+  const [role, setRole] = useState('student');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [created, setCreated] = useState<InviteResult[] | null>(null);
+
+  function parseRows(raw: string): { firstName: string; lastName: string; personalEmail: string }[] {
     return raw
-      .split(/[\s,;]+/)
-      .map((e) => e.trim().toLowerCase())
-      .filter((e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e));
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const parts = line.split(',').map((p) => p.trim());
+        return { firstName: parts[0] ?? '', lastName: parts[1] ?? '', personalEmail: parts[2] ?? '' };
+      })
+      .filter((r) => r.firstName && r.lastName && /\S+@\S+\.\S+/.test(r.personalEmail));
   }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    const valid = parseEmails(emails);
-    if (valid.length === 0) {
-      setError('Enter at least one valid email (comma or newline separated).');
+    const rows = parseRows(csv);
+    if (rows.length === 0) {
+      setError('Paste at least one valid row: FirstName,LastName,email@example.com');
       return;
     }
     setBusy(true);
@@ -43,7 +58,7 @@ export function GenerateInviteForm() {
       const res = await fetch('/api/admin/invitations/mass', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emails: valid, role }),
+        body: JSON.stringify({ rows, role }),
       });
       const payload = (await res.json().catch(() => null)) as MassResponse | null;
       if (!res.ok || !payload?.invitations) {
@@ -51,7 +66,8 @@ export function GenerateInviteForm() {
         return;
       }
       setCreated(payload.invitations);
-      setEmails('');
+      setCsv('');
+      router.refresh();
     } catch {
       setError('Network error — is the API running?');
     } finally {
@@ -59,43 +75,32 @@ export function GenerateInviteForm() {
     }
   }
 
-  function inviteUrl(token: string, email: string | null): string {
-    const base = `${window.location.origin}/register-invite?token=${token}`;
-    return email ? `${base}&email=${encodeURIComponent(email)}` : base;
-  }
-
-  async function copy(url: string, token: string) {
-    await navigator.clipboard.writeText(url);
-    setCopied(token);
-    setTimeout(() => setCopied(null), 1500);
-  }
-
   return (
     <section className="card p-6">
       <h2 className="text-sm font-bold text-slate-900">New invitations</h2>
+      <p className="mt-1 text-xs text-slate-400">One person per line: FirstName, LastName, personal email.</p>
       <form onSubmit={submit} className="mt-4 space-y-5">
         <div>
-          <label className="field-label" htmlFor="emails">Emails</label>
+          <label className="field-label" htmlFor="csv">Invite list</label>
           <textarea
-            id="emails"
-            rows={5}
-            value={emails}
-            onChange={(e) => setEmails(e.target.value)}
-            placeholder="geleta.daba@a2sv.org, abebe.kebede@a2sv.org&#10;one-per-line works too"
-            className="field-input resize-none"
+            id="csv"
+            rows={6}
+            value={csv}
+            onChange={(e) => setCsv(e.target.value)}
+            placeholder={'Geleta,Daba,geleta.daba@gmail.com\nAbebe,Kebede,abebe.k@yahoo.com'}
+            className="field-input resize-none font-mono text-sm"
           />
-          <p className="mt-1 text-xs text-slate-400">Comma, semicolon or newline separated — one invite per email.</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Each person gets an org login email (first.last@akibatech.com) and an invite emailed to their personal address.
+          </p>
         </div>
 
         <OutlinedSelect
           label="Role"
           value={role}
           onChange={setRole}
-          options={[
-            { value: 'student', label: 'Student' },
-            { value: 'head_of_education', label: 'Head of Education' },
-          ]}
-          hint="Students land in their group; HoE roles get the education section."
+          options={ROLES}
+          hint="The role each invited person gets."
         />
 
         {error && (
@@ -105,35 +110,26 @@ export function GenerateInviteForm() {
         )}
 
         <button type="submit" className="btn-primary w-full" disabled={busy}>
-          {busy ? 'Generating…' : `Generate ${parseEmails(emails).length || ''} invite${parseEmails(emails).length === 1 ? '' : 's'}`}
+          {busy ? 'Sending…' : `Send ${parseRows(csv).length || ''} invite${parseRows(csv).length === 1 ? '' : 's'}`}
         </button>
       </form>
 
       {created && (
         <div className="mt-5 border-t border-slate-100 pt-4">
           <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-            {created.length} invite link{created.length === 1 ? '' : 's'} created
+            {created.length} invite{created.length === 1 ? '' : 's'} created
           </p>
           <ul className="space-y-2">
-            {created.map((inv) => {
-              const url = inviteUrl(inv.token, inv.email);
-              return (
-                <li key={inv.token} className="card-tint p-2.5">
-                  <p className="truncate text-xs font-medium text-slate-600">{inv.email}</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <OutlinedInput
-                      label="Invite link"
-                      value={url}
-                      readOnly
-                      onChange={() => undefined}
-                    />
-                  </div>
-                  <button type="button" onClick={() => copy(url, inv.token)} className="btn-primary mt-2 w-full !py-2 text-xs">
-                    {copied === inv.token ? 'Copied ✓' : 'Copy link'}
-                  </button>
-                </li>
-              );
-            })}
+            {created.map((inv) => (
+              <li key={inv.id} className="card-tint p-3">
+                <p className="text-sm font-semibold text-slate-800">
+                  {inv.firstName} {inv.lastName}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {inv.orgEmail} → {inv.personalEmail}
+                </p>
+              </li>
+            ))}
           </ul>
         </div>
       )}

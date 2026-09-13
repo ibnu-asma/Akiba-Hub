@@ -1,31 +1,29 @@
 import { redirect } from 'next/navigation';
 import { ROLE_LEVEL, type Role } from '@hub/shared';
-import { getMe, hubFetch, safe, type SuperGroup, type UserDto } from '@/lib/api';
-import { AddGroupForm } from '@/components/admin/add-group-form';
+import { getMe, hubFetch, safe, type Group, type SuperGroup, type UserSummaryDto } from '@/lib/api';
+import { GroupsManager } from '@/components/admin/groups-manager';
 
-/** HoA: create a group — supergroup, description, country, HoE heads (SPEC §8.5). */
-export default async function AddGroupPage() {
+/** HoA: group management — list, filter, create, assign students/heads, delete (SPEC §8.6, §11). */
+export default async function GroupsPage() {
   const me = await getMe();
   if (!me) redirect('/login');
   if ((ROLE_LEVEL[me.role as Role] ?? 1) < 3) redirect('/dashboard');
 
-  const [superGroups, users] = await Promise.all([
+  const [groups, superGroups, users] = await Promise.all([
+    safe(hubFetch<Group[]>('/groups')),
     safe(hubFetch<SuperGroup[]>('/super-groups')),
-    safe(hubFetch<UserDto[]>('/users')),
+    safe(hubFetch<UserSummaryDto[]>('/users')),
   ]);
 
-  const heads =
-    users
-      ?.filter((u) => u.role === 'head_of_education' || u.role === 'head_of_academy')
-      .map((u) => ({ id: u.id, name: u.name, role: u.role })) ?? [];
-
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Add Group</h1>
-        <p className="mt-1 text-sm text-slate-500">Groups are the education unit heads manage; assign them to a supergroup.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Groups</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Create groups, assign students and heads, and organize them under super groups.
+        </p>
       </header>
-      <AddGroupForm superGroups={superGroups ?? []} heads={heads} />
+      <GroupsManager initialGroups={groups ?? []} superGroups={superGroups ?? []} users={users ?? []} />
     </div>
   );
 }

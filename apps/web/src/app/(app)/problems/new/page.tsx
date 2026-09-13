@@ -1,24 +1,23 @@
 import { redirect } from 'next/navigation';
 import { ROLE_LEVEL, type Role } from '@hub/shared';
 import { getMe } from '@/lib/api';
-import { AddProblemForm } from '@/components/head/add-problem-form';
+import { ProblemsManager } from '@/components/head/problems-manager';
 
-/** HoE/HoA: add DSA problems for the students to solve (SPEC §7.5). */
-export default async function AddProblemPage() {
+/** HoE/HoA: problem management — list, filter, add, edit, delete (SPEC §7.5). */
+export default async function ProblemsPage() {
   const me = await getMe();
   if (!me) redirect('/login');
   if ((ROLE_LEVEL[me.role as Role] ?? 1) < 2) redirect('/dashboard');
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Add Problem</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Problems</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Add DSA questions for the students to solve and work on their problem-solving skills. Problems link out to their source
-          platform (LeetCode, Codeforces, HackerRank) and join the group's Latest Problems feed.
+          Curate the DSA library — add, edit, and remove problems, filtered by difficulty and topic.
         </p>
       </header>
-      <AddProblemForm />
+      <ProblemsManager />
     </div>
   );
 }

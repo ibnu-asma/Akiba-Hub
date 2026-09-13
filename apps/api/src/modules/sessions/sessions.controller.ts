@@ -66,6 +66,12 @@ export class SessionsController {
     );
   }
 
+  @Get('attendance-grid')
+  async attendanceGrid(@Query('groupId') groupId: string, @Query('month') month?: string) {
+    const m = /^\d{4}-\d{2}$/.test(month ?? '') ? month! : new Date().toISOString().slice(0, 7);
+    return this.sessions.getAttendanceGrid(groupId, m);
+  }
+
   @Get(':id/attendance')
   async attendance(@Param('id') id: string, @Query('groupId') groupId: string) {
     return this.sessions.getAttendance(id, groupId);

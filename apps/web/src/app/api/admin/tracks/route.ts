@@ -1,6 +1,11 @@
-import { proxyAction } from '@/lib/bff';
+import { proxyAction, proxyGet } from '@/lib/bff';
 
-/** HoE/HoA: create a track for a program phase (SPEC §6.2 / §7.5). */
+/** HoE/HoA: list tracks (SPEC §7.6). */
+export async function GET() {
+  return proxyGet('/tracks');
+}
+
+/** HoE/HoA: create a track for a program phase (SPEC §7.6). */
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   if (!body) {

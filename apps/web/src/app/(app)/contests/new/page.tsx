@@ -1,27 +1,38 @@
 import { redirect } from 'next/navigation';
 import { ROLE_LEVEL, type Role } from '@hub/shared';
-import { getMe, hubFetch, safe, type Group, type ProblemDto } from '@/lib/api';
-import { AddContestForm } from '@/components/head/add-contest-form';
+import { getMe, hubFetch, safe, type ContestDto, type Group, type ProblemDto } from '@/lib/api';
+import { ContestsManager } from '@/components/head/contests-manager';
 
-/** HoE/HoA: schedule an A2SV contest and attach questions (SPEC §7.6). */
-export default async function AddContestPage() {
+interface ListResponse {
+  rows: ContestDto[];
+  total: number;
+}
+
+/** HoE/HoA: contest management (schedule, edit, questions, delete) (SPEC §7.7). */
+export default async function ContestsPage() {
   const me = await getMe();
   if (!me) redirect('/login');
   if ((ROLE_LEVEL[me.role as Role] ?? 1) < 2) redirect('/dashboard');
 
-  const groups = ((await safe(hubFetch<Group[]>('/groups'))) ?? []);
-  const problems = ((await safe(hubFetch<ProblemDto[]>('/problems'))) ?? []);
+  const [groups, problems, initial] = await Promise.all([
+    safe(hubFetch<Group[]>('/groups')),
+    safe(hubFetch<ProblemDto[]>('/problems?limit=200')),
+    safe(hubFetch<ListResponse>('/contests?limit=10&offset=0')),
+  ]);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Add Contest</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Contests</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Schedule an A2SV contest for your groups — in-person or virtual — then attach the contest questions. Students
-          upsolve them after the standing is published.
+          Schedule standard and super contests, assign groups, and manage the contest questions (A, B, C…).
         </p>
       </header>
-      <AddContestForm groups={groups} problems={problems} />
+      <ContestsManager
+        initial={initial ?? { rows: [], total: 0 }}
+        groups={groups ?? []}
+        problems={problems ?? []}
+      />
     </div>
   );
 }

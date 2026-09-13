@@ -1,6 +1,11 @@
-import { proxyAction } from '@/lib/bff';
+import { proxyAction, proxyGet } from '@/lib/bff';
 
-/** HoA: create a super group (SPEC §8.3). */
+/** HoA: list super groups with member groups (SPEC §8.4). */
+export async function GET() {
+  return proxyGet('/super-groups');
+}
+
+/** HoA: create a super group with optional member groups (SPEC §8.4). */
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   if (!body) {
@@ -8,3 +13,4 @@ export async function POST(req: Request) {
   }
   return proxyAction('/super-groups', body);
 }
+

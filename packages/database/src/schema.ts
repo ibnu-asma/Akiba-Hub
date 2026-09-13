@@ -82,8 +82,9 @@ export const tracks = pgTable(
     name: varchar('name', { length: 160 }).notNull(),
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
-  (t) => [uniqueIndex('tracks_sg_phase_idx').on(t.superGroupId, t.phase)],
+  (t) => [uniqueIndex('tracks_sg_phase_idx').on(t.superGroupId, t.phase).where(sql`${t.deletedAt} is null`)],
 );
 
 export const trackProblems = pgTable(
@@ -110,6 +111,7 @@ export const problems = pgTable(
     votesUp: integer('votes_up').notNull().default(0),
     votesDown: integer('votes_down').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [index('problems_platform_idx').on(t.platform), index('problems_difficulty_idx').on(t.difficulty), index('problems_added_by_idx').on(t.addedBy)],
 );
@@ -140,6 +142,7 @@ export const contests = pgTable(
     standingsLink: varchar('standings_link', { length: 500 }),
     createdBy: uuid('created_by').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
   (t) => [index('contests_date_idx').on(t.date)],
 );
@@ -261,7 +264,10 @@ export const invitations = pgTable(
   'invitations',
   {
     id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
-    email: varchar('email', { length: 254 }),
+    email: varchar('email', { length: 254 }), // generated org login email (mass) | null (take-over)
+    firstName: varchar('first_name', { length: 80 }),
+    lastName: varchar('last_name', { length: 80 }),
+    personalEmail: varchar('personal_email', { length: 254 }),
     role: varchar('role', { length: 32 }).notNull(),
     groupId: uuid('group_id'),
     mass: boolean('mass').notNull().default(true),
@@ -269,6 +275,7 @@ export const invitations = pgTable(
     tokenHash: varchar('token_hash', { length: 64 }).notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     usedAt: timestamp('used_at', { withTimezone: true }),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
     createdBy: uuid('created_by').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },

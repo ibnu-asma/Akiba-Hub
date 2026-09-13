@@ -10,9 +10,9 @@ chk() { if [ "$2" = "$3" ]; then pass=$((pass+1)); echo "PASS $1 (=$2)"; else fa
 pyid() { python3 -c "import json,sys;d=json.load(open('$1'));print(d.get('$2',''))" 2>/dev/null; }
 
 # 0) sessions: HoE via BFF (cookie) + HoA direct API (token for direct reads)
-code=$(curl -s -c /tmp/e2c-hoe.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"head@a2sv.org","password":"a2sv-demo"}' -o /dev/null -w '%{http_code}')
+code=$(curl -s -c /tmp/e2c-hoe.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"head@akibatech.com","password":"a2sv-demo"}' -o /dev/null -w '%{http_code}')
 chk "hoe-login" "$code" 200
-TOK=$(curl -sm 5 -H 'Content-Type: application/json' -d '{"email":"admin@a2sv.org","password":"a2sv-demo"}' $A/auth/login | python3 -c "import json,sys;print(json.load(sys.stdin).get('accessToken',''))")
+TOK=$(curl -sm 5 -H 'Content-Type: application/json' -d '{"email":"admin@akibatech.com","password":"a2sv-demo"}' $A/auth/login | python3 -c "import json,sys;print(json.load(sys.stdin).get('accessToken',''))")
 [ -n "$TOK" ] && chk "api-token" ok ok || chk "api-token" missing ok
 SGID=$(curl -sm 5 -H "Authorization: Bearer $TOK" $A/super-groups | python3 -c "import json,sys;print(json.load(sys.stdin)[0]['id'])")
 [ -n "$SGID" ] && chk "super-group-id" ok ok || chk "super-group-id" missing ok
@@ -21,7 +21,7 @@ SGID=$(curl -sm 5 -H "Authorization: Bearer $TOK" $A/super-groups | python3 -c "
 for p in problems/new tracks/new exercises/new; do
   chk "hoe-page-$p" "$(curl -s -b /tmp/e2c-hoe.jar $B/$p -o /dev/null -w '%{http_code}')" 200
 done
-curl -s -c /tmp/e2c-stu.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"student@a2sv.org","password":"a2sv-demo"}' -o /dev/null
+curl -s -c /tmp/e2c-stu.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"student@akibatech.com","password":"a2sv-demo"}' -o /dev/null
 chk "stu-page-guard" "$(curl -s -b /tmp/e2c-stu.jar $B/problems/new -o /dev/null -w '%{http_code}')" 307
 chk "stu-write-403" "$(curl -s -b /tmp/e2c-stu.jar -X POST $B/api/admin/problems -H 'Content-Type: application/json' -d "{\"name\":\"Nope $TS\",\"platform\":\"leetcode\",\"difficulty\":\"easy\",\"tags\":[],\"link\":\"https://leetcode.com\"}" -o /dev/null -w '%{http_code}')" 403
 

@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { Icon } from '@/components/icon';
 import { Sparkline } from '@/components/sparkline';
-import { formatDate, formatDateTime, quoteOfTheDay, timeAgo } from '@/lib/format';
+import { formatDate, formatDateTime, timeAgo } from '@/lib/format';
 import type { Activity, SessionDto } from '@/lib/api';
+
+export { QuoteBanner } from '@/components/quote-banner';
 
 function initials(name: string): string {
   return name
@@ -63,33 +65,7 @@ export function StatCard({
   );
 }
 
-/** Quote banner — light-green gradient, giant role watermark, Problems CTA. */
-export function QuoteBanner({ firstName, watermark }: { firstName: string; watermark?: string }) {
-  const quote = quoteOfTheDay();
-  return (
-    <section className="relative overflow-hidden rounded-[1.25rem] border border-a2sv-200 bg-gradient-to-br from-banner-from to-banner-to p-6 md:p-8">
-      {watermark && (
-        <span
-          aria-hidden="true"
-          className="absolute -right-2 top-3 hidden max-w-[60%] select-none text-right text-[2.6rem] font-bold uppercase leading-none tracking-tight text-a2sv-500/25 md:block lg:text-[3.4rem]"
-        >
-          {watermark}
-        </span>
-      )}
-      <div className="relative max-w-2xl">
-        <p className="text-lg font-semibold leading-snug text-slate-800">“{quote.text}”</p>
-        <p className="mt-1 text-sm text-slate-600">— {quote.author}</p>
-        <p className="mt-5 text-sm font-medium text-slate-700">Welcome back, {firstName}!</p>
-        <Link href="/problems" className="btn-primary mt-3 px-6">
-          Problems
-        </Link>
-      </div>
-      <span aria-hidden="true" className="absolute bottom-4 right-5 text-3xl md:text-4xl">
-        🚀
-      </span>
-    </section>
-  );
-}
+/** Quote banner — imports the client-side energetic-quote banner (fetched live). */
 
 export function EventsPanel({ sessions, scopeHint }: { sessions: SessionDto[] | null; scopeHint?: string }) {
   const today = new Date().toISOString().slice(0, 10);

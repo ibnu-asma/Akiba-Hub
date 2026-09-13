@@ -1,8 +1,11 @@
 import { redirect } from 'next/navigation';
 import { ROLE_LEVEL, ROLE_NAMES, type Role } from '@hub/shared';
-import { getMe, hubFetch, safe, type Activity, type Group, type SessionDto, type SuperGroup, type UserDto } from '@/lib/api';
+import { getMe, hubFetch, safe, type Activity, type CompletionRow, type DailyProblemDto, type Group, type SessionDto, type SubmissionDto, type SuperGroup, type UserDto } from '@/lib/api';
 import { minutesToDays } from '@/lib/format';
+import { mySubmissionStats, mySolvedSet } from '@/lib/student';
 import { ActivityFeed, EventsPanel, QuickLink, QuoteBanner, StatCard } from '@/components/dashboard-widgets';
+import { DailyProblemCard, TeamCompletionCard } from '@/components/student/dashboard-cards';
+import { RecentSolvesList } from '@/components/student/recent-solves';
 
 export default async function DashboardPage() {
   const me = await getMe();
@@ -72,7 +75,28 @@ export default async function DashboardPage() {
     );
   }
 
-  const [sessions] = await Promise.all([safe(hubFetch<SessionDto[]>('/sessions'))]);
+  const [sessions, recentSolves, daily, completion, exercise, solved] = await Promise.all([
+    safe(hubFetch<SessionDto[]>('/sessions')),
+    safe(hubFetch<SubmissionDto[]>('/submissions?group=1&limit=10')),
+    safe(hubFetch<DailyProblemDto[]>('/daily-problems?limit=20')),
+    safe(hubFetch<CompletionRow[]>('/summary/completion')),
+    safe(hubFetch<{ problems: { id: string; name: string; difficulty: string }[]; students: { userId: string; name: string; cells: Record<string, { attempts: number; minutes: number }> }[] }>('/summary/exercise')),
+    mySolvedSet(),
+  ]);
+
+  const stats = await mySubmissionStats();
+
+  // Today's daily problem for my super group (latest dated ≤ today).
+  const today = new Date().toISOString().slice(0, 10);
+  const myDaily = (daily ?? [])
+    .filter((d) => me.superGroupId == null || d.superGroupId === me.superGroupId)
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .find((d) => d.date <= today);
+
+  // Peer counter for the daily card — teammates with a cell for this problem.
+  const teammates = exercise?.students ?? [];
+  const myRow = completion?.find((r) => r.userId === me.id) ?? null;
+  const solvedByTeammates = myDaily ? teammates.filter((s) => s.cells[myDaily.problemId]).length : undefined;
 
   return (
     <div className="space-y-6">
@@ -82,17 +106,19 @@ export default async function DashboardPage() {
         </div>
         <EventsPanel sessions={sessions} scopeHint="Scheduled by your head of education" />
       </div>
+
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Solutions" value="—" delta={0} spark={[4, 6, 5, 7, 6, 8]} accent="green" hint="Submissions land with the Exercises module" />
-        <StatCard label="Time Spent (min)" value="—" delta={0} spark={[3, 5, 4, 6, 5, 7]} accent="blue" hint={minutesToDays(0)} />
-        <StatCard label="Rating" value="—" delta={0} spark={[5, 4, 6, 5, 7, 6]} accent="orange" hint="Contest module lands next milestone" />
+        <StatCard label="Solutions" value={String(stats.count)} delta={Math.min(99, stats.count * 2)} spark={[3, 5, 4, 6, 5, 8]} accent="green" hint={`${stats.runs} total attempts logged`} />
+        <StatCard label="Time Spent (min)" value={String(stats.minutes)} delta={Math.min(99, Math.round(stats.minutes / 12))} spark={[4, 3, 6, 5, 7, 6]} accent="blue" hint={minutesToDays(stats.minutes)} />
+        <StatCard label="Rating" value={String(me.rating ?? 1200)} delta={4.2} spark={[5, 4, 6, 5, 7, 7]} accent="orange" hint="Contest performance updates your rating" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <QuickLink href="/problems" icon="list" label="Problems" sub="Solve and submit" />
-        <QuickLink href="/contests" icon="trophy" label="Contests" sub="Upsolve contest problems" />
-        <QuickLink href="/tracks" icon="map" label="Tracks" sub="Your learning path" />
-        <QuickLink href="/forum" icon="chat" label="Forum" sub="Discuss with your group" />
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <DailyProblemCard daily={myDaily ?? null} solved={myDaily ? solved.has(myDaily.problemId) : false} solvedByTeammates={solvedByTeammates} teammateCount={teammates.filter((s) => s.userId !== me.id).length + (myRow ? 1 : 0)} />
+        <TeamCompletionCard rows={completion ?? []} myId={me.id} />
       </div>
+
+      <RecentSolvesList submissions={recentSolves ?? []} />
     </div>
   );
 }

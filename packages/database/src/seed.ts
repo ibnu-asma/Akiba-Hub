@@ -19,7 +19,7 @@ async function main() {
   const [admins] = await db
     .insert(users)
     .values({
-      email: 'admin@a2sv.org',
+      email: 'admin@akibatech.com',
       name: 'Head of Academy',
       passwordHash,
       role: 'head_of_academy',
@@ -54,7 +54,7 @@ async function main() {
   const [hoe] = await db
     .insert(users)
     .values({
-      email: 'head@a2sv.org',
+      email: 'head@akibatech.com',
       name: 'Head of Education',
       passwordHash,
       role: 'head_of_education',
@@ -69,7 +69,7 @@ async function main() {
   const [student] = await db
     .insert(users)
     .values({
-      email: 'student@a2sv.org',
+      email: 'student@akibatech.com',
       name: 'Geleta Daba',
       passwordHash,
       role: 'student',

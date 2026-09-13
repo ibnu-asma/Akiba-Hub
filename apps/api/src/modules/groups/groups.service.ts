@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
-import { groups, groupHeads, users, superGroups, eq, and, isNull, inArray } from '@hub/database';
+import { groups, groupHeads, users, superGroups, eq, and, isNull, inArray, asc } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
 import { DomainError, ROLE_NAMES } from '@hub/shared';
 
@@ -11,7 +11,9 @@ export interface GroupSummary {
   description: string | null;
   country: string | null;
   superGroupId: string | null;
+  superGroupName: string | null;
   heads: { id: string; name: string }[];
+  students: { id: string; name: string; avatarUrl: string | null }[];
   studentCount: number;
 }
 
@@ -59,12 +61,43 @@ export class GroupsService {
     return created;
   }
 
+  /** Edit a group's details (SPEC §8.6). */
+  async update(
+    id: string,
+    input: { name: string; shortName: string; description?: string | null; country?: string | null; superGroupId?: string | null },
+    actor: { id: string; name: string },
+  ): Promise<void> {
+    const rows = await this.db.db
+      .update(groups)
+      .set({
+        name: input.name,
+        shortName: input.shortName,
+        description: input.description ?? null,
+        country: input.country ?? null,
+        superGroupId: input.superGroupId ?? null,
+      })
+      .where(eq(groups.id, id))
+      .returning()
+      .execute();
+    if (!rows[0]) throw DomainError.notFound(`Group ${id}`);
+    await this.audit.record({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorRole: ROLE_NAMES.head_of_academy,
+      action: 'UPDATE',
+      entityType: 'group',
+      entityId: id,
+      description: `updated the group '${input.name}'`,
+    });
+  }
+
   async list(): Promise<GroupSummary[]> {
     const groupRows = await this.db.db
       .select()
       .from(groups)
       .leftJoin(superGroups, eq(groups.superGroupId, superGroups.id))
       .where(isNull(groups.deletedAt))
+      .orderBy(asc(groups.name))
       .execute();
     if (groupRows.length === 0) return [];
 
@@ -74,19 +107,19 @@ export class GroupsService {
       .from(groupHeads)
       .innerJoin(users, eq(groupHeads.userId, users.id))
       .execute();
-    const countRows = await this.db.db
-      .select({ groupId: users.groupId })
+    const studentRows = await this.db.db
+      .select({ id: users.id, name: users.name, avatarUrl: users.avatarUrl, groupId: users.groupId })
       .from(users)
-      .where(and(inArray(users.groupId, ids), eq(users.isRemoved, false)))
+      .where(and(inArray(users.groupId, ids), eq(users.isRemoved, false), eq(users.role, 'student')))
       .execute();
 
     const byHead: Record<string, { id: string; name: string }[]> = {};
     for (const h of headRows) {
       (byHead[h.groupId] ??= []).push({ id: h.userId, name: h.name });
     }
-    const counts: Record<string, number> = {};
-    for (const c of countRows) {
-      if (c.groupId) counts[c.groupId] = (counts[c.groupId] ?? 0) + 1;
+    const byGroupStudents: Record<string, { id: string; name: string; avatarUrl: string | null }[]> = {};
+    for (const s of studentRows) {
+      if (s.groupId) (byGroupStudents[s.groupId] ??= []).push({ id: s.id, name: s.name, avatarUrl: s.avatarUrl });
     }
 
     return groupRows.map((r) => ({
@@ -96,8 +129,10 @@ export class GroupsService {
       description: r.groups.description,
       country: r.groups.country,
       superGroupId: r.groups.superGroupId,
+      superGroupName: r.super_groups?.name ?? null,
       heads: byHead[r.groups.id] ?? [],
-      studentCount: counts[r.groups.id] ?? 0,
+      students: byGroupStudents[r.groups.id] ?? [],
+      studentCount: (byGroupStudents[r.groups.id] ?? []).length,
     }));
   }
 
@@ -117,6 +152,59 @@ export class GroupsService {
       entityType: 'group',
       entityId: id,
       description: `deleted the group '${rows[0].name}'`,
+    });
+  }
+
+  /** Replace the set of heads assigned to a group (SPEC §11 assign-head). */
+  async assignHeads(groupId: string, headUserIds: string[], actor: { id: string; name: string }): Promise<void> {
+    const g = await this.db.db.select().from(groups).where(eq(groups.id, groupId)).limit(1).execute();
+    if (!g[0]) throw DomainError.notFound(`Group ${groupId}`);
+    await this.db.db.delete(groupHeads).where(eq(groupHeads.groupId, groupId)).execute();
+    if (headUserIds.length > 0) {
+      await this.db.db
+        .insert(groupHeads)
+        .values(headUserIds.map((userId) => ({ groupId, userId })))
+        .execute();
+    }
+    await this.audit.record({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorRole: ROLE_NAMES.head_of_academy,
+      action: 'UPDATE',
+      entityType: 'group',
+      entityId: groupId,
+      description: `assigned ${headUserIds.length} head(s) to group '${g[0].name}'`,
+    });
+  }
+
+  /** Assign students into a group (SPEC §11 — the invite follow-up). */
+  async addStudents(groupId: string, userIds: string[], actor: { id: string; name: string }): Promise<{ added: number }> {
+    const g = await this.db.db.select().from(groups).where(eq(groups.id, groupId)).limit(1).execute();
+    if (!g[0]) throw DomainError.notFound(`Group ${groupId}`);
+    await this.db.db.update(users).set({ groupId }).where(inArray(users.id, userIds)).execute();
+    await this.audit.record({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorRole: ROLE_NAMES.head_of_academy,
+      action: 'UPDATE',
+      entityType: 'group',
+      entityId: groupId,
+      description: `assigned ${userIds.length} student(s) to group '${g[0].name}'`,
+    });
+    return { added: userIds.length };
+  }
+
+  /** Remove a student from a group (clear their groupId). */
+  async removeStudent(groupId: string, userId: string, actor: { id: string; name: string }): Promise<void> {
+    await this.db.db.update(users).set({ groupId: null }).where(and(eq(users.id, userId), eq(users.groupId, groupId))).execute();
+    await this.audit.record({
+      actorId: actor.id,
+      actorName: actor.name,
+      actorRole: ROLE_NAMES.head_of_academy,
+      action: 'UPDATE',
+      entityType: 'group',
+      entityId: groupId,
+      description: `removed a student from a group`,
     });
   }
 }

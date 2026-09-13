@@ -1,6 +1,18 @@
-import { proxyAction } from '@/lib/bff';
+import { proxyAction, proxyGet } from '@/lib/bff';
 
-/** HoE/HoA: schedule an A2SV contest and assign groups (SPEC §7.6). */
+/** HoE/HoA: list contests (with search/filter/pagination via query string). */
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const params = new URLSearchParams();
+  for (const key of ['q', 'type', 'limit', 'offset']) {
+    const value = url.searchParams.get(key);
+    if (value) params.set(key, value);
+  }
+  const qs = params.toString();
+  return proxyGet(`/contests${qs ? `?${qs}` : ''}`);
+}
+
+/** HoE/HoA: schedule a contest and assign groups (SPEC §7.7). */
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   if (!body) {

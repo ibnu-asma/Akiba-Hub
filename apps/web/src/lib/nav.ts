@@ -33,12 +33,15 @@ export type AllIconName =
   | 'dots'
   | 'mail'
   | 'clock'
-  | 'upload';
+  | 'upload'
+  | 'externalLink'
+  | 'bookmark';
 
 export interface NavItem {
   label: string;
   href: string;
   icon: AllIconName;
+  children?: { label: string; href: string }[];
 }
 
 export interface NavSection {

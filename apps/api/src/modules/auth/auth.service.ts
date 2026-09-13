@@ -31,12 +31,17 @@ export class AuthService {
     const invite = await this.repo.findInviteByHash(tokenHash);
     if (!invite) throw DomainError.notFound('Invitation not found');
     if (invite.usedAt) throw DomainError.conflict('Invitation already used');
+    if (invite.revokedAt) throw DomainError.conflict('Invitation has been revoked');
     if (invite.expiresAt < new Date()) throw DomainError.conflict('Invitation expired');
 
     const role = invite.role in ROLES ? invite.role : ROLES.student;
+    // The invite carries the generated org login email (SPEC §8.5); fall back to
+    // a name-derived alias only for legacy invites without an email.
+    const email = invite.email ?? orgEmail(payload.name);
+    const name = payload.name || [invite.firstName, invite.lastName].filter(Boolean).join(' ');
     const user = await this.repo.create({
-      email: payload.name.toLowerCase().replace(/\s+/g, '.') + '@a2sv.org', // demo derivation; replace with invite.email when provided
-      name: payload.name,
+      email,
+      name,
       passwordHash: await bcrypt.hash(payload.password, 10),
       role,
       groupId: invite.groupId,
@@ -48,10 +53,21 @@ export class AuthService {
     return this.buildSession(user);
   }
 
-  async me(userId: string): Promise<{ id: string; name: string; email: string; role: string }> {
-    const user = await this.repo.findById(userId);
+  async me(userId: string) {
+    const user = await this.repo.findProfileById(userId);
     if (!user) throw DomainError.notFound('User not found');
-    return { id: user.id, name: user.name, email: user.email, role: user.role };
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      groupId: user.groupId,
+      superGroupId: user.superGroupId,
+      rating: user.rating ?? 1200,
+      avatarUrl: user.avatarUrl ?? null,
+      country: user.country ?? null,
+      university: user.university ?? null,
+    };
   }
 
   private buildSession(user: { id: string; name: string; email: string; role: string }): AuthSession {
@@ -67,4 +83,9 @@ export class AuthService {
 /** Deterministic O(1) token indexing — hash at rest only. */
 export function hashToken(token: string): string {
   return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+/** Fallback org login email derived from a full name (legacy invites only). */
+function orgEmail(name: string): string {
+  return name.toLowerCase().trim().replace(/\s+/g, '.') + '@akibatech.com';
 }

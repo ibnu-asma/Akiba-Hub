@@ -14,7 +14,15 @@ const EnvSchema = z.object({
   JWT_EXPIRES: z.string().default('15m'),
   REFRESH_EXPIRES: z.string().default('30d'),
   INVITE_EXPIRES: z.string().default('7d'),
-  WEB_ORIGIN: z.string().default('http://localhost:3001'),
+  WEB_ORIGIN: z.string().default('http://localhost:3100'),
+  // Email delivery (SPEC §8.5). `preview` logs the rendered email instead of sending.
+  MAIL_MODE: z.enum(['preview', 'smtp']).default('preview'),
+  SMTP_HOST: z.string().default(''),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_SECURE: z.string().default('false'),
+  SMTP_USER: z.string().default(''),
+  SMTP_PASS: z.string().default(''),
+  MAIL_FROM: z.string().default('Akiba <noreply@akibatech.com>'),
 });
 
 /** Minimal .env loader (no extra dependency, never overrides real env vars). */

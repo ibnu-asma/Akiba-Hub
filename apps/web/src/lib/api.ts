@@ -48,9 +48,23 @@ export interface Me {
   name: string;
   email: string;
   role: string;
+  groupId: string | null;
+  superGroupId: string | null;
+  rating: number;
+  avatarUrl: string | null;
+  country: string | null;
+  university: string | null;
 }
 
 export type UserDto = Me;
+
+/** Admin view of a user — includes group assignment + soft-delete flag (SPEC §8.7). */
+export interface UserSummaryDto extends Me {
+  groupId: string | null;
+  isRemoved: boolean;
+  rating: number;
+  avatarUrl: string | null;
+}
 
 /** /auth/me — request-deduped so layout and pages share a single upstream call. */
 export const getMe = cache(async (): Promise<Me | null> => {
@@ -85,9 +99,11 @@ export interface Group {
   name: string;
   shortName: string;
   description: string | null;
-  country: string;
-  superGroupId: string;
+  country: string | null;
+  superGroupId: string | null;
+  superGroupName: string | null;
   heads: { id: string; name: string }[];
+  students: { id: string; name: string; avatarUrl: string | null }[];
   studentCount: number;
 }
 
@@ -121,7 +137,25 @@ export interface TrackDto {
   phase: string;
   name: string;
   sortOrder: number;
+  problemCount: number;
   createdAt: string;
+}
+
+export interface ExerciseDto {
+  id: string;
+  problemId: string;
+  problemName: string;
+  difficulty: string;
+  platform: string;
+  tags: string[];
+  link: string;
+  trackId: string;
+  trackName: string;
+  phase: string;
+  superGroupId: string;
+  superGroupName: string;
+  sortOrder: number;
+  createdAt?: string;
 }
 
 export interface ContestDto {
@@ -134,6 +168,22 @@ export interface ContestDto {
   standingsLink: string | null;
   createdBy: string;
   createdAt: string;
+  groupNames: string[];
+  groupIds: string[];
+  superGroupIds: string[];
+  groupCount: number;
+  problemCount: number;
+}
+
+export interface ContestProblemDto {
+  problemId: string;
+  pseudo: string;
+  name: string;
+  difficulty: string;
+  platform: string;
+  link: string;
+  tags?: string[];
+  createdAt?: string;
 }
 
 export interface DailyProblemDto {
@@ -146,6 +196,79 @@ export interface DailyProblemDto {
   platform: string;
   difficulty: string;
   link: string;
+}
+
+export interface CompletionRow {
+  userId: string;
+  name: string;
+  solved: number;
+  total: number;
+  pct: number;
+}
+
+export interface FundDto {
+  id: string;
+  name: string;
+  description: string | null;
+  amount: number;
+  currency: string;
+  createdAt: string;
+}
+
+export interface FundWithRollupDto extends FundDto {
+  paidTotal: number;
+  pendingTotal: number;
+}
+
+export interface SubmissionDto {
+  id: string;
+  userId: string;
+  userName: string | null;
+  avatarUrl: string | null;
+  problemId: string;
+  problemName: string | null;
+  language: string;
+  timeSpentMin: number;
+  tries: number;
+  source: string;
+  createdAt: string;
+}
+
+export interface PostDto {
+  id: string;
+  userId: string;
+  userName: string | null;
+  userAvatar?: string | null;
+  userRole?: string | null;
+  title: string;
+  body: string;
+  votesUp: number;
+  votesDown: number;
+  score: number;
+  commentCount: number;
+  myVote?: number;
+  createdAt: string;
+}
+
+export interface CommentDto {
+  id: string;
+  userId?: string;
+  userName: string | null;
+  userAvatar?: string | null;
+  userRole?: string | null;
+  body: string;
+  createdAt: string;
+}
+
+export interface StipendDto {
+  id: string;
+  userId: string;
+  userName: string | null;
+  month: string;
+  amount: number;
+  mode: string;
+  status: string;
+  createdAt: string;
 }
 
 /** Non-throwing wrapper — dashboards degrade to empty states, never crash. */

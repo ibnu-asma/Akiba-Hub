@@ -11,9 +11,9 @@ interface LoginResponse {
 }
 
 const DEMO_ACCOUNTS = [
-  { label: 'Head of Academy', email: 'admin@a2sv.org' },
-  { label: 'Head of Education', email: 'head@a2sv.org' },
-  { label: 'Student', email: 'student@a2sv.org' },
+  { label: 'Head of Academy', email: 'admin@akibatech.com' },
+  { label: 'Head of Education', email: 'head@akibatech.com' },
+  { label: 'Student', email: 'student@akibatech.com' },
 ];
 
 export default function LoginPage() {
@@ -54,7 +54,7 @@ export default function LoginPage() {
           <span className="inline-grid h-14 w-14 place-items-center rounded-2xl bg-a2sv-500 text-white shadow-[0_12px_22px_-10px_rgba(15,169,88,0.6)]">
             <Icon name="code" className="h-7 w-7" />
           </span>
-          <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">Sign in to A2SV Hub</h1>
+          <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900">Sign in to Akiba Hub</h1>
           <p className="mt-1 text-sm text-slate-500">Access is invite-only (SPEC §12.1).</p>
         </div>
 

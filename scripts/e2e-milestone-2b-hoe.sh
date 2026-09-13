@@ -8,11 +8,11 @@ TAG=$(date +%s)
 pass=0; fail=0
 chk() { if [ "$2" = "$3" ]; then pass=$((pass+1)); echo "PASS $1 (=$2)"; else fail=$((fail+1)); echo "FAIL $1 (got=$2 want=$3)"; fi; }
 
-ADMIN=$(curl -sm 5 -H 'Content-Type: application/json' -d '{"email":"admin@a2sv.org","password":"a2sv-demo"}' $A/auth/login | python3 -c 'import json,sys;print(json.load(sys.stdin)["accessToken"])')
+ADMIN=$(curl -sm 5 -H 'Content-Type: application/json' -d '{"email":"admin@akibatech.com","password":"a2sv-demo"}' $A/auth/login | python3 -c 'import json,sys;print(json.load(sys.stdin)["accessToken"])')
 GID=$(curl -sm 5 $A/groups -H "Authorization: Bearer $ADMIN" | python3 -c 'import json,sys; print(next(g["id"] for g in json.load(sys.stdin) if g["name"]=="Remote Group 5A"))')
 
 # HoE session
-curl -s -c /tmp/hoe.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"head@a2sv.org","password":"a2sv-demo"}' -o /dev/null
+curl -s -c /tmp/hoe.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"head@akibatech.com","password":"a2sv-demo"}' -o /dev/null
 
 # 1) Pages render for HoE
 chk "attendance-page" "$(curl -s -b /tmp/hoe.jar $B/attendance -o /dev/null -w '%{http_code}')" 200
@@ -38,7 +38,7 @@ chk "attendance-save" "$code" 200
 chk "roster-all-present" "$(curl -s -b /tmp/hoe.jar "$B/api/admin/sessions/$SID/attendance?groupId=$GID" | python3 -c 'import json,sys; print(all(r["status"]=="present" for r in json.load(sys.stdin)))')" True
 
 # 6) Student dashboard Events panel shows the new session
-curl -s -c /tmp/stu.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"student@a2sv.org","password":"a2sv-demo"}' -o /dev/null
+curl -s -c /tmp/stu.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"student@akibatech.com","password":"a2sv-demo"}' -o /dev/null
 curl -s -b /tmp/stu.jar $B/dashboard -o /tmp/stu-dash2.html
 grep -q "$SNAME" /tmp/stu-dash2.html && chk "student-events-sees-session" yes yes || chk "student-events-sees-session" no yes
 

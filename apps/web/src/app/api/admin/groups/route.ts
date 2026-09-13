@@ -1,6 +1,11 @@
-import { proxyAction } from '@/lib/bff';
+import { proxyAction, proxyGet } from '@/lib/bff';
 
-/** HoA: create a group (SPEC §8.5). */
+/** HoA: list groups with heads + students (SPEC §8.6). */
+export async function GET() {
+  return proxyGet('/groups');
+}
+
+/** HoA: create a group (SPEC §8.6). */
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   if (!body) {
@@ -8,3 +13,5 @@ export async function POST(req: Request) {
   }
   return proxyAction('/groups', body);
 }
+
+

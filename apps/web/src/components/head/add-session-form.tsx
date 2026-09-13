@@ -88,7 +88,7 @@ export function AddSessionForm({ groups }: { groups: Group[] }) {
           <OutlinedInput label="End" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
         </div>
         <div className="sm:col-span-2">
-          <OutlinedInput label="Location" placeholder="e.g. Room 3F, A2SV Hub" value={location} onChange={(e) => setLocation(e.target.value)} />
+          <OutlinedInput label="Location" placeholder="e.g. Room 3F, Akiba Hub" value={location} onChange={(e) => setLocation(e.target.value)} />
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { JwtService } from './common/auth/jwt.service.js';
 import { AuthGuard } from './common/auth/auth.guard.js';
 import { ScopeService } from './common/auth/scope.service.js';
 import { AuditService } from './common/audit/audit.service.js';
+import { MailerService } from './common/mailer/mailer.service.js';
 
 import { AuthController } from './modules/auth/auth.controller.js';
 import { AuthService } from './modules/auth/auth.service.js';
@@ -40,6 +41,21 @@ import { ContestsService } from './modules/contests/contests.service.js';
 import { DailyProblemsController } from './modules/daily-problems/daily-problems.controller.js';
 import { DailyProblemsService } from './modules/daily-problems/daily-problems.service.js';
 
+import { FundsController } from './modules/funds/funds.controller.js';
+import { FundsService } from './modules/funds/funds.service.js';
+
+import { SubmissionsController } from './modules/submissions/submissions.controller.js';
+import { SubmissionsService } from './modules/submissions/submissions.service.js';
+
+import { SummaryController } from './modules/summary/summary.controller.js';
+import { SummaryService } from './modules/summary/summary.service.js';
+
+import { ComparisonController } from './modules/comparison/comparison.controller.js';
+import { ComparisonService } from './modules/comparison/comparison.service.js';
+
+import { ForumController } from './modules/forum/forum.controller.js';
+import { ForumService } from './modules/forum/forum.service.js';
+
 /**
  * Root composition root. Shared singletons are provided once at module root;
  * feature modules are controllers + their service graph only.
@@ -57,6 +73,11 @@ import { DailyProblemsService } from './modules/daily-problems/daily-problems.se
     TracksController,
     ContestsController,
     DailyProblemsController,
+    FundsController,
+    SubmissionsController,
+    SummaryController,
+    ComparisonController,
+    ForumController,
   ],
   providers: [
     // shared infra
@@ -66,6 +87,7 @@ import { DailyProblemsService } from './modules/daily-problems/daily-problems.se
     AuthGuard,
     ScopeService,
     AuditService,
+    MailerService,
 
     // feature services
     AuthService,
@@ -79,6 +101,11 @@ import { DailyProblemsService } from './modules/daily-problems/daily-problems.se
     TracksService,
     ContestsService,
     DailyProblemsService,
+    FundsService,
+    SubmissionsService,
+    SummaryService,
+    ComparisonService,
+    ForumService,
   ],
 })
 export class AppModule {}

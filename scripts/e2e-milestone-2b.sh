@@ -8,7 +8,7 @@ pass=0; fail=0
 chk() { if [ "$2" = "$3" ]; then pass=$((pass+1)); echo "PASS $1 (=$2)"; else fail=$((fail+1)); echo "FAIL $1 (got=$2 want=$3)"; fi; }
 
 # HoA session
-curl -s -c /tmp/hoa.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"admin@a2sv.org","password":"a2sv-demo"}' -o /dev/null
+curl -s -c /tmp/hoa.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"admin@akibatech.com","password":"a2sv-demo"}' -o /dev/null
 
 # 1) Create super group via BFF (unique name per run)
 code=$(curl -s -b /tmp/hoa.jar -X POST $B/api/admin/super-groups -H 'Content-Type: application/json' -d "{\"name\":\"SG-E2E-$TAG\"}" -o /tmp/sg.json -w '%{http_code}')
@@ -19,7 +19,7 @@ code=$(curl -s -b /tmp/hoa.jar -X POST $B/api/admin/super-groups -H 'Content-Typ
 chk "super-group-dupe-409" "$code" 409
 
 # 3) Mass invite via BFF
-EMAIL="student.$TAG@a2sv.org"
+EMAIL="student.$TAG@akibatech.com"
 INV=$(curl -s -b /tmp/hoa.jar -X POST $B/api/admin/invitations/mass -H 'Content-Type: application/json' -d "{\"emails\":[\"$EMAIL\"],\"role\":\"student\"}")
 TOKEN=$(echo "$INV" | python3 -c 'import json,sys; print(json.load(sys.stdin)["invitations"][0]["token"])' 2>/dev/null)
 [ ${#TOKEN} -eq 64 ] && chk "mass-invite-token" "64" "64" || chk "mass-invite-token" "${#TOKEN}" "64"
@@ -51,7 +51,7 @@ chk "register-invite-public" "$(curl -s $B/register-invite -o /dev/null -w '%{ht
 chk "register-invite-missing-token" "$(curl -s $B/register-invite -o /dev/null -w '%{http_code}')" 200
 
 # 9) Security: HoE cannot mass-invite (level guard -> 403)
-curl -s -c /tmp/hoe.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"head@a2sv.org","password":"a2sv-demo"}' -o /dev/null
+curl -s -c /tmp/hoe.jar -X POST $B/api/auth/login -H 'Content-Type: application/json' -d '{"email":"head@akibatech.com","password":"a2sv-demo"}' -o /dev/null
 code=$(curl -s -b /tmp/hoe.jar -X POST $B/api/admin/invitations/mass -H 'Content-Type: application/json' -d '{"emails":["x@y.z"],"role":"student"}' -o /tmp/hoe-403.json -w '%{http_code}')
 chk "hoe-forbidden-invite" "$code" 403
 

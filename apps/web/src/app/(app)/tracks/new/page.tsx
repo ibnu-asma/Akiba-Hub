@@ -1,29 +1,29 @@
 import { redirect } from 'next/navigation';
 import { ROLE_LEVEL, type Role } from '@hub/shared';
-import { getMe, hubFetch, safe, type SuperGroup } from '@/lib/api';
-import { AddTrackForm } from '@/components/head/add-track-form';
+import { getMe, hubFetch, safe, type ProblemDto, type SuperGroup, type TrackDto } from '@/lib/api';
+import { TracksManager } from '@/components/head/tracks-manager';
 
-/** HoE/HoA: create tracks for the education seasons/program phases (SPEC §7.5). */
-export default async function AddTrackPage() {
+/** HoE/HoA: track management — curriculum phases per super group (SPEC §7.6). */
+export default async function TracksPage() {
   const me = await getMe();
   if (!me) redirect('/login');
   if ((ROLE_LEVEL[me.role as Role] ?? 1) < 2) redirect('/dashboard');
 
-  const superGroups = (await safe(hubFetch<SuperGroup[]>('/super-groups'))) ?? [];
+  const [superGroups, tracks, problems] = await Promise.all([
+    safe(hubFetch<SuperGroup[]>('/super-groups')),
+    safe(hubFetch<TrackDto[]>('/tracks')),
+    safe(hubFetch<ProblemDto[]>('/problems?limit=200')),
+  ]);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Add Track</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Tracks</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Tracks group the year-long education program into five phases — Python Track, Education Phase I, Camp I, Education Phase
-          II, and Camp II. Create one per super group and phase; exercises are then attached to it.
+          The five education phases, one per super group — create, edit, and manage each track&apos;s problems.
         </p>
       </header>
-      {superGroups.length === 0 && (
-        <p className="card-tint px-4 py-3 text-sm text-slate-600">No super groups yet — a Head of Academy needs to create one first.</p>
-      )}
-      <AddTrackForm superGroups={superGroups} />
+      <TracksManager initialTracks={tracks ?? []} superGroups={superGroups ?? []} problems={problems ?? []} />
     </div>
   );
 }

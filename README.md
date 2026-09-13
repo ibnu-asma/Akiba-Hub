@@ -1,6 +1,6 @@
-# A2SV Hub
+# Akiba Hub
 
-The A2SV education hub — tracks, contests, sessions, attendance, and analytics for
+The Akiba education hub — tracks, contests, sessions, attendance, and analytics for
 Students, Heads of Education, and Heads of Academy. See `SPEC.md` for the full
 product specification (roles, screens, data model, API surface).
 
@@ -40,8 +40,8 @@ pnpm dev:api                    # API on :3000
 pnpm dev:web                    # Web on :3100
 ```
 
-Seed accounts (see `packages/database/src/seed.ts`): `admin@a2sv.org` (Head of
-Academy), `head@a2sv.org` (Head of Education), `student@a2sv.org` — all with the
+Seed accounts (see `packages/database/src/seed.ts`): `admin@akibatech.com` (Head of
+Academy), `head@akibatech.com` (Head of Education), `student@akibatech.com` — all with the
 seed password `a2sv-demo`.
 
 ## Verification

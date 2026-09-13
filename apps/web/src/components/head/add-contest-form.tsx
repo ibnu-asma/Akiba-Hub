@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Checkbox, OutlinedInput, OutlinedSelect, type SelectOption } from '@/components/form/field';
 import { SelectUser } from '@/components/form/select-user';
@@ -76,6 +77,7 @@ export function AddContestForm({ groups, problems }: { groups: Group[]; problems
       }
       setCreated(payload as ContestDto);
       setErrors({});
+      router.refresh();
     } catch {
       setServerError('Network error — is the API running?');
     } finally {
@@ -100,6 +102,7 @@ export function AddContestForm({ groups, problems }: { groups: Group[]; problems
       }
       setQuestionsSaved((payload as { added?: number })?.added ?? 0);
       setAttached(true);
+      router.refresh();
     } catch {
       setServerError('Network error — is the API running?');
     } finally {
@@ -126,7 +129,10 @@ export function AddContestForm({ groups, problems }: { groups: Group[]; problems
             <p className="rounded-xl bg-a2sv-50 px-4 py-3 text-sm font-semibold text-a2sv-700">
               {questionsSaved} contest question{questionsSaved === 1 ? '' : 's'} attached — letters A, B, C… assigned.
             </p>
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link href={`/contests/${created.id}`} className="btn-primary">
+                View Contest Board →
+              </Link>
               <button
                 type="button"
                 className="btn-ghost"
@@ -138,7 +144,7 @@ export function AddContestForm({ groups, problems }: { groups: Group[]; problems
               >
                 Attach more
               </button>
-              <button type="button" className="btn-primary" onClick={() => router.push('/dashboard')}>
+              <button type="button" className="btn-secondary" onClick={() => router.push('/dashboard')}>
                 Done
               </button>
             </div>

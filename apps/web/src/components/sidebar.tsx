@@ -1,9 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon } from './icon';
-import type { NavSection } from '@/lib/nav';
+import type { NavItem, NavSection } from '@/lib/nav';
 
 /** Role-scoped sidebar (1/2/3-section rule) — sticky on desktop, drawer on mobile. */
 export function Sidebar({
@@ -66,31 +67,77 @@ function NavList({ sections, onNavigate }: { sections: NavSection[]; onNavigate?
         <div key={section.id} className={index > 0 ? 'mt-5 border-t border-slate-100 pt-5' : ''}>
           <p className="nav-section-title">{section.title}</p>
           <ul className="space-y-0.5 px-3">
-            {section.items.map((item) => {
-              const active = pathname === item.href;
+            {section.items.map((item) => (
+              <NavItemRow key={item.href} item={item} pathname={pathname} onNavigate={onNavigate} />
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+function NavItemRow({ item, pathname, onNavigate }: { item: NavItem; pathname: string; onNavigate?: () => void }) {
+  const childActive = item.children?.some((c) => pathname.startsWith(c.href)) ?? false;
+  const parentActive = pathname === item.href;
+  const [open, setOpen] = useState(childActive);
+
+  useEffect(() => {
+    if (childActive) setOpen(true);
+  }, [childActive]);
+
+  if (item.children?.length) {
+    return (
+      <li>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+            open || childActive ? 'bg-a2sv-50 font-semibold text-a2sv-700' : 'font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+          }`}
+        >
+          <Icon name={item.icon} className={`h-[18px] w-[18px] shrink-0 ${open || childActive ? 'text-a2sv-600' : 'text-slate-400'}`} />
+          <span className="flex-1 text-left">{item.label}</span>
+          <Icon name={open ? 'chevronDown' : 'chevronRight'} className="h-4 w-4 text-slate-400" />
+        </button>
+        {open && (
+          <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-slate-200 pl-2">
+            {item.children.map((child) => {
+              const active = pathname.startsWith(child.href);
               return (
-                <li key={item.href}>
+                <li key={child.href}>
                   <Link
-                    href={item.href}
+                    href={child.href}
                     onClick={onNavigate}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
-                      active
-                        ? 'bg-a2sv-50 font-semibold text-a2sv-700'
-                        : 'font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                    className={`block truncate rounded-lg px-3 py-2 text-sm transition ${
+                      active ? 'bg-a2sv-50 font-semibold text-a2sv-700' : 'font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
-                    <Icon
-                      name={item.icon}
-                      className={`h-[18px] w-[18px] shrink-0 ${active ? 'text-a2sv-600' : 'text-slate-400'}`}
-                    />
-                    {item.label}
+                    {child.label}
                   </Link>
                 </li>
               );
             })}
           </ul>
-        </div>
-      ))}
-    </nav>
+        )}
+      </li>
+    );
+  }
+
+  const active = parentActive;
+  return (
+    <li>
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+          active ? 'bg-a2sv-50 font-semibold text-a2sv-700' : 'font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+        }`}
+      >
+        <Icon name={item.icon} className={`h-[18px] w-[18px] shrink-0 ${active ? 'text-a2sv-600' : 'text-slate-400'}`} />
+        {item.label}
+      </Link>
+    </li>
   );
 }

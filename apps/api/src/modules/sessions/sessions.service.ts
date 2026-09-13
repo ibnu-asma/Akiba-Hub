@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
-import { sessions, sessionGroups, attendanceRecords, users, and, desc, eq, inArray } from '@hub/database';
+import { sessions, sessionGroups, attendanceRecords, users, and, asc, desc, eq, inArray, sql } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
 import { ATTENDANCE_STATUSES, DomainError, ROLE_NAMES, isHoEOrHigher } from '@hub/shared';
 
@@ -99,12 +99,12 @@ export class SessionsService {
       userId: u.userId,
       name: u.name,
       status: (byUser[u.userId]?.status as Status | undefined) ?? 'pending',
-      checkInAt: byUser[u.userId]?.checkInAt,
-      checkOutAt: byUser[u.userId]?.checkOutAt,
+      checkInAt: byUser[u.userId]?.checkInAt ?? null,
+      checkOutAt: byUser[u.userId]?.checkOutAt ?? null,
     }));
   }
 
-  /** Mark attendance for a roster (individual or batch). */
+  /** Mark attendance for a roster (individual or batch). Present/Late capture a check-in time. */
   async setAttendance(
     sessionId: string,
     rows: { userId: string; status: string }[],
@@ -114,24 +114,63 @@ export class SessionsService {
       if (!(Object.values(ATTENDANCE_STATUSES) as string[]).includes(r.status)) {
         throw DomainError.validation(`Invalid status: ${r.status}`);
       }
+      const arriving = r.status === 'present' || r.status === 'late';
       const existing = await this.db.db
-        .select({ id: attendanceRecords.id })
+        .select({ id: attendanceRecords.id, checkInAt: attendanceRecords.checkInAt })
         .from(attendanceRecords)
         .where(and(eq(attendanceRecords.sessionId, sessionId), eq(attendanceRecords.userId, r.userId)))
         .execute();
+      const checkInAt = arriving ? (existing[0]?.checkInAt ?? new Date()) : null;
       if (existing[0]) {
         await this.db.db
           .update(attendanceRecords)
-          .set({ status: r.status, markedBy })
+          .set({ status: r.status, markedBy, checkInAt })
           .where(eq(attendanceRecords.id, existing[0].id))
           .execute();
       } else {
         await this.db.db
           .insert(attendanceRecords)
-          .values({ sessionId, userId: r.userId, status: r.status, markedBy })
+          .values({ sessionId, userId: r.userId, status: r.status, markedBy, checkInAt })
           .execute();
       }
     }
+  }
+
+  /** Monthly color-coded grid — a group's students × that month's sessions (SPEC §7.4). */
+  async getAttendanceGrid(groupId: string, month: string) {
+    const [year, mon] = month.split('-').map(Number);
+    const start = `${month}-01`;
+    const next = mon === 12 ? [year + 1, 1] : [year, mon + 1];
+    const end = `${String(next[0]).padStart(4, '0')}-${String(next[1]).padStart(2, '0')}-01`;
+
+    const sessionRows = await this.db.db
+      .select({ id: sessions.id, name: sessions.name, date: sessions.date })
+      .from(sessions)
+      .innerJoin(sessionGroups, eq(sessions.id, sessionGroups.sessionId))
+      .where(and(eq(sessionGroups.groupId, groupId), sql`${sessions.date} >= ${start}::date`, sql`${sessions.date} < ${end}::date`))
+      .orderBy(asc(sessions.date))
+      .execute();
+
+    const students = await this.db.db
+      .select({ id: users.id, name: users.name })
+      .from(users)
+      .where(and(eq(users.groupId, groupId), eq(users.role, 'student'), eq(users.isRemoved, false)))
+      .orderBy(asc(users.name))
+      .execute();
+
+    const sessionIds = sessionRows.map((s) => s.id);
+    const records = sessionIds.length
+      ? await this.db.db.select().from(attendanceRecords).where(inArray(attendanceRecords.sessionId, sessionIds)).execute()
+      : [];
+
+    return {
+      sessions: sessionRows,
+      students: students.map((st) => ({
+        userId: st.id,
+        name: st.name,
+        cells: Object.fromEntries(records.filter((r) => r.userId === st.id).map((r) => [r.sessionId, r.status])),
+      })),
+    };
   }
 }
 

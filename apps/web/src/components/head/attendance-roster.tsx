@@ -12,6 +12,18 @@ interface RosterRow {
   checkOutAt: string | null;
 }
 
+interface AttendanceGrid {
+  sessions: { id: string; name: string; date: string }[];
+  students: { userId: string; name: string; cells: Record<string, string> }[];
+}
+
+const GRID_COLOR: Record<string, string> = {
+  present: '#16a34a',
+  absent: '#dc2626',
+  excused: '#d97706',
+  late: '#2563eb',
+};
+
 type StatusKey = 'present' | 'excused' | 'late' | 'absent';
 
 const STATUS_META: Record<StatusKey, { label: string; title: string; active: string }> = {
@@ -42,6 +54,7 @@ export function AttendanceRoster({ sessions, groups }: { sessions: SessionDto[];
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [grid, setGrid] = useState<AttendanceGrid | null>(null);
 
   const session = sessions.find((s) => s.id === sessionId) ?? null;
   const ready = Boolean(sessionId && groupId);
@@ -73,6 +86,18 @@ export function AttendanceRoster({ sessions, groups }: { sessions: SessionDto[];
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (!groupId) {
+      setGrid(null);
+      return;
+    }
+    const month = new Date().toISOString().slice(0, 7);
+    fetch(`/api/admin/sessions/attendance-grid?groupId=${encodeURIComponent(groupId)}&month=${month}`)
+      .then((r) => r.json())
+      .then((d) => setGrid(d && Array.isArray(d.sessions) ? (d as AttendanceGrid) : null))
+      .catch(() => setGrid(null));
+  }, [groupId]);
+
   function setStatus(userId: string, status: string) {
     setRows((prev) => prev?.map((r) => (r.userId === userId ? { ...r, status } : r)) ?? prev);
   }
@@ -85,6 +110,7 @@ export function AttendanceRoster({ sessions, groups }: { sessions: SessionDto[];
     acc[r.status] = (acc[r.status] ?? 0) + 1;
     return acc;
   }, {});
+  const presentPct = rows && rows.length > 0 ? Math.round(((counts['present'] ?? 0) / rows.length) * 100) : 0;
 
   async function save() {
     if (!rows || !ready) return;
@@ -139,6 +165,7 @@ export function AttendanceRoster({ sessions, groups }: { sessions: SessionDto[];
           <h2 className="text-sm font-bold text-slate-900">Roster</h2>
           {rows && (
             <div className="flex flex-wrap items-center gap-2">
+              <span className="chip bg-a2sv-50 font-semibold text-a2sv-700">{presentPct}% present</span>
               {STATUS_ORDER.map((key) => (
                 <span key={key} className="chip bg-slate-100 text-slate-600">
                   <span className={`mr-1 inline-block h-2 w-2 rounded-full ${STATUS_META[key].active.split(' ')[1]}`} />
@@ -164,7 +191,14 @@ export function AttendanceRoster({ sessions, groups }: { sessions: SessionDto[];
               return (
                 <li key={row.userId} className="flex items-center gap-3 px-5 py-3">
                   <span className="avatar h-9 w-9 text-[11px]">{initials(row.name)}</span>
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{row.name}</span>
+                  <span className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-slate-800">{row.name}</p>
+                    {(row.status === 'present' || row.status === 'late') && row.checkInAt && (
+                      <p className="text-xs text-slate-400">
+                        Checked in {new Date(row.checkInAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    )}
+                  </span>
                   <div className="flex items-center gap-1.5">
                     {STATUS_ORDER.map((key) => (
                       <button
@@ -201,6 +235,55 @@ export function AttendanceRoster({ sessions, groups }: { sessions: SessionDto[];
           </div>
         )}
       </section>
+
+      {grid && grid.sessions.length > 0 && (
+        <section className="card overflow-x-auto">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <h2 className="text-sm font-bold text-slate-900">Monthly overview</h2>
+            <span className="chip bg-slate-100 text-slate-500">{new Date().toISOString().slice(0, 7)}</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px] text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Student</th>
+                  {grid.sessions.map((s) => (
+                    <th key={s.id} className="px-2 py-3 text-center font-semibold" title={s.name}>
+                      {s.date.slice(8)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {grid.students.map((st) => (
+                  <tr key={st.userId}>
+                    <td className="px-5 py-2.5 font-medium text-slate-800">{st.name}</td>
+                    {grid.sessions.map((s) => {
+                      const status = st.cells[s.id];
+                      return (
+                        <td key={s.id} className="px-2 py-2.5 text-center">
+                          <span
+                            className="inline-block h-3.5 w-3.5 rounded-full"
+                            style={{ backgroundColor: status ? (GRID_COLOR[status] ?? '#e2e8f0') : '#e2e8f0' }}
+                            title={status ? status : 'unmarked'}
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">
+            <span className="mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: GRID_COLOR.present }} /> Present
+            <span className="ml-3 mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: GRID_COLOR.late }} /> Late
+            <span className="ml-3 mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: GRID_COLOR.excused }} /> Excused
+            <span className="ml-3 mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: GRID_COLOR.absent }} /> Absent
+            <span className="ml-3 mr-2 inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: '#e2e8f0' }} /> Unmarked
+          </p>
+        </section>
+      )}
     </div>
   );
 }
