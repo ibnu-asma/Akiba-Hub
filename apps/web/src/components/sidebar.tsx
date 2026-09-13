@@ -40,20 +40,18 @@ export function Sidebar({
 
 function SidebarHeader({ roleLabel }: { roleLabel: string }) {
   return (
-    <div className="px-5 pb-4 pt-5">
-      <span className="avatar h-12 w-12" aria-hidden="true">
-        <Icon name="user" className="h-5 w-5" />
-        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-status-present" />
-      </span>
-      <div className="mt-3 flex items-center gap-2.5">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-a2sv-500 text-white">
-          <Icon name="code" className="h-4.5 w-4.5" />
-        </span>
-        <div>
-          <p className="text-base font-bold tracking-tight text-slate-900">HUB</p>
-          <p className="text-[11px] font-medium text-slate-400">{roleLabel}</p>
-        </div>
+    <div className="border-b border-slate-100 px-5 pb-4 pt-4.5">
+      <div className="flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/akiba.jpg"
+            alt="Akiba Hub"
+            className="h-8 w-auto object-contain max-w-[130px]"
+          />
+        </Link>
       </div>
+      <p className="mt-1.5 text-[11px] font-medium text-slate-400">{roleLabel}</p>
     </div>
   );
 }

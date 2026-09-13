@@ -1,11 +1,19 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module.js';
 import { env } from './config/env.js';
 import { DatabaseProvider } from './config/database.provider.js';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { cors: { origin: env.WEB_ORIGIN.split(' ') } });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    cors: { origin: env.WEB_ORIGIN.split(' ') },
+  });
+
+  // Support base64 profile pictures and rich payloads up to 10MB
+  app.useBodyParser('json', { limit: '10mb' });
+  app.useBodyParser('urlencoded', { limit: '10mb', extended: true });
+
   const db = app.get(DatabaseProvider);
 
   // Ctrl+C / SIGTERM → close the pg pool before exit.

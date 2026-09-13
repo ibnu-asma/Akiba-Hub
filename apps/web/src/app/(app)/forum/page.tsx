@@ -9,14 +9,5 @@ export default async function ForumPage() {
 
   const posts = (await safe(hubFetch<PostDto[]>('/posts?sort=latest'))) ?? [];
 
-  return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Forum</h1>
-        <p className="mt-1 text-sm text-slate-500">Discussion forum for the whole academy.</p>
-      </header>
-      <ForumBoard initialPosts={posts} />
-    </div>
-  );
   return <ForumBoard initialPosts={posts} me={me} />;
 }

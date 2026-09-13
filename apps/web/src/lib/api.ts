@@ -116,6 +116,8 @@ export interface SessionDto {
   endTime: string | null;
   location: string | null;
   lecturer: string | null;
+  resourceLink?: string | null;
+  recordingLink?: string | null;
   createdAt: string;
 }
 

@@ -15,7 +15,7 @@ export const users = pgTable(
     name: varchar('name', { length: 120 }).notNull(),
     passwordHash: varchar('password_hash', { length: 100 }).notNull(),
     role: varchar('role', { length: 32 }).notNull().default('student'),
-    avatarUrl: varchar('avatar_url', { length: 500 }),
+    avatarUrl: text('avatar_url'),
     country: varchar('country', { length: 80 }),
     university: varchar('university', { length: 160 }),
     department: varchar('department', { length: 160 }),

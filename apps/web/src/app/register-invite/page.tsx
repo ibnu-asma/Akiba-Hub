@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { RegisterInviteForm } from '@/components/auth/register-invite-form';
+import { Icon } from '@/components/icon';
 
 /** Public invite-acceptance flow (SPEC §5) — no auth; the token IS the credential. */
 export default async function RegisterInvitePage({
@@ -9,38 +11,61 @@ export default async function RegisterInvitePage({
   const { token, email } = await searchParams;
 
   return (
-    <main className="min-h-screen bg-white">
-      {/* Green header band with the giant HUB wordmark */}
-      <header className="bg-gradient-to-br from-banner-from to-banner-to">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-10">
-          <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-a2sv-500 text-white shadow-[0_12px_22px_-10px_rgba(15,169,88,0.6)]">
-              <span className="text-lg font-bold">H</span>
-            </span>
-            <div>
-              <p className="text-xl font-bold tracking-tight text-slate-900">HUB</p>
-              <p className="text-xs font-medium text-slate-600">Register Invite</p>
-            </div>
-          </div>
-          <span aria-hidden="true" className="hidden text-3xl sm:block">
-            🚀
-          </span>
+    <div className="min-h-screen bg-slate-50/60 flex flex-col">
+      {/* Clean Modern Top Navbar */}
+      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+          <Link href="/login" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/akiba.jpg"
+              alt="Akiba Logo"
+              className="h-8 w-auto object-contain"
+            />
+          </Link>
+
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+          >
+            <span>&larr; Return to Sign In</span>
+          </Link>
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-6 py-10">
-        {!token ? (
-          <div className="card p-8 text-center">
-            <p className="text-3xl">🔗</p>
-            <h1 className="mt-3 text-xl font-bold text-slate-900">Invite link is missing</h1>
-            <p className="mt-2 text-sm text-slate-500">
-              This page is reached from an invite email. Please open the full link you received (it contains a token).
-            </p>
-          </div>
-        ) : (
-          <RegisterInviteForm token={token} initialEmail={email ?? null} />
-        )}
-      </div>
-    </main>
+      {/* Main Content Area */}
+      <main className="flex-1 py-10 px-4 sm:px-6 flex items-center justify-center">
+        <div className="w-full max-w-2xl">
+          {!token ? (
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-8 sm:p-10 text-center shadow-xs">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200/80">
+                <Icon name="mail" className="h-7 w-7" />
+              </div>
+              <h1 className="mt-4 text-xl font-bold text-slate-900 sm:text-2xl">
+                Invitation Token Required
+              </h1>
+              <p className="mt-2 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                This page is accessible through an invitation link sent to your email. Please check your inbox and click the full registration link.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href="/login"
+                  className="btn-primary inline-flex items-center gap-2 text-xs py-2.5 px-5"
+                >
+                  <span>Go to Sign In</span>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <RegisterInviteForm token={token} initialEmail={email ?? null} />
+          )}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200/60 bg-white py-4 text-center text-xs text-slate-400">
+        Protected by Akiba Identity System • Enrollment is invite-only
+      </footer>
+    </div>
   );
 }

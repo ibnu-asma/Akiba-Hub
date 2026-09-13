@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
-import { loginDto, registerInviteDto } from './auth.dto.js';
+import { loginDto, registerInviteDto, updateProfileDto } from './auth.dto.js';
 import { AuthService } from './auth.service.js';
 
 @Controller('auth')
@@ -24,6 +24,12 @@ export class AuthController {
       password: parsed.password,
       country: parsed.country,
       university: parsed.university,
+      avatarUrl: parsed.avatarUrl,
+      department: parsed.department,
+      instagram: parsed.instagram,
+      linkedin: parsed.linkedin,
+      studentId: parsed.studentId,
+      bio: parsed.bio,
     });
   }
 
@@ -31,5 +37,12 @@ export class AuthController {
   @UseGuards(AuthGuard)
   async me(@CurrentPrincipal() principal: Principal) {
     return this.auth.me(principal.id);
+  }
+
+  @Patch('me')
+  @UseGuards(AuthGuard)
+  async updateMe(@Body() body: unknown, @CurrentPrincipal() principal: Principal) {
+    const parsed = updateProfileDto.parse(body);
+    return this.auth.updateProfile(principal.id, parsed);
   }
 }

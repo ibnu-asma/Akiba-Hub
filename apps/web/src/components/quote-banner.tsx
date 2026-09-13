@@ -2,58 +2,45 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { FALLBACK_QUOTES, type Quote } from '@/lib/quote';
 
-/** Energetic fallback quotes — shown instantly then or when the API is unavailable/rate-limited. */
-const FALLBACK_QUOTES = [
-  { text: 'Success is an iceberg — what people see above the surface is only a fraction of your effort.', author: 'Unknown' },
-  { text: 'Believe you can and you are halfway there.', author: 'Theodore Roosevelt' },
-  { text: 'Success is not final, failure is not fatal: it is the courage to continue that counts.', author: 'Winston Churchill' },
-  { text: 'It does not matter how slowly you go as long as you do not stop.', author: 'Confucius' },
-  { text: 'Push yourself, because no one else is going to do it for you.', author: 'Unknown' },
-  { text: 'Great things never come from comfort zones.', author: 'Unknown' },
-  { text: 'Your only limit is your own imagination.', author: 'Unknown' },
-];
-
-function randomFallback() {
+function randomFallback(): Quote {
   return FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)]!;
 }
 
-interface Quote {
-  text: string;
-  author: string;
-}
+/** Quote banner — energetic daily quote from 3rd party + role watermark + Problems CTA (SPEC §6.2). */
+export function QuoteBanner({
+  firstName,
+  watermark,
+  initialQuote,
+}: {
+  firstName: string;
+  watermark?: string;
+  initialQuote?: Quote | null;
+}) {
+  const [quote, setQuote] = useState<Quote>(() => initialQuote ?? randomFallback());
+  const [loading, setLoading] = useState(false);
 
-/** Fetch an energetic quote from a free API, falling back locally on any failure. */
-async function fetchQuote(): Promise<Quote> {
-  try {
-    const res = await fetch('https://zenquotes.io/api/random', {
-      signal: AbortSignal.timeout(4500),
-      // no-store so a fresh quote arrives on each refresh
-      cache: 'no-store',
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = (await res.json()) as { q: string; a: string }[];
-    const first = data?.[0];
-    if (!first?.q) throw new Error('empty');
-    return { text: first.q, author: first.a?.trim() || 'Unknown' };
-  } catch {
-    return randomFallback();
+  async function loadQuote() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/quote', { cache: 'no-store' });
+      if (res.ok) {
+        const data = (await res.json()) as Quote;
+        if (data?.text) setQuote(data);
+      }
+    } catch {
+      // Keep current quote
+    } finally {
+      setLoading(false);
+    }
   }
-}
-
-/** Quote banner — energetic daily quote + role watermark + Problems CTA (SPEC §6.2). */
-export function QuoteBanner({ firstName, watermark }: { firstName: string; watermark?: string }) {
-  const [quote, setQuote] = useState<Quote>(randomFallback);
 
   useEffect(() => {
-    let active = true;
-    fetchQuote().then((q) => {
-      if (active) setQuote(q);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
+    if (!initialQuote) {
+      loadQuote();
+    }
+  }, [initialQuote]);
 
   return (
     <section className="relative overflow-hidden rounded-[1.25rem] border border-a2sv-200 bg-gradient-to-br from-banner-from to-banner-to p-6 md:p-8">
@@ -66,10 +53,34 @@ export function QuoteBanner({ firstName, watermark }: { firstName: string; water
         </span>
       )}
       <div className="relative max-w-2xl">
-        <p className="text-lg font-semibold leading-snug text-slate-800">“{quote.text}”</p>
-        <p className="mt-1 text-sm text-slate-600">— {quote.author}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-lg font-semibold leading-snug text-slate-800">“{quote.text}”</p>
+            <p className="mt-1 text-sm text-slate-600">— {quote.author}</p>
+          </div>
+          <button
+            type="button"
+            onClick={loadQuote}
+            disabled={loading}
+            title="Get another quote"
+            className="rounded-lg p-1.5 text-slate-400 hover:text-slate-700 hover:bg-white/50 transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            <svg
+              className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+          </button>
+        </div>
+
         <p className="mt-5 text-sm font-medium text-slate-700">Welcome back, {firstName}!</p>
-        <Link href="/problems" className="btn-primary mt-3 px-6">
+        <Link href="/problems" className="btn-primary mt-3 px-6 inline-flex">
           Problems
         </Link>
       </div>

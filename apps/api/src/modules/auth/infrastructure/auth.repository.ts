@@ -79,6 +79,12 @@ export class AuthRepository {
     groupId?: string | null;
     country?: string | null;
     university?: string | null;
+    avatarUrl?: string | null;
+    department?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
+    studentId?: string | null;
+    bio?: string | null;
     invitedById?: string | null;
   }): Promise<PublicUser> {
     const rows = await this.db.db
@@ -91,8 +97,36 @@ export class AuthRepository {
         groupId: input.groupId ?? null,
         country: input.country ?? null,
         university: input.university ?? null,
+        avatarUrl: input.avatarUrl ?? null,
+        department: input.department ?? null,
+        instagram: input.instagram ?? null,
+        linkedin: input.linkedin ?? null,
+        studentId: input.studentId ?? null,
+        bio: input.bio ?? null,
         invitedById: input.invitedById ?? null,
       })
+      .returning({ id: users.id, email: users.email, name: users.name, role: users.role, groupId: users.groupId, avatarUrl: users.avatarUrl })
+      .execute();
+    return rows[0] as PublicUser;
+  }
+
+  async updateProfile(
+    userId: string,
+    data: {
+      avatarUrl?: string | null;
+      country?: string | null;
+      university?: string | null;
+      department?: string | null;
+      instagram?: string | null;
+      linkedin?: string | null;
+      studentId?: string | null;
+      bio?: string | null;
+    },
+  ): Promise<PublicUser> {
+    const rows = await this.db.db
+      .update(users)
+      .set(data)
+      .where(eq(users.id, userId))
       .returning({ id: users.id, email: users.email, name: users.name, role: users.role, groupId: users.groupId, avatarUrl: users.avatarUrl })
       .execute();
     return rows[0] as PublicUser;

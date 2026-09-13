@@ -15,8 +15,6 @@ export class ForumController {
   constructor(private readonly forum: ForumService) {}
 
   @Get()
-  async list(@Query('sort') sort?: string) {
-    return this.forum.list(sort === 'top' || sort === 'oldest' ? sort : 'latest');
   async list(@Query('sort') sort?: string, @CurrentPrincipal() principal?: Principal) {
     return this.forum.list(sort === 'top' || sort === 'oldest' ? sort : 'latest', 100, principal?.id);
   }

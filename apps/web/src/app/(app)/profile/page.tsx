@@ -1,15 +1,7 @@
 import { redirect } from 'next/navigation';
 import { ROLE_NAMES } from '@hub/shared';
 import { getMe, hubFetch, safe, type Group } from '@/lib/api';
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]!.toUpperCase())
-    .join('');
-}
+import { ProfileAvatarSection } from '@/components/profile/profile-editor';
 
 /** Profile — view account overview for current user or teammate (SPEC §6.6). */
 export default async function ProfilePage({
@@ -57,21 +49,18 @@ export default async function ProfilePage({
         </h1>
       </header>
 
-      <section className="card p-6 text-center">
-        <span className="mx-auto grid h-20 w-20 place-items-center overflow-hidden rounded-full bg-a2sv-100 text-xl font-bold text-a2sv-700">
-          {targetUser.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={targetUser.avatarUrl} alt={targetUser.name} className="h-20 w-20 rounded-full object-cover" />
-          ) : (
-            initials(targetUser.name)
-          )}
-        </span>
+      <section className="card p-6 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <ProfileAvatarSection
+          avatarUrl={targetUser.avatarUrl}
+          name={targetUser.name}
+          isViewingSelf={isViewingSelf}
+        />
         <h2 className="mt-3 text-xl font-bold text-slate-900">{targetUser.name}</h2>
         <p className="mt-1 text-sm text-slate-500">{targetUser.email}</p>
         <span className="chip mt-3 bg-a2sv-500 text-white">{roleLabel}</span>
       </section>
 
-      <section className="card p-6">
+      <section className="card p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
         <dl className="divide-y divide-slate-100">
           <Detail label="Rating" value={String(targetUser.rating ?? 1200)} />
           <Detail label="Group" value={userGroup?.name ?? 'Not assigned'} />

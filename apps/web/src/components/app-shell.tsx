@@ -59,7 +59,7 @@ export async function AppShell({ me, children }: { me: Me; children: React.React
   }));
 
   return (
-    <ShellFrame roleLabel={roleLabel} sections={sections} name={me.name}>
+    <ShellFrame roleLabel={roleLabel} sections={sections} me={me}>
       {children}
     </ShellFrame>
   );

@@ -25,7 +25,18 @@ export class AuthService {
    */
   async registerWithInvite(
     token: string,
-    payload: { name: string; password: string; country: string; university: string },
+    payload: {
+      name: string;
+      password: string;
+      country: string;
+      university: string;
+      avatarUrl?: string;
+      department?: string;
+      instagram?: string;
+      linkedin?: string;
+      studentId?: string;
+      bio?: string;
+    },
   ): Promise<AuthSession> {
     const tokenHash = hashToken(token);
     const invite = await this.repo.findInviteByHash(tokenHash);
@@ -47,10 +58,33 @@ export class AuthService {
       groupId: invite.groupId,
       country: payload.country,
       university: payload.university,
+      avatarUrl: payload.avatarUrl,
+      department: payload.department,
+      instagram: payload.instagram,
+      linkedin: payload.linkedin,
+      studentId: payload.studentId,
+      bio: payload.bio,
       invitedById: null,
     });
     await this.repo.markInviteUsed(invite.id, user.id);
     return this.buildSession(user);
+  }
+
+  async updateProfile(
+    userId: string,
+    data: {
+      avatarUrl?: string | null;
+      country?: string | null;
+      university?: string | null;
+      department?: string | null;
+      instagram?: string | null;
+      linkedin?: string | null;
+      studentId?: string | null;
+      bio?: string | null;
+    },
+  ) {
+    const updated = await this.repo.updateProfile(userId, data);
+    return this.me(updated.id);
   }
 
   async me(userId: string) {

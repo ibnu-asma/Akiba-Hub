@@ -34,7 +34,7 @@ export function GroupsBoard({ groups, me }: { groups: Group[]; me: Me }) {
         <section className="card p-10 text-center">
           <p className="text-3xl">👥</p>
           <p className="mt-2 text-sm text-slate-500">
-            You&apos;re not in a group yet — ask your Head of Academy to assign you via the Groups page.
+            You&apos;re not in a group yet — ask your Head of Academy to assign you.
           </p>
         </section>
       </div>
