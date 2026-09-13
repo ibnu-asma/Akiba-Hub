@@ -4,6 +4,7 @@ import {
   hubFetch,
   safe,
   type Group,
+  type Me,
   type SubmissionDto,
   type UserAttendanceRecord,
 } from '@/lib/api';
@@ -84,21 +85,27 @@ export default async function ProfilePage({
   let userGroup = groups?.find((g) => g.id === me.groupId) ?? null;
 
   if (!isViewingSelf && userId) {
-    // Locate student in group roster
-    for (const g of groups ?? []) {
-      const found = g.students.find((s) => s.id === userId);
-      if (found) {
-        targetUser = {
-          ...me,
-          id: found.id,
-          name: found.name,
-          email: `${found.name.toLowerCase().replace(/\s+/g, '.')}@akibatech.com`,
-          avatarUrl: found.avatarUrl,
-          groupId: g.id,
-          role: 'student',
-        };
-        userGroup = g;
-        break;
+    const fetchedUser = await safe(hubFetch<Me>(`/users/${userId}`));
+    if (fetchedUser) {
+      targetUser = fetchedUser;
+      userGroup = groups?.find((g) => g.id === fetchedUser.groupId) ?? null;
+    } else {
+      // Fallback: locate student in group roster
+      for (const g of groups ?? []) {
+        const found = g.students.find((s) => s.id === userId);
+        if (found) {
+          targetUser = {
+            ...me,
+            id: found.id,
+            name: found.name,
+            email: `${found.name.toLowerCase().replace(/\s+/g, '.')}@akibatech.com`,
+            avatarUrl: found.avatarUrl,
+            groupId: g.id,
+            role: 'student',
+          };
+          userGroup = g;
+          break;
+        }
       }
     }
   }

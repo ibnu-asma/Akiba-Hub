@@ -39,11 +39,23 @@ export class UsersController {
     return this.users.list(scope, { q, role, limit, offset });
   }
 
+  @Get('search')
+  @UseGuards(AuthGuard)
+  async search(@Query('q') q?: string) {
+    return this.users.search(q);
+  }
+
   @Get('removed')
   @UseGuards(AuthGuard, new MockRulesGuard(3)) // HoA only
   async removed(@Query() query: Record<string, unknown>) {
     const { q, limit, offset } = removedDto.parse(query);
     return this.users.listRemoved({ q, limit, offset });
+  }
+
+  @Get(':id')
+  @UseGuards(AuthGuard)
+  async getById(@Param('id') id: string) {
+    return this.users.getById(id);
   }
 
   @Patch(':id/role')

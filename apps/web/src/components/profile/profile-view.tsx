@@ -242,24 +242,12 @@ export function ProfileView({
             <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-5 border-t border-slate-100">
               <div className="rounded-xl bg-slate-50/80 p-3 border border-slate-100 text-center">
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                  Contest Rating
-                </span>
-                <p className="text-xl font-extrabold text-slate-900 mt-0.5">
-                  {targetUser.rating ?? 1200}
-                </p>
-                <span className="text-[10px] font-semibold text-slate-400">Official Rating</span>
-              </div>
-
-              <div className="rounded-xl bg-slate-50/80 p-3 border border-slate-100 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                   Problems Solved
                 </span>
                 <p className="text-xl font-extrabold text-slate-900 mt-0.5">
                   {solvedCount}
                 </p>
-                <span className="text-[10px] font-semibold text-slate-400">Verified Solves</span>
               </div>
-
               <div className="rounded-xl bg-slate-50/80 p-3 border border-slate-100 text-center">
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                   Time Spent
@@ -272,6 +260,18 @@ export function ProfileView({
                   {minutesToDays(totalMinutes)}
                 </span>
               </div>
+              <div className="rounded-xl bg-slate-50/80 p-3 border border-slate-100 text-center">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                  Contest Rating
+                </span>
+                <p className="text-xl font-extrabold text-slate-900 mt-0.5">
+                  {targetUser.rating ?? 1200}
+                </p>
+              </div>
+
+              
+
+              
 
               <div className="rounded-xl bg-slate-50/80 p-3 border border-slate-100 text-center">
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
@@ -311,8 +311,8 @@ export function ProfileView({
 
         {/* Compact Key-Value Metadata Grid */}
         <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-          <CompactDetail label="Group" value={groupName || 'Remote Group 4'} icon="users" />
           <CompactDetail label="Program" value={superGroupName || 'G1 Akiba - Remote'} icon="bookmark" />
+          <CompactDetail label="Group" value={groupName || 'Remote Group 4'} icon="users" />
           <CompactDetail label="University" value={targetUser.university || 'ASTU'} icon="file" />
           <CompactDetail label="Department" value={targetUser.department || 'Computer Science & Engineering'} icon="list" />
           <CompactDetail label="Student ID" value={targetUser.studentId || 'ATR/1234/12'} icon="shield" />

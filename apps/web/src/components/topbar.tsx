@@ -20,8 +20,10 @@ function initials(name: string): string {
 interface StudentSearchItem {
   id: string;
   name: string;
+  email?: string;
   avatarUrl?: string | null;
   groupName?: string;
+  isInvited?: boolean;
 }
 
 interface ProblemSearchItem {
@@ -204,57 +206,29 @@ export function Topbar({
   }, [chatMessages, aiTyping, aiOpen]);
 
   // Load students and problems for the search palette
-  async function loadSearchData() {
-    if (!loadedGroups) {
-      try {
-        const res = await fetch('/api/admin/groups');
-        const groups = await res.json().catch(() => null);
-        if (Array.isArray(groups)) {
-          const studentItems: StudentSearchItem[] = [];
-          for (const g of groups) {
-            if (Array.isArray(g.students)) {
-              for (const s of g.students) {
-                studentItems.push({
-                  id: s.id,
-                  name: s.name,
-                  avatarUrl: s.avatarUrl,
-                  groupName: g.name,
-                });
-              }
-            }
-          }
-          setStudents(studentItems);
-          setLoadedGroups(true);
-        }
-      } catch {
-        // Continue with empty student search
+  async function loadSearchData(query = '') {
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const data = await res.json().catch(() => null);
+      if (data && Array.isArray(data.students)) {
+        setStudents(data.students);
       }
-    }
-
-    if (!loadedProblems) {
-      try {
-        const res = await fetch('/api/admin/problems?limit=50');
-        const problemsData = await res.json().catch(() => null);
-        const rows = Array.isArray(problemsData)
-          ? problemsData
-          : problemsData?.rows ?? [];
-        if (Array.isArray(rows)) {
-          setProblems(
-            rows.map((p: any) => ({
-              id: p.id,
-              name: p.name,
-              platform: p.platform,
-              difficulty: p.difficulty,
-              link: p.link,
-            })),
-          );
-          setLoadedProblems(true);
-        }
-      } catch {
-        // Continue with empty problem search
+      if (data && Array.isArray(data.problems)) {
+        setProblems(data.problems);
       }
+    } catch {
+      // Continue with existing items
     }
   }
+
+  // Debounced live search whenever user types
+  useEffect(() => {
+    if (!searchOpen) return;
+    const timer = setTimeout(() => {
+      loadSearchData(searchQuery.trim());
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchOpen]);
 
   // Navigation Items indexed from sections + standard routes
   const pageItems = useMemo(() => {
@@ -300,7 +274,11 @@ export function Topbar({
 
     // Students match
     const matchingStudents = students.filter(
-      (s) => !q || s.name.toLowerCase().includes(q) || (s.groupName && s.groupName.toLowerCase().includes(q)),
+      (s) =>
+        !q ||
+        s.name.toLowerCase().includes(q) ||
+        (s.email && s.email.toLowerCase().includes(q)) ||
+        (s.groupName && s.groupName.toLowerCase().includes(q)),
     );
 
     // Problems match
@@ -777,26 +755,35 @@ export function Topbar({
                     {searchResults.students.map((student) => (
                       <Link
                         key={student.id}
-                        href={`/profile?userId=${student.id}`}
+                        href={student.isInvited ? `/invites?q=${encodeURIComponent(student.name)}` : `/profile?userId=${student.id}`}
                         onClick={() => setSearchOpen(false)}
                         className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 group transition-colors"
                       >
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2.5 min-w-0">
                           {student.avatarUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={student.avatarUrl}
                               alt={student.name}
-                              className="h-6 w-6 rounded-full object-cover"
+                              className="h-7 w-7 rounded-full object-cover shrink-0"
                             />
                           ) : (
-                            <span className="grid h-6 w-6 place-items-center rounded-full bg-a2sv-100 text-[10px] font-bold text-a2sv-700">
+                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-a2sv-100 text-[10px] font-bold text-a2sv-700">
                               {initials(student.name)}
                             </span>
                           )}
-                          <span>{student.name}</span>
+                          <div className="flex flex-col text-left truncate">
+                            <span className="font-semibold text-slate-900 truncate">{student.name}</span>
+                            {student.email && (
+                              <span className="text-[10px] text-slate-400 font-normal truncate">{student.email}</span>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-[10px] font-medium text-slate-400">
+                        <span className={`shrink-0 ml-2 text-[10px] font-semibold px-2 py-0.5 rounded-md ${
+                          student.isInvited
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200/60'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}>
                           {student.groupName ?? 'Student'}
                         </span>
                       </Link>

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
-import { users, and, asc, eq, sql } from '@hub/database';
+import { users, groups, invitations, problems, and, asc, eq, sql, isNull } from '@hub/database';
 import { DomainError, ROLES } from '@hub/shared';
 import { DataScope } from '../../common/auth/scope.service.js';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -77,6 +77,153 @@ export class UsersService {
 
     const rows = await this.db.db.select().from(users).where(where).orderBy(asc(users.name)).execute();
     return rows.map(toSummary);
+  }
+
+  async getById(id: string) {
+    const row = await this.db.db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        groupId: users.groupId,
+        rating: users.rating,
+        avatarUrl: users.avatarUrl,
+        country: users.country,
+        university: users.university,
+        department: users.department,
+        instagram: users.instagram,
+        linkedin: users.linkedin,
+        github: users.github,
+        studentId: users.studentId,
+        bio: users.bio,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(and(eq(users.id, id), eq(users.isRemoved, false)))
+      .limit(1)
+      .execute();
+    if (!row[0]) throw DomainError.notFound(`User ${id}`);
+    return row[0];
+  }
+
+  async search(q?: string) {
+    const query = q?.trim().toLowerCase() ?? '';
+    const pattern = `%${query}%`;
+
+    // 1. Search Users (active)
+    const userConditions: ReturnType<typeof sql>[] = [eq(users.isRemoved, false)];
+    if (query) {
+      userConditions.push(
+        sql`(lower(${users.name}) like ${pattern} or lower(${users.email}) like ${pattern} or lower(coalesce(${users.university}, '')) like ${pattern})`,
+      );
+    }
+
+    const userRows = await this.db.db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        groupId: users.groupId,
+        groupName: groups.name,
+        avatarUrl: users.avatarUrl,
+        university: users.university,
+      })
+      .from(users)
+      .leftJoin(groups, eq(users.groupId, groups.id))
+      .where(and(...userConditions))
+      .orderBy(asc(users.name))
+      .limit(30)
+      .execute();
+
+    const seenEmails = new Set(userRows.map((u) => u.email.toLowerCase()));
+
+    // 2. Search Invitations (for pending / invited scholars like Geleta Daba)
+    let inviteItems: {
+      id: string;
+      name: string;
+      email: string;
+      role: string;
+      groupId: string | null;
+      groupName: string;
+      avatarUrl: string | null;
+      isInvited: boolean;
+    }[] = [];
+
+    if (query) {
+      const inviteRows = await this.db.db
+        .select({
+          id: invitations.id,
+          firstName: invitations.firstName,
+          lastName: invitations.lastName,
+          email: invitations.email,
+          role: invitations.role,
+          groupId: invitations.groupId,
+          groupName: groups.name,
+        })
+        .from(invitations)
+        .leftJoin(groups, eq(invitations.groupId, groups.id))
+        .where(
+          sql`(lower(coalesce(${invitations.firstName}, '')) like ${pattern} or lower(coalesce(${invitations.lastName}, '')) like ${pattern} or lower(coalesce(${invitations.email}, '')) like ${pattern})`,
+        )
+        .limit(15)
+        .execute();
+
+      inviteItems = inviteRows
+        .filter((inv) => inv.email && !seenEmails.has(inv.email.toLowerCase()))
+        .map((inv) => ({
+          id: inv.id,
+          name: [inv.firstName, inv.lastName].filter(Boolean).join(' ') || inv.email || 'Invited Scholar',
+          email: inv.email || '',
+          role: inv.role,
+          groupId: inv.groupId,
+          groupName: inv.groupName ?? 'Invited Scholar',
+          avatarUrl: null,
+          isInvited: true,
+        }));
+    }
+
+    const students = [
+      ...userRows.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        groupId: u.groupId,
+        groupName: u.groupName ?? 'Student',
+        avatarUrl: u.avatarUrl,
+        isInvited: false,
+      })),
+      ...inviteItems,
+    ];
+
+    // 3. Search Problems
+    const problemConditions: ReturnType<typeof sql>[] = [isNull(problems.deletedAt)];
+    if (query) {
+      problemConditions.push(
+        sql`(lower(${problems.name}) like ${pattern} or lower(${problems.platform}) like ${pattern} or lower(${problems.difficulty}) like ${pattern})`,
+      );
+    }
+
+    const problemRows = await this.db.db
+      .select({
+        id: problems.id,
+        name: problems.name,
+        platform: problems.platform,
+        difficulty: problems.difficulty,
+        link: problems.link,
+      })
+      .from(problems)
+      .where(and(...problemConditions))
+      .orderBy(asc(problems.name))
+      .limit(30)
+      .execute();
+
+    return {
+      students,
+      problems: problemRows,
+    };
   }
 
   async updateRole(userId: string, role: string, groupId: string | null, actor: ActorRef): Promise<UserSummary> {
