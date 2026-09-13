@@ -21,6 +21,7 @@ export const users = pgTable(
     department: varchar('department', { length: 160 }),
     instagram: varchar('instagram', { length: 120 }),
     linkedin: varchar('linkedin', { length: 320 }),
+    github: varchar('github', { length: 120 }),
     studentId: varchar('student_id', { length: 64 }),
     bio: text('bio'),
     rating: real('rating').notNull().default(1200),

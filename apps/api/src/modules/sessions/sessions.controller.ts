@@ -72,6 +72,12 @@ export class SessionsController {
     return this.sessions.getAttendanceGrid(groupId, m);
   }
 
+  @Get('user-attendance')
+  async userAttendance(@CurrentPrincipal() principal: Principal, @Query('userId') userId?: string) {
+    const targetUserId = userId || principal.id;
+    return this.sessions.getUserAttendanceRecords(targetUserId);
+  }
+
   @Get(':id/attendance')
   async attendance(@Param('id') id: string, @Query('groupId') groupId: string) {
     return this.sessions.getAttendance(id, groupId);

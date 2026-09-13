@@ -73,12 +73,14 @@ export class AuthService {
   async updateProfile(
     userId: string,
     data: {
+      name?: string;
       avatarUrl?: string | null;
       country?: string | null;
       university?: string | null;
       department?: string | null;
       instagram?: string | null;
       linkedin?: string | null;
+      github?: string | null;
       studentId?: string | null;
       bio?: string | null;
     },
@@ -101,6 +103,13 @@ export class AuthService {
       avatarUrl: user.avatarUrl ?? null,
       country: user.country ?? null,
       university: user.university ?? null,
+      department: user.department ?? null,
+      instagram: user.instagram ?? null,
+      linkedin: user.linkedin ?? null,
+      github: user.github ?? null,
+      studentId: user.studentId ?? null,
+      bio: user.bio ?? null,
+      createdAt: user.createdAt,
     };
   }
 

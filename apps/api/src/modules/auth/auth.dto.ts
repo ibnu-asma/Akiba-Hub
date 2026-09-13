@@ -17,15 +17,18 @@ export const registerInviteDto = z.object({
   linkedin: z.string().max(320).optional(),
   studentId: z.string().max(64).optional(),
   bio: z.string().max(2000).optional(),
+  github: z.string().max(120).optional(),
 });
 
 export const updateProfileDto = z.object({
+  name: z.string().min(1).max(120).optional(),
   avatarUrl: z.string().nullable().optional(),
   country: z.string().max(80).optional(),
   university: z.string().max(160).optional(),
   department: z.string().max(160).optional(),
   instagram: z.string().max(120).optional(),
   linkedin: z.string().max(320).optional(),
+  github: z.string().max(120).optional(),
   studentId: z.string().max(64).optional(),
   bio: z.string().max(2000).optional(),
 });

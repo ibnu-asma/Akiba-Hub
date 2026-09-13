@@ -54,6 +54,24 @@ export interface Me {
   avatarUrl: string | null;
   country: string | null;
   university: string | null;
+  department?: string | null;
+  instagram?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  studentId?: string | null;
+  bio?: string | null;
+  createdAt?: string;
+}
+
+export interface UserAttendanceRecord {
+  id: string;
+  sessionId: string;
+  sessionName: string;
+  date: string;
+  startTime: string | null;
+  endTime: string | null;
+  status: 'present' | 'absent' | 'late' | 'excused';
+  checkInAt: string | null;
 }
 
 export type UserDto = Me;

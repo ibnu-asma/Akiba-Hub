@@ -30,7 +30,6 @@ export function timeAgo(iso: string): string {
 }
 
 export function minutesToDays(minutes: number): string {
-  return `That's ${(minutes / 1440).toFixed(0)} days`;
   if (minutes === 0) return "That's 0 days";
   if (minutes >= 1440) return `That's ${(minutes / 1440).toFixed(1)} days`;
   return `That's ${(minutes / 1440).toFixed(1)} days (${minutes} min)`;

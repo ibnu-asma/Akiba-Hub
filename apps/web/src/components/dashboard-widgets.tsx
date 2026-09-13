@@ -1,42 +1,30 @@
 import Link from 'next/link';
-import { formatDateTime } from '@/lib/format';
-import type { Activity, SessionDto } from '@/lib/api';
 import { Icon } from '@/components/icon';
+import { Sparkline } from '@/components/sparkline';
+import { formatDate, formatDateTime, timeAgo } from '@/lib/format';
+import type { Activity, SessionDto } from '@/lib/api';
+
 export { QuoteBanner } from '@/components/quote-banner';
 
-export type StatAccent = 'green' | 'blue' | 'orange';
-
-const ACCENTS: Record<StatAccent, string> = {
-  green: '#059669',
-  blue: '#2563eb',
-  orange: '#ea580c',
-};
-
-/** Compact inline SVG sparkline matching the spec accent colors. */
-export function Sparkline({ points, color = '#059669' }: { points: number[]; color?: string }) {
-  if (points.length < 2) return null;
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1;
-  const width = 80;
-  const height = 32;
-  const step = width / (points.length - 1);
-  const path = points
-    .map((p, i) => {
-      const x = i * step;
-      const y = height - ((p - min) / range) * (height - 6) - 3;
-      return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
-    })
-    .join(' ');
-
-  return (
-    <svg width={width} height={height} className="overflow-visible" aria-hidden="true">
-      <path d={path} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toUpperCase())
+    .join('');
 }
 
-/** Stat card with trend indicator and sparkline. */
+/* Stat-card accent palette — mirrors the dashboard screenshots (green/blue/orange bars). */
+const ACCENTS = {
+  green: '#0FA958',
+  blue: '#2563EB',
+  orange: '#F59E0B',
+} as const;
+
+export type StatAccent = keyof typeof ACCENTS;
+
+/** Stat card — label, delta pill, big value, hint, colored bar sparkline. */
 export function StatCard({
   label,
   value,
@@ -91,41 +79,33 @@ function parseTimeString(timeStr?: string | null): { hours: number; minutes: num
 }
 
 function getSessionEndTime(session: SessionDto): Date {
-  if (!session.date) return new Date(8640000000000000);
   const dateStr = session.date.slice(0, 10);
-  const parts = dateStr.split('-').map(Number);
-  const y = parts[0] ?? 2026;
-  const m = parts[1] ?? 1;
-  const d = parts[2] ?? 1;
+  const [y, m, d] = dateStr.split('-').map(Number);
   if (session.endTime) {
     const t = parseTimeString(session.endTime);
     if (t) {
-      return new Date(y, m - 1, d, t.hours, t.minutes, 0);
+      return new Date(y!, m! - 1, d!, t.hours, t.minutes, 0);
     }
   }
   if (session.startTime) {
     const t = parseTimeString(session.startTime);
     if (t) {
-      return new Date(y, m - 1, d, t.hours + 2, t.minutes, 0);
+      return new Date(y!, m! - 1, d!, t.hours + 2, t.minutes, 0);
     }
   }
-  return new Date(y, m - 1, d, 23, 59, 59);
+  return new Date(y!, m! - 1, d!, 23, 59, 59);
 }
 
 function getSessionStartTime(session: SessionDto): Date {
-  if (!session.date) return new Date(0);
   const dateStr = session.date.slice(0, 10);
-  const parts = dateStr.split('-').map(Number);
-  const y = parts[0] ?? 2026;
-  const m = parts[1] ?? 1;
-  const d = parts[2] ?? 1;
+  const [y, m, d] = dateStr.split('-').map(Number);
   if (session.startTime) {
     const t = parseTimeString(session.startTime);
     if (t) {
-      return new Date(y, m - 1, d, t.hours, t.minutes, 0);
+      return new Date(y!, m! - 1, d!, t.hours, t.minutes, 0);
     }
   }
-  return new Date(y, m - 1, d, 0, 0, 0);
+  return new Date(y!, m! - 1, d!, 0, 0, 0);
 }
 
 function extractMeetingLink(session: SessionDto): string | null {
@@ -259,18 +239,18 @@ export function EventsPanel({ sessions, scopeHint }: { sessions: SessionDto[] | 
   );
 }
 
-/** Activity feed — recent actions across the scope (HoA only). */
+/** Recent Actions feed — light-green cards, green action·timestamp header (SPEC §8.8). */
 export function ActivityFeed({ activities }: { activities: Activity[] }) {
   return (
     <section className="card p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-bold text-slate-900">Recent Actions</h2>
         <Link href="/activities" className="text-xs font-semibold text-a2sv-600 hover:underline">
-          View all →
+          View all
         </Link>
       </div>
       {activities.length === 0 ? (
-        <p className="text-xs text-slate-400">No actions recorded yet.</p>
+        <p className="py-6 text-center text-sm text-slate-400">No activity recorded yet.</p>
       ) : (
         <ul className="space-y-3">
           {activities.map((activity) => (
@@ -278,9 +258,15 @@ export function ActivityFeed({ activities }: { activities: Activity[] }) {
               <p className="text-xs font-semibold text-a2sv-700">
                 {activity.action} - {formatDateTime(activity.createdAt)}
               </p>
-              <p className="mt-1 text-xs text-slate-600">
-                {activity.entityType} · {activity.entityId}
-              </p>
+              <div className="mt-2 flex items-center gap-2.5">
+                <span className="avatar h-8 w-8 text-[10px]">
+                  {initials(activity.actorName)}
+                  <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border border-white bg-status-present" />
+                </span>
+                <p className="truncate text-sm font-medium text-slate-700">{activity.actorName}</p>
+                <span className="chip bg-white text-slate-500">{activity.actorRole}</span>
+              </div>
+              <p className="mt-1 truncate text-xs text-slate-500">{activity.description}</p>
             </li>
           ))}
         </ul>
@@ -289,7 +275,6 @@ export function ActivityFeed({ activities }: { activities: Activity[] }) {
   );
 }
 
-/** HoE dashboard quick link card. */
 export function QuickLink({
   href,
   icon,
@@ -309,9 +294,9 @@ export function QuickLink({
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-a2sv-50 text-a2sv-600">
         <Icon name={icon} />
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-slate-800">{label}</p>
-        <p className="truncate text-xs text-slate-400">{sub}</p>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-slate-900">{label}</p>
+        <p className="truncate text-xs text-slate-500">{sub}</p>
       </div>
     </Link>
   );

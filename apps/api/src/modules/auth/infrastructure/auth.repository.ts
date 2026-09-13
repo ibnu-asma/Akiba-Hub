@@ -22,6 +22,13 @@ interface UserRow {
   rating: number;
   country: string | null;
   university: string | null;
+  department?: string | null;
+  instagram?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  studentId?: string | null;
+  bio?: string | null;
+  createdAt: Date;
 }
 
 interface InviteRow {
@@ -113,12 +120,14 @@ export class AuthRepository {
   async updateProfile(
     userId: string,
     data: {
+      name?: string;
       avatarUrl?: string | null;
       country?: string | null;
       university?: string | null;
       department?: string | null;
       instagram?: string | null;
       linkedin?: string | null;
+      github?: string | null;
       studentId?: string | null;
       bio?: string | null;
     },

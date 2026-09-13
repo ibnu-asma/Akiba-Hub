@@ -172,6 +172,26 @@ export class SessionsService {
       })),
     };
   }
+
+  /** User attendance records with session details (SPEC §6.6 profile attendance grid). */
+  async getUserAttendanceRecords(userId: string) {
+    return this.db.db
+      .select({
+        id: attendanceRecords.id,
+        sessionId: attendanceRecords.sessionId,
+        sessionName: sessions.name,
+        date: sessions.date,
+        startTime: sessions.startTime,
+        endTime: sessions.endTime,
+        status: attendanceRecords.status,
+        checkInAt: attendanceRecords.checkInAt,
+      })
+      .from(attendanceRecords)
+      .innerJoin(sessions, eq(attendanceRecords.sessionId, sessions.id))
+      .where(eq(attendanceRecords.userId, userId))
+      .orderBy(desc(sessions.date))
+      .execute();
+  }
 }
 
 export { ROLE_NAMES };
