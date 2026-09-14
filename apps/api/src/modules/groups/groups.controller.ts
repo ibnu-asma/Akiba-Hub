@@ -35,6 +35,16 @@ export class GroupsController {
     return this.groups.list();
   }
 
+  @Get(':id')
+  async getById(@Param('id') id: string) {
+    return this.groups.getById(id);
+  }
+
+  @Get(':id/progress')
+  async getProgress(@Param('id') id: string) {
+    return this.groups.getProgress(id);
+  }
+
   @Post()
   @UseGuards(AuthGuard, new MockRulesGuard(3))
   async create(@Body() body: unknown, @CurrentPrincipal() principal: Principal) {

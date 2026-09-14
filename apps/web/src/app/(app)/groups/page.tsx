@@ -1,14 +1,16 @@
 import { redirect } from 'next/navigation';
-import { ROLE_LEVEL, type Role } from '@hub/shared';
-import { getMe, hubFetch, safe, type Group } from '@/lib/api';
-import { GroupsBoard } from '@/components/student/groups-board';
+import { getMe, hubFetch, safe, type Group, type SuperGroup } from '@/lib/api';
+import { GroupsCatalog } from '@/components/groups/groups-catalog';
 
-/** Student Groups & Users — own group roster (SPEC §6.10). */
-export default async function StudentGroupsPage() {
+/** Groups & Users Catalog — browse all groups across super groups with progress tracking. */
+export default async function GroupsPage() {
   const me = await getMe();
   if (!me) redirect('/login');
-  if ((ROLE_LEVEL[me.role as Role] ?? 1) >= 2) redirect('/groups/new');
 
-  const groups = (await safe(hubFetch<Group[]>('/groups'))) ?? [];
-  return <GroupsBoard groups={groups} me={me} />;
+  const [groups, superGroups] = await Promise.all([
+    safe(hubFetch<Group[]>('/groups')),
+    safe(hubFetch<SuperGroup[]>('/super-groups')),
+  ]);
+
+  return <GroupsCatalog groups={groups ?? []} superGroups={superGroups ?? []} me={me} />;
 }

@@ -71,6 +71,7 @@ export class SummaryService {
         return {
           userId: s.id,
           name: s.name,
+          avatarUrl: s.avatarUrl ?? null,
           present,
           absent,
           excused,
@@ -110,6 +111,7 @@ export class SummaryService {
         return {
           userId: s.id,
           name: s.name,
+          avatarUrl: s.avatarUrl ?? null,
           totalSolves: days.reduce((sum, d) => sum + d.count, 0),
           activeDays: days.length,
           days,
@@ -162,6 +164,7 @@ export class SummaryService {
         return {
           userId: s.id,
           name: s.name,
+          avatarUrl: s.avatarUrl ?? null,
           solved: done,
           total: totalCount,
           pct: totalCount ? Math.round((done / totalCount) * 100) : 0,
@@ -197,7 +200,14 @@ export class SummaryService {
     }
 
     return {
-      problems: problemRows.map((p) => ({ id: p.id, name: p.name, difficulty: p.difficulty })),
+      problems: problemRows.map((p) => ({
+        id: p.id,
+        name: p.name,
+        difficulty: p.difficulty,
+        platform: p.platform,
+        link: p.link,
+        createdAt: p.createdAt,
+      })),
       students: students.map((s) => ({
         userId: s.id,
         name: s.name,
@@ -210,14 +220,20 @@ export class SummaryService {
   /** Upsolving — contest problems × students matrix (SPEC §7.10.5). */
   async upsolving(scope: DataScope) {
     const contestsRows = await this.db.db
-      .select({ id: contests.id, name: contests.name })
+      .select({ id: contests.id, name: contests.name, date: contests.date })
       .from(contests)
       .orderBy(sql`${contests.date} desc`)
       .limit(20)
       .execute();
     const cpRows = await this.db.db
-      .select({ contestId: contestProblems.contestId, pseudo: contestProblems.pseudo, problemId: contestProblems.problemId })
+      .select({
+        contestId: contestProblems.contestId,
+        pseudo: contestProblems.pseudo,
+        problemId: contestProblems.problemId,
+        problemName: problems.name,
+      })
       .from(contestProblems)
+      .leftJoin(problems, eq(contestProblems.problemId, problems.id))
       .execute();
     const students = await this.students(scope);
     const rows = await this.db.db
@@ -226,16 +242,17 @@ export class SummaryService {
         contestProblemId: submissions.contestProblemId,
         tries: submissions.tries,
         time: submissions.timeSpentMin,
+        createdAt: submissions.createdAt,
       })
       .from(submissions)
       .innerJoin(users, eq(submissions.userId, users.id))
       .where(sql`${users.role} = 'student' AND (${this.scoped(scope)}) AND ${submissions.contestProblemId} IS NOT NULL`)
       .execute();
 
-    const agg = new Map<string, Map<string, { attempts: number; minutes: number }>>();
+    const agg = new Map<string, Map<string, { attempts: number; minutes: number; isUpsolve?: boolean }>>();
     for (const row of rows) {
       const cp = row.contestProblemId!;
-      const byCp = agg.get(row.userId) ?? new Map<string, { attempts: number; minutes: number }>();
+      const byCp = agg.get(row.userId) ?? new Map<string, { attempts: number; minutes: number; isUpsolve?: boolean }>();
       const cell = byCp.get(cp) ?? { attempts: 0, minutes: 0 };
       cell.attempts += row.tries;
       cell.minutes += row.time;
@@ -247,11 +264,15 @@ export class SummaryService {
       contests: contestsRows.map((c) => ({
         id: c.id,
         name: c.name,
-        problems: cpRows.filter((cp) => cp.contestId === c.id).map((cp) => ({ pseudo: cp.pseudo, problemId: cp.problemId })),
+        date: c.date,
+        problems: cpRows
+          .filter((cp) => cp.contestId === c.id)
+          .map((cp) => ({ pseudo: cp.pseudo, problemId: cp.problemId, name: cp.problemName ?? cp.pseudo })),
       })),
       students: students.map((s) => ({
         userId: s.id,
         name: s.name,
+        avatarUrl: s.avatarUrl ?? null,
         cells: Object.fromEntries([...(agg.get(s.id) ?? new Map()).entries()]),
       })),
     };
@@ -268,11 +289,11 @@ export class SummaryService {
         maxRating: d.maxRating,
         students: students
           .filter((s) => s.rating >= d.minRating && s.rating < d.maxRating)
-          .map((s) => ({ userId: s.id, name: s.name, rating: s.rating })),
+          .map((s) => ({ userId: s.id, name: s.name, rating: s.rating, avatarUrl: s.avatarUrl ?? null })),
       })),
       unassigned: students
         .filter((s) => !divs.some((d) => s.rating >= d.minRating && s.rating < d.maxRating))
-        .map((s) => ({ userId: s.id, name: s.name, rating: s.rating })),
+        .map((s) => ({ userId: s.id, name: s.name, rating: s.rating, avatarUrl: s.avatarUrl ?? null })),
     };
   }
 }

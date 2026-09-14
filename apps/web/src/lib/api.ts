@@ -299,3 +299,15 @@ export async function safe<T>(promise: Promise<T>): Promise<T | null> {
     return null;
   }
 }
+
+export type {
+  GroupProgressData,
+  GroupProgressSummary,
+  GroupSessionItem,
+  AttendanceRow,
+  ConsistencyRow,
+  ExerciseMatrix,
+  UpsolvingMatrix,
+  DivisionsData,
+} from '@/components/summary/types';
+
