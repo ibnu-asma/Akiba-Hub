@@ -10,6 +10,7 @@ export default defineConfig({
   out: './drizzle',
   dbCredentials: {
     url: process.env.DATABASE_URL ?? 'postgres://hub:hub@localhost:5433/a2sv_hub',
+    ssl: (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost')) ? { rejectUnauthorized: false } : undefined,
   },
   verbose: true,
   strict: true,
