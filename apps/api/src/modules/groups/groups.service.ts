@@ -8,6 +8,8 @@ import {
   sessions,
   sessionGroups,
   attendanceRecords,
+  tracks,
+  trackProblems,
   eq,
   and,
   isNull,
@@ -346,6 +348,25 @@ export class GroupsService {
       : 0;
     const avgAvailable = Math.max(0, totalExercises - avgCompleted);
 
+    // Query tracks for this group's superGroup
+    let tracksList: { id: string; name: string; phase: string; problemCount: number }[] = [];
+    if (group.superGroupId) {
+      const trackRows = await this.db.db
+        .select({
+          id: tracks.id,
+          name: tracks.name,
+          phase: tracks.phase,
+          problemCount: sql<number>`count(${trackProblems.problemId})::int`,
+        })
+        .from(tracks)
+        .leftJoin(trackProblems, eq(tracks.id, trackProblems.trackId))
+        .where(eq(tracks.superGroupId, group.superGroupId))
+        .groupBy(tracks.id, tracks.name, tracks.phase, tracks.sortOrder)
+        .orderBy(asc(tracks.sortOrder))
+        .execute();
+      tracksList = trackRows;
+    }
+
     return {
       group,
       summary: {
@@ -367,6 +388,7 @@ export class GroupsService {
       sessionStatusByStudent,
       consistency,
       completion,
+      tracks: tracksList,
       exercise,
       upsolving,
       divisions,

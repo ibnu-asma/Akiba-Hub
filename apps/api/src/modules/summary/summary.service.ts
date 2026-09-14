@@ -136,12 +136,28 @@ export class SummaryService {
     }
 
     const totals = await this.db.db
-      .select({ problemId: trackProblems.problemId })
+      .select({
+        trackId: trackProblems.trackId,
+        trackName: tracks.name,
+        problemId: trackProblems.problemId,
+      })
       .from(trackProblems)
       .innerJoin(tracks, eq(trackProblems.trackId, tracks.id))
       .where(superGroupFilter)
       .execute();
-    const totalCount = new Set(totals.map((t) => t.problemId)).size;
+
+    const allAssignedProblems = new Set<string>(totals.map((t) => t.problemId));
+    const totalCount = allAssignedProblems.size;
+
+    const trackProblemsMap = new Map<string, { id: string; name: string; problemIds: Set<string> }>();
+    for (const t of totals) {
+      let entry = trackProblemsMap.get(t.trackId);
+      if (!entry) {
+        entry = { id: t.trackId, name: t.trackName, problemIds: new Set<string>() };
+        trackProblemsMap.set(t.trackId, entry);
+      }
+      entry.problemIds.add(t.problemId);
+    }
 
     const solved = await this.db.db
       .select({ userId: submissions.userId, problemId: submissions.problemId })
@@ -160,7 +176,25 @@ export class SummaryService {
 
     return students
       .map((s) => {
-        const done = solvedSet.get(s.id)?.size ?? 0;
+        const studentSolved = solvedSet.get(s.id) ?? new Set<string>();
+        const done = totalCount > 0
+          ? Array.from(allAssignedProblems).filter((pId) => studentSolved.has(pId)).length
+          : studentSolved.size;
+
+        const byTrack: Record<string, { trackId: string; trackName: string; solved: number; total: number; pct: number }> = {};
+        for (const [trackId, tr] of trackProblemsMap.entries()) {
+          const trackSolved = Array.from(tr.problemIds).filter((pId) => studentSolved.has(pId)).length;
+          const trackTotal = tr.problemIds.size;
+          const trackPct = trackTotal ? Math.round((trackSolved / trackTotal) * 100) : 0;
+          byTrack[trackId] = {
+            trackId,
+            trackName: tr.name,
+            solved: trackSolved,
+            total: trackTotal,
+            pct: trackPct,
+          };
+        }
+
         return {
           userId: s.id,
           name: s.name,
@@ -168,6 +202,7 @@ export class SummaryService {
           solved: done,
           total: totalCount,
           pct: totalCount ? Math.round((done / totalCount) * 100) : 0,
+          byTrack,
         };
       })
       .sort((a, b) => b.pct - a.pct || a.name.localeCompare(b.name));

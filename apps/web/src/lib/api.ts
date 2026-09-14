@@ -218,14 +218,6 @@ export interface DailyProblemDto {
   link: string;
 }
 
-export interface CompletionRow {
-  userId: string;
-  name: string;
-  solved: number;
-  total: number;
-  pct: number;
-}
-
 export interface FundDto {
   id: string;
   name: string;
@@ -306,6 +298,9 @@ export type {
   GroupSessionItem,
   AttendanceRow,
   ConsistencyRow,
+  CompletionRow,
+  TrackOption,
+  StudentTrackCompletion,
   ExerciseMatrix,
   UpsolvingMatrix,
   DivisionsData,

@@ -19,6 +19,21 @@ export interface ConsistencyRow {
   days: { day: string; count: number }[];
 }
 
+export interface TrackOption {
+  id: string;
+  name: string;
+  phase: string;
+  problemCount: number;
+}
+
+export interface StudentTrackCompletion {
+  trackId: string;
+  trackName: string;
+  solved: number;
+  total: number;
+  pct: number;
+}
+
 export interface CompletionRow {
   userId: string;
   name: string;
@@ -26,6 +41,7 @@ export interface CompletionRow {
   solved: number;
   total: number;
   pct: number;
+  byTrack?: Record<string, StudentTrackCompletion>;
 }
 
 export interface MatrixCell {
@@ -118,6 +134,7 @@ export interface GroupProgressData {
   sessionStatusByStudent: Record<string, Record<string, string>>;
   consistency: ConsistencyRow[];
   completion: CompletionRow[];
+  tracks?: TrackOption[];
   exercise: ExerciseMatrix;
   upsolving: UpsolvingMatrix;
   divisions: DivisionsData;
