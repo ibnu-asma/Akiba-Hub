@@ -18,20 +18,20 @@ const DEMO_ACCOUNTS = [
     badge: 'Student',
     badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
-  {
-    role: 'Head of Education',
-    label: 'Education Lead',
-    email: 'head@akibatech.com',
-    badge: 'Education',
-    badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
-  },
-  {
-    role: 'Head of Academy',
-    label: 'Academy Admin',
-    email: 'admin@akibatech.com',
-    badge: 'Admin',
-    badgeColor: 'bg-violet-50 text-violet-700 border-violet-200',
-  },
+  // {
+  //   role: 'Head of Education',
+  //   label: 'Education Lead',
+  //   email: 'head@akibatech.com',
+  //   badge: 'Education',
+  //   badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+  // },
+  // {
+  //   role: 'Head of Academy',
+  //   label: 'Academy Admin',
+  //   email: 'admin@akibatech.com',
+  //   badge: 'Admin',
+  //   badgeColor: 'bg-violet-50 text-violet-700 border-violet-200',
+  // },
 ];
 
 export default function LoginPage() {
