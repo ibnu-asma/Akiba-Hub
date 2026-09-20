@@ -47,33 +47,66 @@ jobs:
             cp -r apps/web/public deploy-web/apps/web/
           fi
           cat << 'EOF' > deploy-web/server.js
-          const path = require('path');
           process.env.NODE_ENV = 'production';
+          process.env.PORT = process.env.PORT || 3000;
           process.env.API_URL = process.env.API_URL || 'https://api.akibatech.com';
-          process.chdir(__dirname);
-          require('./apps/web/server.js');
+          import('./apps/web/server.js');
           EOF
+          node -e "
+            const fs = require('fs');
+            const file = 'deploy-web/package.json';
+            const pkg = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+            pkg.type = 'module';
+            fs.writeFileSync(file, JSON.stringify(pkg, null, 2));
+          "
           mkdir -p deploy-web/tmp
           touch deploy-web/tmp/restart.txt
 
       - name: Prepare API Deployment Package
         run: |
           mkdir -p deploy-api
-          mkdir -p deploy-api/apps/api
-          mkdir -p deploy-api/packages/database
-          mkdir -p deploy-api/packages/shared
-          cp -r apps/api/dist deploy-api/apps/api/
-          cp apps/api/package.json deploy-api/apps/api/
-          cp -r packages/database/dist deploy-api/packages/database/
-          cp packages/database/package.json deploy-api/packages/database/
-          cp -r packages/shared/dist deploy-api/packages/shared/
-          cp packages/shared/package.json deploy-api/packages/shared/
-          cp package.json pnpm-workspace.yaml deploy-api/
-          cp -r node_modules deploy-api/
-          cat << 'EOF' > deploy-api/server.js
-          process.env.NODE_ENV = 'production';
-          import('./apps/api/dist/main.js');
+          npx esbuild apps/api/src/main.ts \
+            --bundle \
+            --platform=node \
+            --target=node22 \
+            --format=esm \
+            --outfile=deploy-api/server.js \
+            --external:@nestjs/* \
+            --external:bcryptjs \
+            --external:drizzle-orm \
+            --external:jsonwebtoken \
+            --external:nodemailer \
+            --external:pg \
+            --external:reflect-metadata \
+            --external:rxjs \
+            --external:zod
+
+          cat << 'EOF' > deploy-api/package.json
+          {
+            "name": "hub-api",
+            "version": "1.0.0",
+            "type": "module",
+            "main": "server.js",
+            "dependencies": {
+              "@nestjs/common": "^12.0.1",
+              "@nestjs/config": "^12.0.0",
+              "@nestjs/core": "^12.0.1",
+              "@nestjs/platform-express": "^12.0.1",
+              "bcryptjs": "^3.0.3",
+              "drizzle-orm": "^0.45.2",
+              "jsonwebtoken": "^9.0.3",
+              "nodemailer": "^6.10.0",
+              "pg": "^8.23.0",
+              "reflect-metadata": "^0.2.2",
+              "rxjs": "^7.8.2",
+              "zod": "^4.6.1"
+            }
+          }
           EOF
+
+          cd deploy-api && npm install --omit=dev --no-audit --no-fund
+          cd ..
+
           mkdir -p deploy-api/tmp
           touch deploy-api/tmp/restart.txt
 
@@ -94,4 +127,3 @@ jobs:
           password: ${{ secrets.CPANEL_FTP_PASSWORD }}
           local-dir: ./deploy-api/
           server-dir: hub-api/
-
