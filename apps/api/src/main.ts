@@ -25,8 +25,13 @@ async function bootstrap(): Promise<void> {
     });
   }
 
-  await app.listen(env.PORT, '0.0.0.0');
-  console.log(`[api] listening on http://localhost:${env.PORT} (${env.NODE_ENV})`);
+  if (typeof env.PORT === 'number' || (!isNaN(Number(env.PORT)) && String(Number(env.PORT)) === String(env.PORT))) {
+    await app.listen(Number(env.PORT), '0.0.0.0');
+    console.log(`[api] listening on http://localhost:${env.PORT} (${env.NODE_ENV})`);
+  } else {
+    await app.listen(env.PORT);
+    console.log(`[api] listening on ${env.PORT} (${env.NODE_ENV})`);
+  }
 }
 
 void bootstrap();

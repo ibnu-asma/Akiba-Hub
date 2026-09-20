@@ -1,0 +1,96 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cpanel
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build applications
+        run: pnpm build
+        env:
+          NODE_ENV: production
+          API_URL: https://api.akibatech.com
+
+      - name: Prepare Web Deployment Package
+        run: |
+          mkdir -p deploy-web
+          cp -r apps/web/.next/standalone/* deploy-web/
+          mkdir -p deploy-web/apps/web/.next
+          cp -r apps/web/.next/static deploy-web/apps/web/.next/
+          if [ -d "apps/web/public" ]; then
+            cp -r apps/web/public deploy-web/apps/web/
+          fi
+          cat << 'EOF' > deploy-web/server.js
+          const path = require('path');
+          process.env.NODE_ENV = 'production';
+          process.env.API_URL = process.env.API_URL || 'https://api.akibatech.com';
+          process.chdir(__dirname);
+          require('./apps/web/server.js');
+          EOF
+          mkdir -p deploy-web/tmp
+          touch deploy-web/tmp/restart.txt
+
+      - name: Prepare API Deployment Package
+        run: |
+          mkdir -p deploy-api
+          mkdir -p deploy-api/apps/api
+          mkdir -p deploy-api/packages/database
+          mkdir -p deploy-api/packages/shared
+          cp -r apps/api/dist deploy-api/apps/api/
+          cp apps/api/package.json deploy-api/apps/api/
+          cp -r packages/database/dist deploy-api/packages/database/
+          cp packages/database/package.json deploy-api/packages/database/
+          cp -r packages/shared/dist deploy-api/packages/shared/
+          cp packages/shared/package.json deploy-api/packages/shared/
+          cp package.json pnpm-workspace.yaml deploy-api/
+          cp -r node_modules deploy-api/
+          cat << 'EOF' > deploy-api/server.js
+          process.env.NODE_ENV = 'production';
+          import('./apps/api/dist/main.js');
+          EOF
+          mkdir -p deploy-api/tmp
+          touch deploy-api/tmp/restart.txt
+
+      - name: Deploy Web to cPanel (hub-web)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.CPANEL_FTP_SERVER }}
+          username: ${{ secrets.CPANEL_FTP_USERNAME }}
+          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
+          local-dir: ./deploy-web/
+          server-dir: hub-web/
+
+      - name: Deploy API to cPanel (hub-api)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.CPANEL_FTP_SERVER }}
+          username: ${{ secrets.CPANEL_FTP_USERNAME }}
+          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
+          local-dir: ./deploy-api/
+          server-dir: hub-api/

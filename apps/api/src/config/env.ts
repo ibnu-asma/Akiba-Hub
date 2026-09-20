@@ -8,7 +8,7 @@ import { z } from 'zod';
  */
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().int().positive().default(3000),
+  PORT: z.union([z.coerce.number().int().positive(), z.string()]).default(3000),
   DATABASE_URL: z.string().min(1).default('postgres://hub:hub@localhost:5433/a2sv_hub'),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES: z.string().default('15m'),
