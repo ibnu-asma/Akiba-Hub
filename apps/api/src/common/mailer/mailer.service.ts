@@ -53,42 +53,96 @@ export class MailerService {
 
   private inviteText(data: InviteEmailData): string {
     return [
-      `Hi ${data.firstName},`,
+      `Welcome to Akiba, ${data.firstName}!`,
       '',
-      'Your Akiba account has been created.',
+      'An account has been created for you on the Akiba platform.',
       '',
-      `Login email: ${data.orgEmail}`,
+      `Your login email: ${data.orgEmail}`,
       '',
-      `Set your password to get started: ${data.inviteUrl}`,
+      'To get started, please set your password by visiting the following link:',
+      data.inviteUrl,
       '',
-      'This invite expires in 7 days. If you did not expect this, ignore this email.',
+      'This invitation link will expire in 7 days.',
+      'If you didn\'t expect this invitation, you can safely ignore this email.',
       '',
-      '— Akiba Team',
+      `© ${new Date().getFullYear()} Akiba Platform`,
     ].join('\n');
   }
 
   private inviteHtml(data: InviteEmailData): string {
     return `<!doctype html>
-<html>
-  <body style="margin:0;padding:0;background:#f6f8f7;font-family:Arial,Helvetica,sans-serif;">
-    <div style="max-width:560px;margin:32px auto;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
-      <div style="background:linear-gradient(135deg,#c8f5d4,#a9ecc0);padding:28px 32px;">
-        <span style="font-size:22px;font-weight:700;color:#0a773c;">Akiba</span>
-      </div>
-      <div style="padding:32px;">
-        <p style="margin:0 0 12px;font-size:16px;color:#1f2937;">Hi ${data.firstName},</p>
-        <p style="margin:0 0 24px;font-size:14px;color:#4b5563;line-height:1.6;">Your Akiba account has been created. Set your password to get started.</p>
-        <div style="background:#ecf9f0;border:1px solid #d8f3e3;border-radius:12px;padding:16px;margin-bottom:24px;">
-          <p style="margin:0 0 4px;font-size:12px;color:#0a773c;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Login email</p>
-          <p style="margin:0;font-size:15px;font-weight:600;color:#111827;">${data.orgEmail}</p>
-        </div>
-        <a href="${data.inviteUrl}" style="display:inline-block;background:#0fa958;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;">Set up my account</a>
-        <p style="margin:24px 0 0;font-size:12px;color:#9ca3af;">This invite expires in 7 days. If you didn&rsquo;t expect this, ignore this email.</p>
-      </div>
-      <div style="padding:16px 32px;border-top:1px solid #f3f4f6;">
-        <p style="margin:0;font-size:12px;color:#9ca3af;">&mdash; Akiba Team</p>
-      </div>
-    </div>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Welcome to Akiba</title>
+  </head>
+  <body style="background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased; margin: 0; padding: 0;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; background-color: #f3f4f6; padding: 40px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); overflow: hidden;">
+            
+            <!-- Header -->
+            <tr>
+              <td style="padding: 40px 48px; text-align: center; background-color: #ffffff; border-bottom: 1px solid #f3f4f6;">
+                <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: #111827; letter-spacing: -0.5px;">Akiba</h1>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding: 48px;">
+                <h2 style="margin: 0 0 24px; font-size: 20px; font-weight: 600; color: #111827;">Welcome to Akiba, ${data.firstName}!</h2>
+                <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.625; color: #4b5563;">
+                  An account has been created for you on the Akiba platform. You're just one step away from accessing your dashboard and getting started.
+                </p>
+                
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 32px; background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                  <tr>
+                    <td style="padding: 24px;">
+                      <p style="margin: 0 0 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">Your Login Email</p>
+                      <p style="margin: 0; font-size: 16px; font-weight: 600; color: #0f172a;">${data.orgEmail}</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin-bottom: 32px;">
+                  <tr>
+                    <td align="center">
+                      <a href="${data.inviteUrl}" style="display: inline-block; padding: 14px 32px; background-color: #10b981; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Set up my password</a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin: 0 0 8px; font-size: 14px; line-height: 1.6; color: #4b5563;">
+                  If the button doesn't work, copy and paste this link into your browser:
+                </p>
+                <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #10b981; word-break: break-all;">
+                  <a href="${data.inviteUrl}" style="color: #10b981; text-decoration: underline;">${data.inviteUrl}</a>
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding: 32px 48px; background-color: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
+                <p style="margin: 0 0 12px; font-size: 13px; color: #64748b;">
+                  This invitation link will expire in 7 days.
+                </p>
+                <p style="margin: 0; font-size: 13px; color: #64748b;">
+                  If you didn't expect this invitation, you can safely ignore this email.
+                </p>
+                <p style="margin: 24px 0 0; font-size: 13px; font-weight: 600; color: #94a3b8;">
+                  &copy; ${new Date().getFullYear()} Akiba Platform
+                </p>
+              </td>
+            </tr>
+            
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>`;
   }
