@@ -234,7 +234,7 @@ export function ProfileView({
                   className="inline-flex items-center gap-1.5 rounded-lg bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700 hover:bg-sky-100 border border-sky-200/60 transition"
                   title="Telegram"
                 >
-                  <Icon name="messageCircle" className="h-3.5 w-3.5" />
+                  <Icon name="chat" className="h-3.5 w-3.5" />
                   <span>Telegram</span>
                 </a>
               )}
@@ -260,7 +260,7 @@ export function ProfileView({
                   className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 border border-indigo-200/60 transition"
                   title="Codeforces"
                 >
-                  <Icon name="barChart2" className="h-3.5 w-3.5" />
+                  <Icon name="chart" className="h-3.5 w-3.5" />
                   <span>Codeforces</span>
                 </a>
               )}
@@ -460,7 +460,7 @@ export function ProfileView({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200/60 text-xs font-semibold transition"
               >
-                <Icon name="messageCircle" className="h-3.5 w-3.5" />
+                <Icon name="chat" className="h-3.5 w-3.5" />
                 <span>Telegram</span>
                 <Icon name="externalLink" className="h-3 w-3 opacity-60" />
               </a>
@@ -504,7 +504,7 @@ export function ProfileView({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/60 text-xs font-semibold transition"
               >
-                <Icon name="barChart2" className="h-3.5 w-3.5" />
+                <Icon name="chart" className="h-3.5 w-3.5" />
                 <span>Codeforces</span>
                 <Icon name="externalLink" className="h-3 w-3 opacity-60" />
               </a>
