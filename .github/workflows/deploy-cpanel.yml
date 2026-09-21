@@ -65,7 +65,7 @@ jobs:
       - name: Prepare API Deployment Package
         run: |
           mkdir -p deploy-api
-          pnpm exec esbuild apps/api/src/main.ts \
+          pnpm exec esbuild apps/api/dist/main.js \
             --bundle \
             --platform=node \
             --target=node22 \
