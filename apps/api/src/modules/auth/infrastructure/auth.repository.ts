@@ -130,6 +130,7 @@ export class AuthRepository {
     userId: string,
     data: {
       name?: string;
+      passwordHash?: string;
       avatarUrl?: string | null;
       country?: string | null;
       university?: string | null;

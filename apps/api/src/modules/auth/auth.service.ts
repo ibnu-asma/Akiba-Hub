@@ -83,6 +83,7 @@ export class AuthService {
     userId: string,
     data: {
       name?: string;
+      password?: string;
       avatarUrl?: string | null;
       country?: string | null;
       university?: string | null;
@@ -97,7 +98,12 @@ export class AuthService {
       bio?: string | null;
     },
   ) {
-    const updated = await this.repo.updateProfile(userId, data);
+    const { password, ...rest } = data;
+    const updateData: any = { ...rest };
+    if (password) {
+      updateData.passwordHash = await bcrypt.hash(password, 10);
+    }
+    const updated = await this.repo.updateProfile(userId, updateData);
     return this.me(updated.id);
   }
 

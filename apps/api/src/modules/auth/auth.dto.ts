@@ -25,6 +25,7 @@ export const registerInviteDto = z.object({
 
 export const updateProfileDto = z.object({
   name: z.string().min(1).max(120).optional(),
+  password: z.string().min(6).max(100).optional(),
   avatarUrl: z.string().nullable().optional(),
   country: z.string().max(80).optional(),
   university: z.string().max(160).optional(),

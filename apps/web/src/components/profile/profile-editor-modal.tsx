@@ -27,6 +27,7 @@ export function ProfileEditorModal({
   const [telegram, setTelegram] = useState(user.telegram || '');
   const [leetcode, setLeetcode] = useState(user.leetcode || '');
   const [codeforces, setCodeforces] = useState(user.codeforces || '');
+  const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +44,7 @@ export function ProfileEditorModal({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim() || undefined,
+          password: password.trim() || undefined,
           bio: bio.trim() || null,
           country: country.trim() || null,
           university: university.trim() || null,
@@ -230,6 +232,19 @@ export function ProfileEditorModal({
                 className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-a2sv-500 focus:outline-none focus:ring-2 focus:ring-a2sv-500/20"
               />
             </div>
+          </div>
+
+          <hr className="my-6 border-slate-100" />
+          <h3 className="text-sm font-bold text-slate-800">Security</h3>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">New Password (optional)</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Leave blank to keep current password"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-a2sv-500 focus:outline-none focus:ring-2 focus:ring-a2sv-500/20"
+            />
           </div>
 
           {/* Modal Actions */}
