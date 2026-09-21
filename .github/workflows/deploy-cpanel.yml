@@ -38,10 +38,10 @@ jobs:
           API_URL: https://api.akibatech.com
 
       - name: Run Database Migrations
-        if: ${{ secrets.DATABASE_URL != '' }}
-        run: pnpm db:migrate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        if: ${{ env.DATABASE_URL != '' }}
+        run: pnpm db:migrate
 
       - name: Prepare Web Deployment Package
         run: |
