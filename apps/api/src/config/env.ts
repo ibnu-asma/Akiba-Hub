@@ -44,11 +44,36 @@ function loadDotEnv(path = resolve(process.cwd(), '.env')): void {
     const eq = line.indexOf('=');
     if (eq < 1) continue;
     const key = line.slice(0, eq).trim();
-    const value = line.slice(eq + 1).trim();
+    let value = line.slice(eq + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1).trim();
+    }
     if (process.env[key] === undefined) process.env[key] = value;
   }
 }
 
+function sanitizeDatabaseUrl(val?: string): string | undefined {
+  if (typeof val !== 'string') return val;
+  let v = val.trim();
+  if (v.startsWith('DATABASE_URL=')) {
+    v = v.slice('DATABASE_URL='.length).trim();
+  }
+  if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+    v = v.slice(1, -1).trim();
+  }
+  return v;
+}
+
 loadDotEnv();
+
+if (process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = sanitizeDatabaseUrl(process.env.DATABASE_URL);
+}
+if (process.env.JWT_SECRET) {
+  let s = process.env.JWT_SECRET.trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    process.env.JWT_SECRET = s.slice(1, -1).trim();
+  }
+}
 
 export const env = EnvSchema.parse(process.env);
