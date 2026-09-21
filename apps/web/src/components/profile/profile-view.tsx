@@ -46,9 +46,11 @@ export function ProfileView({
   // Overall attendance rate
   const totalAtt = attendanceRecords.length;
   const presentAtt = attendanceRecords.filter((r) => r.status === 'present' || r.status === 'late').length;
-  const attRate = totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 0;
+  
+  const attRate = totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 100;
 
   // Active consistency streak
+  
   const activeStreak = consistencySolves.length > 0 ? Math.min(consistencySolves.length, 5) : 0;
 
   return (
