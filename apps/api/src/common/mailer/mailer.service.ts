@@ -86,7 +86,7 @@ export class MailerService {
             <!-- Header -->
             <tr>
               <td style="padding: 40px 48px; text-align: center; background-color: #ffffff; border-bottom: 1px solid #f3f4f6;">
-                <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: #111827; letter-spacing: -0.5px;">Akiba</h1>
+                <img src="${env.WEB_ORIGIN}/akiba.jpg" alt="Akiba Logo" style="height: 48px; width: auto; display: block; margin: 0 auto;" />
               </td>
             </tr>
 

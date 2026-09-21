@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import { DomainError, ROLES } from '@hub/shared';
@@ -10,6 +11,10 @@ import { AuthSession } from './auth.dto.js';
 @Injectable()
 export class AuthService {
   constructor(private readonly repo: AuthRepository, private readonly jwt: JwtService) {}
+  constructor(
+    @Inject(AuthRepository) private readonly repo: AuthRepository,
+    @Inject(JwtService) private readonly jwt: JwtService
+  ) {}
 
   async login(email: string, password: string): Promise<AuthSession> {
     const user = await this.repo.findByEmail(email.toLowerCase());
