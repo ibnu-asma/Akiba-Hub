@@ -37,6 +37,9 @@ export class AuthService {
       department?: string;
       instagram?: string;
       linkedin?: string;
+      telegram?: string;
+      leetcode?: string;
+      codeforces?: string;
       studentId?: string;
       bio?: string;
     },
@@ -65,6 +68,9 @@ export class AuthService {
       department: payload.department,
       instagram: payload.instagram,
       linkedin: payload.linkedin,
+      telegram: payload.telegram,
+      leetcode: payload.leetcode,
+      codeforces: payload.codeforces,
       studentId: payload.studentId,
       bio: payload.bio,
       invitedById: null,
@@ -84,6 +90,9 @@ export class AuthService {
       instagram?: string | null;
       linkedin?: string | null;
       github?: string | null;
+      telegram?: string | null;
+      leetcode?: string | null;
+      codeforces?: string | null;
       studentId?: string | null;
       bio?: string | null;
     },
@@ -110,6 +119,9 @@ export class AuthService {
       instagram: user.instagram ?? null,
       linkedin: user.linkedin ?? null,
       github: user.github ?? null,
+      telegram: user.telegram ?? null,
+      leetcode: user.leetcode ?? null,
+      codeforces: user.codeforces ?? null,
       studentId: user.studentId ?? null,
       bio: user.bio ?? null,
       createdAt: user.createdAt,

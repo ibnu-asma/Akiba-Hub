@@ -58,6 +58,9 @@ export interface Me {
   instagram?: string | null;
   linkedin?: string | null;
   github?: string | null;
+  telegram?: string | null;
+  leetcode?: string | null;
+  codeforces?: string | null;
   studentId?: string | null;
   bio?: string | null;
   createdAt?: string;

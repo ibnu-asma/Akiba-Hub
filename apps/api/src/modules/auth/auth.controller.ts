@@ -28,6 +28,9 @@ export class AuthController {
       department: parsed.department,
       instagram: parsed.instagram,
       linkedin: parsed.linkedin,
+      telegram: parsed.telegram,
+      leetcode: parsed.leetcode,
+      codeforces: parsed.codeforces,
       studentId: parsed.studentId,
       bio: parsed.bio,
     });

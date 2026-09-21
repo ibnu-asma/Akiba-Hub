@@ -26,6 +26,9 @@ interface UserRow {
   instagram?: string | null;
   linkedin?: string | null;
   github?: string | null;
+  telegram?: string | null;
+  leetcode?: string | null;
+  codeforces?: string | null;
   studentId?: string | null;
   bio?: string | null;
   createdAt: Date;
@@ -90,6 +93,9 @@ export class AuthRepository {
     department?: string | null;
     instagram?: string | null;
     linkedin?: string | null;
+    telegram?: string | null;
+    leetcode?: string | null;
+    codeforces?: string | null;
     studentId?: string | null;
     bio?: string | null;
     invitedById?: string | null;
@@ -108,6 +114,9 @@ export class AuthRepository {
         department: input.department ?? null,
         instagram: input.instagram ?? null,
         linkedin: input.linkedin ?? null,
+        telegram: input.telegram ?? null,
+        leetcode: input.leetcode ?? null,
+        codeforces: input.codeforces ?? null,
         studentId: input.studentId ?? null,
         bio: input.bio ?? null,
         invitedById: input.invitedById ?? null,
@@ -128,6 +137,9 @@ export class AuthRepository {
       instagram?: string | null;
       linkedin?: string | null;
       github?: string | null;
+      telegram?: string | null;
+      leetcode?: string | null;
+      codeforces?: string | null;
       studentId?: string | null;
       bio?: string | null;
     },

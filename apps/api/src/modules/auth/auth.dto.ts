@@ -18,6 +18,9 @@ export const registerInviteDto = z.object({
   studentId: z.string().max(64).optional(),
   bio: z.string().max(2000).optional(),
   github: z.string().max(120).optional(),
+  telegram: z.string().max(120).optional(),
+  leetcode: z.string().max(120).optional(),
+  codeforces: z.string().max(120).optional(),
 });
 
 export const updateProfileDto = z.object({
@@ -30,6 +33,9 @@ export const updateProfileDto = z.object({
   linkedin: z.string().max(320).optional(),
   github: z.string().max(120).optional(),
   studentId: z.string().max(64).optional(),
+  telegram: z.string().max(120).optional(),
+  leetcode: z.string().max(120).optional(),
+  codeforces: z.string().max(120).optional(),
   bio: z.string().max(2000).optional(),
 });
 

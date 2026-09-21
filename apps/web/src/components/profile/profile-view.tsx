@@ -226,6 +226,45 @@ export function ProfileView({
                 </a>
               )}
 
+              {targetUser.telegram && (
+                <a
+                  href={targetUser.telegram.startsWith('http') ? targetUser.telegram : `https://t.me/${targetUser.telegram.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700 hover:bg-sky-100 border border-sky-200/60 transition"
+                  title="Telegram"
+                >
+                  <Icon name="messageCircle" className="h-3.5 w-3.5" />
+                  <span>Telegram</span>
+                </a>
+              )}
+
+              {targetUser.leetcode && (
+                <a
+                  href={`https://leetcode.com/u/${targetUser.leetcode.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 border border-amber-200/60 transition"
+                  title="LeetCode"
+                >
+                  <Icon name="code" className="h-3.5 w-3.5" />
+                  <span>LeetCode</span>
+                </a>
+              )}
+
+              {targetUser.codeforces && (
+                <a
+                  href={`https://codeforces.com/profile/${targetUser.codeforces.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 border border-indigo-200/60 transition"
+                  title="Codeforces"
+                >
+                  <Icon name="barChart2" className="h-3.5 w-3.5" />
+                  <span>Codeforces</span>
+                </a>
+              )}
+
               <a
                 href={`mailto:${targetUser.email}`}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
@@ -410,6 +449,72 @@ export function ProfileView({
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-dashed border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 text-xs font-medium transition cursor-pointer"
               >
                 <span>+ Add Instagram</span>
+              </button>
+            ) : null}
+
+            {/* Telegram */}
+            {targetUser.telegram ? (
+              <a
+                href={targetUser.telegram.startsWith('http') ? targetUser.telegram : `https://t.me/${targetUser.telegram.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200/60 text-xs font-semibold transition"
+              >
+                <Icon name="messageCircle" className="h-3.5 w-3.5" />
+                <span>Telegram</span>
+                <Icon name="externalLink" className="h-3 w-3 opacity-60" />
+              </a>
+            ) : isViewingSelf ? (
+              <button
+                type="button"
+                onClick={() => setIsEditorOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-dashed border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 text-xs font-medium transition cursor-pointer"
+              >
+                <span>+ Add Telegram</span>
+              </button>
+            ) : null}
+
+            {/* LeetCode */}
+            {targetUser.leetcode ? (
+              <a
+                href={`https://leetcode.com/u/${targetUser.leetcode.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200/60 text-xs font-semibold transition"
+              >
+                <Icon name="code" className="h-3.5 w-3.5" />
+                <span>LeetCode</span>
+                <Icon name="externalLink" className="h-3 w-3 opacity-60" />
+              </a>
+            ) : isViewingSelf ? (
+              <button
+                type="button"
+                onClick={() => setIsEditorOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-dashed border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 text-xs font-medium transition cursor-pointer"
+              >
+                <span>+ Add LeetCode</span>
+              </button>
+            ) : null}
+
+            {/* Codeforces */}
+            {targetUser.codeforces ? (
+              <a
+                href={`https://codeforces.com/profile/${targetUser.codeforces.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/60 text-xs font-semibold transition"
+              >
+                <Icon name="barChart2" className="h-3.5 w-3.5" />
+                <span>Codeforces</span>
+                <Icon name="externalLink" className="h-3 w-3 opacity-60" />
+              </a>
+            ) : isViewingSelf ? (
+              <button
+                type="button"
+                onClick={() => setIsEditorOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-dashed border-slate-200 text-slate-400 hover:text-slate-600 hover:border-slate-300 text-xs font-medium transition cursor-pointer"
+              >
+                <span>+ Add Codeforces</span>
               </button>
             ) : null}
 

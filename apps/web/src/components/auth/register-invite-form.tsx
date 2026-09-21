@@ -29,6 +29,9 @@ export function RegisterInviteForm({ token, initialEmail }: { token: string; ini
   const [instagram, setInstagram] = useState('');
   const [linkedin, setLinkedin] = useState('');
   const [studentId, setStudentId] = useState('');
+  const [telegram, setTelegram] = useState('');
+  const [leetcode, setLeetcode] = useState('');
+  const [codeforces, setCodeforces] = useState('');
   const [bio, setBio] = useState('');
 
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -87,6 +90,9 @@ export function RegisterInviteForm({ token, initialEmail }: { token: string; ini
           department: department.trim() || undefined,
           instagram: instagram.trim() || undefined,
           linkedin: linkedin.trim() || undefined,
+          telegram: telegram.trim() || undefined,
+          leetcode: leetcode.trim() || undefined,
+          codeforces: codeforces.trim() || undefined,
           studentId: studentId.trim() || undefined,
           bio: bio.trim() || undefined,
         }),
@@ -409,6 +415,51 @@ export function RegisterInviteForm({ token, initialEmail }: { token: string; ini
                   placeholder="@username"
                   value={instagram}
                   onChange={(e) => setInstagram(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-a2sv-500 focus:outline-none focus:ring-2 focus:ring-a2sv-500/20 transition-all"
+                />
+              </div>
+
+              {/* Telegram */}
+              <div>
+                <label htmlFor="reg-telegram" className="block text-xs font-medium text-slate-700 mb-1.5">
+                  Telegram Username
+                </label>
+                <input
+                  id="reg-telegram"
+                  type="text"
+                  placeholder="@username"
+                  value={telegram}
+                  onChange={(e) => setTelegram(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-a2sv-500 focus:outline-none focus:ring-2 focus:ring-a2sv-500/20 transition-all"
+                />
+              </div>
+
+              {/* LeetCode */}
+              <div>
+                <label htmlFor="reg-leetcode" className="block text-xs font-medium text-slate-700 mb-1.5">
+                  LeetCode Username
+                </label>
+                <input
+                  id="reg-leetcode"
+                  type="text"
+                  placeholder="e.g. geleta_daba"
+                  value={leetcode}
+                  onChange={(e) => setLeetcode(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-a2sv-500 focus:outline-none focus:ring-2 focus:ring-a2sv-500/20 transition-all"
+                />
+              </div>
+
+              {/* Codeforces */}
+              <div>
+                <label htmlFor="reg-codeforces" className="block text-xs font-medium text-slate-700 mb-1.5">
+                  Codeforces Handle
+                </label>
+                <input
+                  id="reg-codeforces"
+                  type="text"
+                  placeholder="e.g. tourist"
+                  value={codeforces}
+                  onChange={(e) => setCodeforces(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-a2sv-500 focus:outline-none focus:ring-2 focus:ring-a2sv-500/20 transition-all"
                 />
               </div>
