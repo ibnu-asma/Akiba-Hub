@@ -37,6 +37,12 @@ jobs:
           NODE_ENV: production
           API_URL: https://api.akibatech.com
 
+      - name: Run Database Migrations
+        if: ${{ secrets.DATABASE_URL != '' }}
+        run: pnpm db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Prepare Web Deployment Package
         run: |
           mkdir -p deploy-web
@@ -71,38 +77,24 @@ jobs:
             --target=node22 \
             --format=esm \
             --outfile=deploy-api/server.js \
-            --external:@nestjs/* \
-            --external:bcryptjs \
-            --external:drizzle-orm \
-            --external:jsonwebtoken \
-            --external:nodemailer \
-            --external:pg \
-            --external:reflect-metadata \
-            --external:rxjs \
-            --external:zod
+            --packages=external
 
-          cat << 'EOF' > deploy-api/package.json
-          {
-            "name": "hub-api",
-            "version": "1.0.0",
-            "type": "module",
-            "main": "server.js",
-            "dependencies": {
-              "@nestjs/common": "^12.0.1",
-              "@nestjs/config": "^12.0.0",
-              "@nestjs/core": "^12.0.1",
-              "@nestjs/platform-express": "^12.0.1",
-              "bcryptjs": "^3.0.3",
-              "drizzle-orm": "^0.45.2",
-              "jsonwebtoken": "^9.0.3",
-              "nodemailer": "^6.10.0",
-              "pg": "^8.23.0",
-              "reflect-metadata": "^0.2.2",
-              "rxjs": "^7.8.2",
-              "zod": "^4.6.1"
-            }
-          }
-          EOF
+          node -e "
+            const fs = require('fs');
+            const apiPkg = JSON.parse(fs.readFileSync('apps/api/package.json', 'utf8'));
+            const dbPkg = JSON.parse(fs.readFileSync('packages/database/package.json', 'utf8'));
+            const deps = { ...apiPkg.dependencies, ...dbPkg.dependencies };
+            delete deps['@hub/database'];
+            delete deps['@hub/shared'];
+            const pkg = {
+              name: 'hub-api',
+              version: '1.0.0',
+              type: 'module',
+              main: 'server.js',
+              dependencies: deps
+            };
+            fs.writeFileSync('deploy-api/package.json', JSON.stringify(pkg, null, 2));
+          "
 
           cd deploy-api && npm install --omit=dev --no-audit --no-fund
           cd ..
