@@ -77,7 +77,15 @@ jobs:
             --target=node22 \
             --format=esm \
             --outfile=deploy-api/server.js \
-            --packages=external
+            --external:@nestjs/* \
+            --external:bcryptjs \
+            --external:drizzle-orm \
+            --external:jsonwebtoken \
+            --external:nodemailer \
+            --external:pg \
+            --external:reflect-metadata \
+            --external:rxjs \
+            --external:zod
 
           node -e "
             const fs = require('fs');
