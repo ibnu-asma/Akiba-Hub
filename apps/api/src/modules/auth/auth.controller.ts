@@ -1,4 +1,3 @@
-import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
 import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards, Inject } from '@nestjs/common';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
@@ -7,15 +6,11 @@ import { AuthService } from './auth.service.js';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
-  constructor(@Inject(AuthService) private readonly auth: AuthService) {
-    console.log('--- constructor auth ---', auth);
-  }
+  constructor(@Inject(AuthService) private readonly auth: AuthService) {}
 
   @Post('login')
   @HttpCode(200)
   async login(@Body() body: unknown) {
-    console.log('--- this ---', this);
     const parsed = loginDto.parse(body);
     return this.auth.login(parsed.email, parsed.password);
   }

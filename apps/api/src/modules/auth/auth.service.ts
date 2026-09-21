@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import { Injectable, Inject } from '@nestjs/common';
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
@@ -10,7 +9,6 @@ import { AuthSession } from './auth.dto.js';
 /** Login / invite-registration use-cases (application layer). */
 @Injectable()
 export class AuthService {
-  constructor(private readonly repo: AuthRepository, private readonly jwt: JwtService) {}
   constructor(
     @Inject(AuthRepository) private readonly repo: AuthRepository,
     @Inject(JwtService) private readonly jwt: JwtService
