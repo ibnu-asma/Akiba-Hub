@@ -12,6 +12,12 @@ export class DatabaseProvider {
   readonly pool: DB['pool'];
 
   constructor() {
+    try {
+      const u = new URL(env.DATABASE_URL);
+      console.log(`[db] connecting to ${u.protocol}//${u.username ? u.username + '@' : ''}${u.host}${u.pathname}`);
+    } catch {
+      console.log(`[db] connecting with connection string (masked): ${env.DATABASE_URL.substring(0, 15)}...`);
+    }
     const { db, pool } = createDb(env.DATABASE_URL);
     this.db = db;
     this.pool = pool;

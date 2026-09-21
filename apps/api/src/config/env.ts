@@ -9,7 +9,17 @@ import { z } from 'zod';
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.union([z.coerce.number().int().positive(), z.string()]).default(3000),
-  DATABASE_URL: z.string().min(1).default('postgres://hub:hub@localhost:5433/a2sv_hub'),
+  DATABASE_URL: z
+    .string()
+    .min(1)
+    .refine(
+      (v) => v.startsWith('postgres://') || v.startsWith('postgresql://'),
+      {
+        message:
+          'DATABASE_URL must be a valid PostgreSQL connection string starting with postgresql:// or postgres://',
+      },
+    )
+    .default('postgres://hub:hub@localhost:5433/a2sv_hub'),
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES: z.string().default('15m'),
   REFRESH_EXPIRES: z.string().default('30d'),

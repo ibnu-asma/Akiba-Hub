@@ -9,7 +9,12 @@ export type DB = ReturnType<typeof createDb>;
  * The pool is the single Postgres entry point for the API (pooled, lazy).
  */
 export function createDb(connectionString: string) {
-  const pool = new Pool({ connectionString, max: 20 });
+  const isRemote = !connectionString.includes('localhost') && !connectionString.includes('127.0.0.1');
+  const pool = new Pool({
+    connectionString,
+    max: 20,
+    ssl: isRemote ? { rejectUnauthorized: false } : undefined,
+  });
   const db = drizzle({ client: pool, schema });
   return { db, pool };
 }
