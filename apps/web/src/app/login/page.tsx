@@ -200,7 +200,7 @@ export default function LoginPage() {
           </form>
 
           {/* Quick Demo Accounts Selector */}
-          <div className="mt-8 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 shadow-2xs">
+          {/* <div className="mt-8 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 shadow-2xs">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Quick Demo Accounts
@@ -239,7 +239,7 @@ export default function LoginPage() {
                 );
               })}
             </div>
-          </div>
+          </div> */}
 
           {/* Register with Invite Link */}
           <div className="mt-6 text-center text-xs text-slate-500">
