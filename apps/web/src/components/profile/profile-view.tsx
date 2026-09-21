@@ -46,10 +46,10 @@ export function ProfileView({
   // Overall attendance rate
   const totalAtt = attendanceRecords.length;
   const presentAtt = attendanceRecords.filter((r) => r.status === 'present' || r.status === 'late').length;
-  const attRate = totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 95;
+  const attRate = totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 0;
 
   // Active consistency streak
-  const activeStreak = consistencySolves.length > 0 ? Math.min(consistencySolves.length, 5) : 1;
+  const activeStreak = consistencySolves.length > 0 ? Math.min(consistencySolves.length, 5) : 0;
 
   return (
     <div className="space-y-6">
@@ -350,12 +350,12 @@ export function ProfileView({
 
         {/* Compact Key-Value Metadata Grid */}
         <div className="mt-3.5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-          <CompactDetail label="Program" value={superGroupName || 'G1 Akiba - Remote'} icon="bookmark" />
-          <CompactDetail label="Group" value={groupName || 'Remote Group 4'} icon="users" />
-          <CompactDetail label="University" value={targetUser.university || 'ASTU'} icon="file" />
-          <CompactDetail label="Department" value={targetUser.department || 'Computer Science & Engineering'} icon="list" />
-          <CompactDetail label="Student ID" value={targetUser.studentId || 'ATR/1234/12'} icon="shield" />
-          <CompactDetail label="Country" value={targetUser.country || 'Ethiopia'} icon="map" />
+          <CompactDetail label="Program" value={superGroupName || 'Unassigned'} icon="bookmark" />
+          <CompactDetail label="Group" value={groupName || 'Unassigned'} icon="users" />
+          <CompactDetail label="University" value={targetUser.university || 'Not provided'} icon="file" />
+          <CompactDetail label="Department" value={targetUser.department || 'Not provided'} icon="list" />
+          <CompactDetail label="Student ID" value={targetUser.studentId || 'Not provided'} icon="shield" />
+          <CompactDetail label="Country" value={targetUser.country || 'Not provided'} icon="map" />
           <CompactDetail
             label="Member Since"
             value={
