@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { DatabaseProvider } from '../../../config/database.provider.js';
 import { users, groups, invitations, eq } from '@hub/database';
 
@@ -49,7 +49,7 @@ interface InviteRow {
 /** Storage contract for the auth aggregate (infrastructure layer). */
 @Injectable()
 export class AuthRepository {
-  constructor(private readonly db: DatabaseProvider) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider) {}
 
   async findByEmail(email: string): Promise<UserRow | undefined> {
     const rows = await this.db.db

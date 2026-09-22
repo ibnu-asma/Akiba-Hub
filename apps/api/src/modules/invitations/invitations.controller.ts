@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -33,7 +33,7 @@ const listDto = z.object({
 @Controller('invitations')
 @UseGuards(AuthGuard, new MockRulesGuard(3)) // HoA only
 export class InvitationsController {
-  constructor(private readonly invitations: InvitationsService) {}
+  constructor(@Inject(InvitationsService) private readonly invitations: InvitationsService) {}
 
   @Post('mass')
   @HttpCode(201)

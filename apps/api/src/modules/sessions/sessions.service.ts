@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { sessions, sessionGroups, attendanceRecords, users, and, asc, desc, eq, inArray, sql } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -24,7 +24,7 @@ export interface CreateSessionInput {
 /** Session + attendance use-cases (HoE/HoA; spec §7.3–7.4). */
 @Injectable()
 export class SessionsService {
-  constructor(private readonly db: DatabaseProvider, private readonly audit: AuditService) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService) {}
 
   async create(input: CreateSessionInput, actor: { id: string; name: string; role: string }) {
     if (!isHoEOrHigher(actor.role)) throw DomainError.forbidden('Only heads can create sessions');

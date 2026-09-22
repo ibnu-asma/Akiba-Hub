@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { superGroups, groups, eq, inArray, isNull, and } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -14,7 +14,7 @@ export interface SuperGroupSummary {
 /** SuperGroup aggregate (HoA only; spec §8.4). */
 @Injectable()
 export class SuperGroupsService {
-  constructor(private readonly db: DatabaseProvider, private readonly audit: AuditService) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService) {}
 
   async create(name: string, groupIds: string[], actor: { id: string; name: string }): Promise<{ id: string; name: string }> {
     const rows = await this.db.db

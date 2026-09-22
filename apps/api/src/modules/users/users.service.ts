@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { users, groups, invitations, problems, and, asc, eq, sql, isNull } from '@hub/database';
 import { DomainError, ROLES } from '@hub/shared';
@@ -50,10 +50,7 @@ function toSummary(row: Record<string, unknown>): UserSummary {
 /** User administration use-cases — HoA only (spec §8.7: promote/demote/delete). */
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly db: DatabaseProvider,
-    private readonly audit: AuditService,
-  ) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService, ) {}
 
   /** Active users. When `limit` is provided, returns a paged result with a total count. */
   async list(scope: DataScope, opts?: ListUsersOpts): Promise<UserSummary[] | Paged<UserSummary>> {

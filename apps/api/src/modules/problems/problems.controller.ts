@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -25,7 +25,7 @@ const listDto = z.object({
 @Controller('problems')
 @UseGuards(AuthGuard)
 export class ProblemsController {
-  constructor(private readonly problems: ProblemsService) {}
+  constructor(@Inject(ProblemsService) private readonly problems: ProblemsService) {}
 
   /** Library read — every role sees the problem cards (spec §6.3). */
   @Get()

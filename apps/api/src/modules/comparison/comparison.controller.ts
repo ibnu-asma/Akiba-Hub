@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -17,10 +17,7 @@ const compareDto = z.object({
 @Controller('comparison')
 @UseGuards(AuthGuard, new MockRulesGuard(2))
 export class ComparisonController {
-  constructor(
-    private readonly comparison: ComparisonService,
-    private readonly scopes: ScopeService,
-  ) {}
+  constructor(@Inject(ComparisonService) private readonly comparison: ComparisonService, @Inject(ScopeService) private readonly scopes: ScopeService, ) {}
 
   @Post()
   async compare(@Body() body: unknown, @CurrentPrincipal() principal: Principal) {

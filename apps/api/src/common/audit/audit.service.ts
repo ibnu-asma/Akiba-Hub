@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { activityLogs, and, desc, lte, sql } from '@hub/database';
 
@@ -22,7 +22,7 @@ export interface AuditLogRow {
  */
 @Injectable()
 export class AuditService {
-  constructor(private readonly db: DatabaseProvider) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider) {}
 
   async record(input: {
     actorId: string;

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import {
   attendanceRecords,
@@ -25,7 +25,7 @@ type SQLFragment = ReturnType<typeof sql>;
  */
 @Injectable()
 export class ComparisonService {
-  constructor(private readonly db: DatabaseProvider) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider) {}
 
   private studentCount(groupId: string) {
     return this.db.db

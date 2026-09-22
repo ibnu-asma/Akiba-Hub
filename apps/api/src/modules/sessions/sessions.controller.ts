@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -35,7 +35,7 @@ const attendanceDto = z.object({
 @Controller('sessions')
 @UseGuards(AuthGuard)
 export class SessionsController {
-  constructor(private readonly sessions: SessionsService, private readonly scopes: ScopeService) {}
+  constructor(@Inject(SessionsService) private readonly sessions: SessionsService, @Inject(ScopeService) private readonly scopes: ScopeService) {}
 
   @Get()
   async list(@CurrentPrincipal() principal: Principal, @Query('all') all?: string) {

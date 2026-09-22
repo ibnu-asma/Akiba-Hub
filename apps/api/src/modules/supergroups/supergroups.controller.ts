@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -12,7 +12,7 @@ const setGroupsDto = z.object({ groupIds: z.array(z.string().uuid()).default([])
 @Controller('super-groups')
 @UseGuards(AuthGuard)
 export class SuperGroupsController {
-  constructor(private readonly superGroups: SuperGroupsService) {}
+  constructor(@Inject(SuperGroupsService) private readonly superGroups: SuperGroupsService) {}
 
   @Get()
   async list() {

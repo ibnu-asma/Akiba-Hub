@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import {
   groups,
@@ -38,11 +38,7 @@ export interface GroupSummary {
 /** Group aggregate (HoA admin; HoE/HoA read; spec §8.6). */
 @Injectable()
 export class GroupsService {
-  constructor(
-    private readonly db: DatabaseProvider,
-    private readonly audit: AuditService,
-    private readonly summary: SummaryService,
-  ) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService, @Inject(SummaryService) private readonly summary: SummaryService, ) {}
 
   async create(input: {
     name: string;
@@ -334,7 +330,7 @@ export class GroupsService {
     const totalExcused = attendance.reduce((sum, r) => sum + r.excused, 0);
     const totalLate = attendance.reduce((sum, r) => sum + r.late, 0);
     const totalRecords = totalPresent + totalAbsent + totalExcused + totalLate;
-    const overallPresentPct = totalRecords ? Math.round((totalPresent / totalRecords) * 100) : 0;
+    const overallPresentPct = totalRecords ? Math.round((totalPresent / totalRecords) * 100) : 100;
 
     const totalSolves = consistency.reduce((sum, r) => sum + r.totalSolves, 0);
     const avgSolves = consistency.length ? Math.round(totalSolves / consistency.length) : 0;

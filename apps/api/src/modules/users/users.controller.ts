@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Delete, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -26,10 +26,7 @@ const removedDto = z.object({
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly users: UsersService,
-    private readonly scopes: ScopeService,
-  ) {}
+  constructor(@Inject(UsersService) private readonly users: UsersService, @Inject(ScopeService) private readonly scopes: ScopeService, ) {}
 
   @Get()
   @UseGuards(AuthGuard, new MockRulesGuard(2)) // HoE can read; HoA everything

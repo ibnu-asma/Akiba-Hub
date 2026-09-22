@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { problems, and, desc, eq, isNull, sql } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -23,7 +23,7 @@ export interface ListProblemOptions {
 /** Problems library — HoE/HoA curate, every role reads (spec §6.3 / §7.5). */
 @Injectable()
 export class ProblemsService {
-  constructor(private readonly db: DatabaseProvider, private readonly audit: AuditService) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService) {}
 
   async create(input: CreateProblemInput, actor: { id: string; name: string; role: string }) {
     const rows = await this.db.db

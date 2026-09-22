@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
 import { ScopeService } from '../../common/auth/scope.service.js';
@@ -19,10 +19,7 @@ const createDto = z.object({
 @Controller('submissions')
 @UseGuards(AuthGuard)
 export class SubmissionsController {
-  constructor(
-    private readonly submissions: SubmissionsService,
-    private readonly scopes: ScopeService,
-  ) {}
+  constructor(@Inject(SubmissionsService) private readonly submissions: SubmissionsService, @Inject(ScopeService) private readonly scopes: ScopeService, ) {}
 
   @Get()
   async list(@CurrentPrincipal() principal: Principal, @Query('limit') limit?: string, @Query('group') group?: string) {

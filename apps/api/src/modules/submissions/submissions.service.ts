@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { desc, eq, inArray, problems, sql, submissions, users } from '@hub/database';
 import { ROLES } from '@hub/shared';
@@ -20,7 +20,7 @@ export interface CreateSubmissionInput {
  */
 @Injectable()
 export class SubmissionsService {
-  constructor(private readonly db: DatabaseProvider) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider) {}
 
   async create(input: CreateSubmissionInput, actor: { id: string }) {
     const rows = await this.db.db

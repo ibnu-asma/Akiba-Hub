@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { contestGroups, contestProblems, contests, desc, eq, groups, problems, and, inArray, isNull, sql } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -26,7 +26,7 @@ const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 /** Contests — HoE/HoA schedule + attach questions, every role reads (spec §6.8 / §7.7). */
 @Injectable()
 export class ContestsService {
-  constructor(private readonly db: DatabaseProvider, private readonly audit: AuditService) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService) {}
 
   async create(input: CreateContestInput, actor: { id: string; name: string; role: string }) {
     const rows = await this.db.db

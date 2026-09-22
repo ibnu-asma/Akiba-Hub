@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { and, desc, eq, invitations, sql, users } from '@hub/database';
@@ -33,11 +33,7 @@ export interface InvitationResult {
  */
 @Injectable()
 export class InvitationsService {
-  constructor(
-    private readonly db: DatabaseProvider,
-    private readonly audit: AuditService,
-    private readonly mailer: MailerService,
-  ) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService, @Inject(MailerService) private readonly mailer: MailerService, ) {}
 
   async generateMass(invitees: MassInviteeInput[], role: string, actor: { id: string; name: string }): Promise<InvitationResult[]> {
     const ttlMs = durationToMs(env.INVITE_EXPIRES);

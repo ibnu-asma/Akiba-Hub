@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -24,7 +24,7 @@ const reassignDto = z.object({
 @Controller('tracks')
 @UseGuards(AuthGuard)
 export class TracksController {
-  constructor(private readonly tracks: TracksService) {}
+  constructor(@Inject(TracksService) private readonly tracks: TracksService) {}
 
   @Get()
   async list() {

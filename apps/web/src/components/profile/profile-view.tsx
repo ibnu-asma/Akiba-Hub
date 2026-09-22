@@ -172,7 +172,7 @@ export function ProfileView({
                 <span className="italic text-slate-400">
                   {effectiveMode === 'self'
                     ? 'Add a bio describing your goals, background, or favorite algorithms by clicking "Edit Profile".'
-                    : 'A2SV Academy scholar solving daily algorithms and building software solutions.'}
+                    : 'Akiba Academy scholar solving daily algorithms and building software solutions.'}
                 </span>
               )}
             </p>

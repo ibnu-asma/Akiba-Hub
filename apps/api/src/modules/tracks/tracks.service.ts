@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { tracks, trackProblems, problems, superGroups, and, asc, desc, eq, inArray, isNull, sql } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -21,7 +21,7 @@ export interface ListExercisesOptions {
 /** Tracks are the per-SuperGroup curriculum phases (spec §10, §6.2). */
 @Injectable()
 export class TracksService {
-  constructor(private readonly db: DatabaseProvider, private readonly audit: AuditService) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService) {}
 
   async create(input: CreateTrackInput, actor: { id: string; name: string; role: string }) {
     const sg = await this.db.db

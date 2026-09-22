@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
 import { z } from 'zod';
@@ -12,7 +12,7 @@ const commentDto = z.object({ body: z.string().min(1).max(2000) });
 @Controller('posts')
 @UseGuards(AuthGuard)
 export class ForumController {
-  constructor(private readonly forum: ForumService) {}
+  constructor(@Inject(ForumService) private readonly forum: ForumService) {}
 
   @Get()
   async list(@Query('sort') sort?: string, @CurrentPrincipal() principal?: Principal) {

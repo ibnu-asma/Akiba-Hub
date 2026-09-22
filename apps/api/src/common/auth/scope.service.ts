@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { users, groups, groupHeads, eq } from '@hub/database';
 import { ROLES } from '@hub/shared';
@@ -17,7 +17,7 @@ export interface DataScope {
  */
 @Injectable()
 export class ScopeService {
-  constructor(private readonly db: DatabaseProvider) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider) {}
 
   async forUser(userId: string, role: string): Promise<DataScope> {
     // HoA: platform-wide.

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { desc, eq, funds, sql, stipends, users } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -23,7 +23,7 @@ export interface AssignStipendsInput {
  */
 @Injectable()
 export class FundsService {
-  constructor(private readonly db: DatabaseProvider, private readonly audit: AuditService) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService) {}
 
   async create(input: CreateFundInput, actor: { id: string; name: string; role: string }) {
     const rows = await this.db.db

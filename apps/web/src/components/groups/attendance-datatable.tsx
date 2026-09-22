@@ -154,7 +154,7 @@ export function AttendanceDataTable({
   const filteredAbsent = processedStudents.reduce((sum, s) => sum + s.absent, 0);
   const filteredExcused = processedStudents.reduce((sum, s) => sum + s.excused, 0);
   const filteredTotal = filteredPresent + filteredAbsent + filteredExcused;
-  const filteredPresentPct = filteredTotal ? Math.round((filteredPresent / filteredTotal) * 100) : 0;
+  const filteredPresentPct = filteredTotal ? Math.round((filteredPresent / filteredTotal) * 100) : 100;
 
   return (
     <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs space-y-4">

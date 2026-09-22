@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import {
   attendanceRecords,
@@ -27,7 +27,7 @@ type SQLFragment = ReturnType<typeof sql>;
  */
 @Injectable()
 export class SummaryService {
-  constructor(private readonly db: DatabaseProvider) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider) {}
 
   /** `users.groupId IN scope.groupIds`, or true when global (HoA). */
   private scoped(scope: DataScope): SQLFragment {
@@ -77,7 +77,7 @@ export class SummaryService {
           excused,
           late,
           total,
-          presentPct: total ? Math.round((present / total) * 100) : 0,
+          presentPct: total ? Math.round((present / total) * 100) : 100,
         };
       })
       .sort((a, b) => b.presentPct - a.presentPct || a.name.localeCompare(b.name));

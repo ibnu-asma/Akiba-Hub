@@ -9,8 +9,7 @@ import { AuthSession } from './auth.dto.js';
 /** Login / invite-registration use-cases (application layer). */
 @Injectable()
 export class AuthService {
-  constructor(
-    @Inject(AuthRepository) private readonly repo: AuthRepository,
+  constructor(@Inject(AuthRepository) private readonly repo: AuthRepository,
     @Inject(JwtService) private readonly jwt: JwtService
   ) {}
 

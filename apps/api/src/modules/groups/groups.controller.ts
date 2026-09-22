@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -28,7 +28,7 @@ const updateDto = z.object({
 @Controller('groups')
 @UseGuards(AuthGuard)
 export class GroupsController {
-  constructor(private readonly groups: GroupsService) {}
+  constructor(@Inject(GroupsService) private readonly groups: GroupsService) {}
 
   @Get()
   async list() {

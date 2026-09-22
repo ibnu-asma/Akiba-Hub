@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Param, Query, UseGuards, Patch, Delete } from '@nestjs/common';
+import { Inject, Body, Controller, Get, Post, Param, Query, UseGuards, Patch, Delete } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -23,7 +23,7 @@ const attachDto = z.object({
 @Controller('contests')
 @UseGuards(AuthGuard)
 export class ContestsController {
-  constructor(private readonly contests: ContestsService) {}
+  constructor(@Inject(ContestsService) private readonly contests: ContestsService) {}
 
   /** Contest feed — every role sees the cards + "Standing" badge (spec §6.8). */
   @Get()

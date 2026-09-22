@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { dailyProblems, desc, eq, problems } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -13,7 +13,7 @@ export interface CreateDailyProblemInput {
 /** Daily problems — the 24-hour challenge queue (spec §6.5 / §7.7). */
 @Injectable()
 export class DailyProblemsService {
-  constructor(private readonly db: DatabaseProvider, private readonly audit: AuditService) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider, @Inject(AuditService) private readonly audit: AuditService) {}
 
   async create(input: CreateDailyProblemInput, actor: { id: string; name: string; role: string }) {
     try {

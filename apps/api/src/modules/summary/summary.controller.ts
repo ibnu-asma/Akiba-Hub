@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Inject, Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -9,10 +9,7 @@ import { SummaryService } from './summary.service.js';
 @Controller('summary')
 @UseGuards(AuthGuard, new MockRulesGuard(2))
 export class SummaryController {
-  constructor(
-    private readonly summary: SummaryService,
-    private readonly scopes: ScopeService,
-  ) {}
+  constructor(@Inject(SummaryService) private readonly summary: SummaryService, @Inject(ScopeService) private readonly scopes: ScopeService, ) {}
 
   private async scope(principal: Principal) {
     return this.scopes.forUser(principal.id, principal.role);

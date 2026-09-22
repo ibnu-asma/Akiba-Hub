@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Inject, Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -13,7 +13,7 @@ const listDto = z.object({
 @Controller('activities')
 @UseGuards(AuthGuard, new MockRulesGuard(3))
 export class ActivitiesController {
-  constructor(private readonly audit: AuditService) {}
+  constructor(@Inject(AuditService) private readonly audit: AuditService) {}
 
   @Get()
   async list(@Query() query: Record<string, unknown>) {

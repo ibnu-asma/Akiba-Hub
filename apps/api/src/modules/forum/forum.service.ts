@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { and, comments, eq, inArray, posts, postVotes, sql, users } from '@hub/database';
 import { DomainError } from '@hub/shared';
@@ -14,7 +14,7 @@ export interface CreatePostInput {
  */
 @Injectable()
 export class ForumService {
-  constructor(private readonly db: DatabaseProvider) {}
+  constructor(@Inject(DatabaseProvider) private readonly db: DatabaseProvider) {}
 
   async list(sort = 'latest', limit = 100, actorId?: string) {
     const orderClause =

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -14,7 +14,7 @@ const createDto = z.object({
 @Controller('daily-problems')
 @UseGuards(AuthGuard)
 export class DailyProblemsController {
-  constructor(private readonly dailyProblems: DailyProblemsService) {}
+  constructor(@Inject(DailyProblemsService) private readonly dailyProblems: DailyProblemsService) {}
 
   /** Daily problem feed — every role (students see the challenge card, spec §6.5). */
   @Get()
