@@ -242,6 +242,7 @@ export interface SubmissionDto {
   avatarUrl: string | null;
   problemId: string;
   problemName: string | null;
+  problemLink?: string | null;
   language: string;
   timeSpentMin: number;
   tries: number;

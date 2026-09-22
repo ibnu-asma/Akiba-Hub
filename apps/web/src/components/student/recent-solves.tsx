@@ -108,7 +108,7 @@ export function RecentSolvesList({ submissions }: { submissions: SubmissionDto[]
               {/* Left: Avatar + Details */}
               <div className="flex items-center gap-3.5 min-w-0 flex-1">
                 {/* Avatar with gradient fallback */}
-                <div className="relative shrink-0">
+                <Link href={`/profile?userId=${s.userId}`} className="relative shrink-0 block hover:opacity-80 transition-opacity">
                   <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-slate-200/80 bg-gradient-to-tr from-a2sv-600 to-indigo-600 text-xs font-bold text-white shadow-2xs">
                     {s.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -121,13 +121,15 @@ export function RecentSolvesList({ submissions }: { submissions: SubmissionDto[]
                     className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500"
                     title="Verified solver"
                   />
-                </div>
+                </Link>
 
                 {/* Problem title + tags + meta */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Link
-                      href={`/problems/${s.problemId}`}
+                      href={s.problemLink ?? `/problems/${s.problemId}`}
+                      target={s.problemLink ? '_blank' : undefined}
+                      rel={s.problemLink ? 'noopener noreferrer' : undefined}
                       className="font-bold text-sm text-slate-900 hover:text-a2sv-600 transition truncate max-w-md"
                       title={s.problemName ?? 'Problem'}
                     >
@@ -153,7 +155,10 @@ export function RecentSolvesList({ submissions }: { submissions: SubmissionDto[]
                   {/* Solver name & stats */}
                   <div className="mt-1 flex items-center gap-2.5 text-xs text-slate-500 flex-wrap">
                     <span>
-                      solved by <span className="font-semibold text-slate-700">{solverName}</span>
+                      solved by{' '}
+                      <Link href={`/profile?userId=${s.userId}`} className="font-semibold text-slate-700 hover:text-a2sv-600 transition">
+                        {solverName}
+                      </Link>
                     </span>
 
                     {s.timeSpentMin > 0 && (

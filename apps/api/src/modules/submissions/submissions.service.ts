@@ -50,6 +50,7 @@ export class SubmissionsService {
         avatarUrl: users.avatarUrl,
         problemId: submissions.problemId,
         problemName: problems.name,
+        problemLink: problems.link,
         language: submissions.language,
         timeSpentMin: submissions.timeSpentMin,
         tries: submissions.tries,
