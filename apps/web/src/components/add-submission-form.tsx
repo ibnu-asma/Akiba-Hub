@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { OutlinedInput, OutlinedSelect } from '@/components/form/field';
 
@@ -10,17 +10,41 @@ const LANGUAGES = [
   'Kotlin', 'Rust',
 ].map((lang) => ({ value: lang, label: lang }));
 
+import { type SubmissionDto } from '@/lib/api';
+
 /** Add Submission — time, tries, language, and an Edit/Preview code editor (SPEC §6.4). */
-export function AddSubmissionForm({ problemId }: { problemId: string }) {
+export function AddSubmissionForm({ problemId, previousSubmission }: { problemId: string; previousSubmission?: SubmissionDto }) {
   const router = useRouter();
-  const [timeSpentMin, setTimeSpentMin] = useState('');
-  const [tries, setTries] = useState('1');
-  const [language, setLanguage] = useState('');
-  const [code, setCode] = useState('');
+  const [timeSpentMin, setTimeSpentMin] = useState(previousSubmission?.timeSpentMin?.toString() ?? '');
+  const [tries, setTries] = useState(previousSubmission?.tries?.toString() ?? '1');
+  const [language, setLanguage] = useState(previousSubmission?.language ?? '');
+  const [code, setCode] = useState(previousSubmission?.code ?? '');
   const [tab, setTab] = useState<'edit' | 'preview'>('edit');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(`draft-submission-${problemId}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.timeSpentMin) setTimeSpentMin(parsed.timeSpentMin);
+        if (parsed.tries) setTries(parsed.tries);
+        if (parsed.language) setLanguage(parsed.language);
+        if (parsed.code) setCode(parsed.code);
+      } catch {}
+    }
+  }, [problemId]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem(`draft-submission-${problemId}`, JSON.stringify({
+        timeSpentMin, tries, language, code
+      }));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [timeSpentMin, tries, language, code, problemId]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -53,6 +77,7 @@ export function AddSubmissionForm({ problemId }: { problemId: string }) {
         setError(payload?.error?.message ?? 'Could not save the submission.');
         return;
       }
+      localStorage.removeItem(`draft-submission-${problemId}`);
       router.push('/problems');
       router.refresh();
     } catch {
@@ -63,8 +88,21 @@ export function AddSubmissionForm({ problemId }: { problemId: string }) {
   }
 
   return (
-    <form onSubmit={submit} className="card space-y-4 p-6">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={submit} className="card space-y-5 p-6 sm:p-8 bg-white rounded-2xl shadow-sm border border-slate-200/60">
+      {previousSubmission && (
+        <div className="rounded-xl bg-blue-50/50 p-3.5 border border-blue-100/50 flex items-start gap-3">
+          <div className="mt-0.5 grid place-items-center h-5 w-5 rounded-full bg-blue-100 text-blue-600">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-sm text-blue-800">
+            <strong>We loaded your last submission.</strong> You can review or update your code and time spent.
+          </p>
+        </div>
+      )}
+
+      <div className="grid gap-5 sm:grid-cols-2">
         <OutlinedInput
           label="Time spent (minutes)"
           type="number"
@@ -113,11 +151,12 @@ export function AddSubmissionForm({ problemId }: { problemId: string }) {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="// Paste your solution…"
-            rows={10}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 font-mono text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100"
+            rows={12}
+            className="w-full rounded-xl border border-slate-300 bg-slate-900 px-4 py-4 font-mono text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-500/20"
+            spellCheck={false}
           />
         ) : (
-          <pre className="max-h-80 overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-3.5 font-mono text-sm text-slate-800">
+          <pre className="max-h-[500px] overflow-auto rounded-xl border border-slate-700 bg-slate-900 p-4 font-mono text-sm text-slate-100 shadow-inner">
             {code
               .split('\n')
               .map((line, i) => `${String(i + 1).padStart(2, ' ')} | ${line}`)

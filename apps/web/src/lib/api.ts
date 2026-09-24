@@ -244,6 +244,7 @@ export interface SubmissionDto {
   problemName: string | null;
   problemLink?: string | null;
   language: string;
+  code?: string | null;
   timeSpentMin: number;
   tries: number;
   source: string;
