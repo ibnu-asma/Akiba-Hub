@@ -153,7 +153,7 @@ export class SessionsService {
       .execute();
 
     const students = await this.db.db
-      .select({ id: users.id, name: users.name })
+      .select({ id: users.id, name: users.name, avatarUrl: users.avatarUrl })
       .from(users)
       .where(and(eq(users.groupId, groupId), eq(users.role, 'student'), eq(users.isRemoved, false)))
       .orderBy(asc(users.name))
@@ -169,6 +169,7 @@ export class SessionsService {
       students: students.map((st) => ({
         userId: st.id,
         name: st.name,
+        avatarUrl: st.avatarUrl,
         cells: Object.fromEntries(records.filter((r) => r.userId === st.id).map((r) => [r.sessionId, r.status])),
       })),
     };

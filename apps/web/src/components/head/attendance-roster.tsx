@@ -17,7 +17,7 @@ interface RosterRow {
 
 interface AttendanceGrid {
   sessions: { id: string; name: string; date: string }[];
-  students: { userId: string; name: string; cells: Record<string, string> }[];
+  students: { userId: string; name: string; avatarUrl?: string | null; cells: Record<string, string> }[];
 }
 
 const GRID_COLOR: Record<string, string> = {
@@ -392,7 +392,12 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
                   <tbody className="divide-y divide-slate-100 bg-white">
                     {grid.students.map((st) => (
                       <tr key={st.userId} className="hover:bg-slate-50/50 transition">
-                        <td className="px-6 py-3 font-semibold text-slate-800 whitespace-nowrap">{st.name}</td>
+                        <td className="px-6 py-3 whitespace-nowrap">
+                          <Link href={`/profile?userId=${st.userId}`} className="flex items-center gap-3 group/link">
+                            <Avatar name={st.name} url={st.avatarUrl} />
+                            <span className="text-sm font-bold text-slate-800 group-hover/link:text-a2sv-600 transition">{st.name}</span>
+                          </Link>
+                        </td>
                         {grid.sessions.map((s) => {
                           const status = st.cells[s.id];
                           return (
