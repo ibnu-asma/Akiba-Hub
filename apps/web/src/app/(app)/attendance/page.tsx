@@ -15,12 +15,6 @@ export default async function AttendancePage() {
   ]);
 
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Take Attendance</h1>
-        <p className="mt-1 text-sm text-slate-500">Pick a session and group, then mark each participant Present, Excused, Late or Absent.</p>
-      </header>
-      <AttendanceRoster sessions={sessions ?? []} groups={groups ?? []} />
-    </div>
+    <AttendanceRoster sessions={sessions ?? []} groups={groups ?? []} me={me} />
   );
 }
