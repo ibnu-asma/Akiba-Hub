@@ -186,7 +186,7 @@ export default async function DashboardPage() {
         
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <QuickLink href="/attendance" icon="calendar" label="Take attendance" sub="Mark today's roster" />
-          <QuickLink href="/sessions/new" icon="plus" label="Add session" sub="Schedule a class or event" />
+          <QuickLink href="/sessions" icon="calendar" label="Sessions" sub="Manage lectures and events" />
           <QuickLink href="/daily-problem" icon="list" label="Daily problem" sub="Manage the challenge queue" />
           <QuickLink href="/summary" icon="chart" label="Summary" sub="Attendance · consistency · more" />
         </div>
