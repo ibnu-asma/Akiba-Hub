@@ -7,7 +7,25 @@ import { GroupCard } from './group-card';
 import type { Group, SuperGroup, Me, UserSummaryDto } from '@/lib/api';
 import { ROLE_LEVEL, type Role } from '@hub/shared';
 
+
+function initials(name: string): string {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join('');
+}
+
+function Avatar({ name, url, size = 'h-8 w-8 text-xs' }: { name: string; url?: string | null; size?: string }) {
+  if (url) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={url} alt={name} className={`${size} shrink-0 rounded-full object-cover border border-white shadow-xs`} />;
+  }
+  return (
+    <span className={`${size} grid shrink-0 place-items-center rounded-full bg-emerald-100 font-bold text-emerald-800 border border-white shadow-xs`}>
+      {initials(name)}
+    </span>
+  );
+}
+
 const ALL = '__all__';
+
 
 export function GroupsCatalog({
   groups,
@@ -26,9 +44,16 @@ export function GroupsCatalog({
   const [superGroupId, setSuperGroupId] = useState(ALL);
   const [country, setCountry] = useState(ALL);
   
+
   const [page, setPage] = useState(0);
   const [usersPage, setUsersPage] = useState(0);
   const pageSize = 12;
+
+  const [userGroupFilter, setUserGroupFilter] = useState(ALL);
+  const [userRoleFilter, setUserRoleFilter] = useState(ALL);
+  const [userCountryFilter, setUserCountryFilter] = useState(ALL);
+  const [userUnivFilter, setUserUnivFilter] = useState(ALL);
+
 
   const isHead = (ROLE_LEVEL[me.role as Role] ?? 1) >= 2;
   const isHoA = (ROLE_LEVEL[me.role as Role] ?? 1) >= 3;
@@ -60,16 +85,43 @@ export function GroupsCatalog({
   }, [filteredGroups, page]);
 
   // Apply filters to Users
+
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     const query = q.trim().toLowerCase();
     return users.filter(u => {
       if (query) {
-        return u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query);
+        if (!u.name.toLowerCase().includes(query) && !u.email.toLowerCase().includes(query)) return false;
       }
+      if (userGroupFilter !== ALL && u.groupId !== userGroupFilter) return false;
+      if (userRoleFilter !== ALL && u.role !== userRoleFilter) return false;
+      if (userCountryFilter !== ALL && (u.country ?? '') !== userCountryFilter) return false;
+      if (userUnivFilter !== ALL && (u.university ?? '') !== userUnivFilter) return false;
       return true;
     }).sort((a, b) => a.name.localeCompare(b.name));
-  }, [users, q]);
+  }, [users, q, userGroupFilter, userRoleFilter, userCountryFilter, userUnivFilter]);
+
+  const userGroups = useMemo(() => {
+    if (!users) return [];
+    const ids = new Set(users.map(u => u.groupId).filter(Boolean) as string[]);
+    return groups.filter(g => ids.has(g.id)).sort((a,b) => a.name.localeCompare(b.name));
+  }, [users, groups]);
+  
+  const userCountries = useMemo(() => {
+    if (!users) return [];
+    return Array.from(new Set(users.map(u => u.country).filter(Boolean) as string[])).sort();
+  }, [users]);
+  
+  const userUnivs = useMemo(() => {
+    if (!users) return [];
+    return Array.from(new Set(users.map(u => u.university).filter(Boolean) as string[])).sort();
+  }, [users]);
+  
+  const userRoles = useMemo(() => {
+    if (!users) return [];
+    return Array.from(new Set(users.map(u => u.role))).sort();
+  }, [users]);
+
 
   const pagedUsers = useMemo(() => {
     const start = usersPage * pageSize;
@@ -208,13 +260,13 @@ export function GroupsCatalog({
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <table className="min-w-full divide-y divide-slate-200">
+<table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Student Name</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Group</th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Profile</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-200">
@@ -230,27 +282,23 @@ export function GroupsCatalog({
                   return (
                     <tr key={u.id} className="hover:bg-slate-50 transition">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs shrink-0">
-                            {u.name.substring(0, 2).toUpperCase()}
-                          </div>
-                          <span className="text-sm font-medium text-slate-900">{u.name}</span>
-                        </div>
+                        <Link href={`/profile?userId=${u.id}`} className="flex items-center gap-3 group/link">
+                          <Avatar name={u.name} url={u.avatarUrl} size="h-10 w-10 text-sm" />
+                          <span className="text-sm font-medium text-slate-900 group-hover/link:text-a2sv-600 transition">{u.name}</span>
+                        </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{u.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                         {userGroup ? (
-                          <Link href={`/groups/${userGroup.id}`} className="hover:text-a2sv-600 hover:underline">
+                          <Link href={`/groups/${userGroup.id}`} className="hover:text-a2sv-600 hover:underline inline-flex items-center gap-1">
                             {userGroup.name}
                           </Link>
                         ) : (
                           <span className="text-slate-300">Unassigned</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Link href={`/profile?userId=${u.id}`} className="text-a2sv-600 hover:text-a2sv-700">
-                          View Profile &rarr;
-                        </Link>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 capitalize">
+                        {u.role.replace(/_/g, ' ')}
                       </td>
                     </tr>
                   );
@@ -261,8 +309,10 @@ export function GroupsCatalog({
           
           {totalUsersPages > 1 && (
             <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-between items-center">
-              <span className="text-sm text-slate-500">Showing {usersPage * pageSize + 1} to {Math.min((usersPage + 1) * pageSize, filteredUsers.length)} of {filteredUsers.length} users</span>
-              <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-500">
+                Showing {usersPage * pageSize + 1} to {Math.min((usersPage + 1) * pageSize, filteredUsers.length)} of {filteredUsers.length} users
+              </span>
+              <div className="flex items-center gap-1">
                 <button
                   disabled={usersPage === 0}
                   onClick={() => setUsersPage(usersPage - 1)}
@@ -270,6 +320,27 @@ export function GroupsCatalog({
                 >
                   Prev
                 </button>
+                
+                <div className="hidden sm:flex items-center px-1">
+                  {Array.from({ length: totalUsersPages }).map((_, i) => {
+                    if (i === 0 || i === totalUsersPages - 1 || Math.abs(i - usersPage) <= 1) {
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setUsersPage(i)}
+                          className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition ${i === usersPage ? 'bg-a2sv-500 text-white' : 'text-slate-600 hover:bg-slate-200'}`}
+                        >
+                          {i + 1}
+                        </button>
+                      );
+                    }
+                    if (Math.abs(i - usersPage) === 2) {
+                      return <span key={i} className="text-slate-400 px-1">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
                 <button
                   disabled={usersPage >= totalUsersPages - 1}
                   onClick={() => setUsersPage(usersPage + 1)}
