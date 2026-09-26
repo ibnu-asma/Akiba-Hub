@@ -348,6 +348,7 @@ export function ProblemsBoard({
               myId={myId}
               isBookmarked={bookmarkedIds.has(problem.id)}
               onToggleBookmark={toggleBookmark}
+              isHead={isHead}
             />
           ))}
         </div>
