@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
-import { roadmaps, roadmapSections, roadmapItems, roadmapProgress } from '@hub/database';
-import { eq, asc, and, inArray } from 'drizzle-orm';
+import { roadmaps, roadmapSections, roadmapItems, roadmapProgress, eq, asc, and, inArray } from '@hub/database';
+
 import { DomainError, ERROR_CODES } from '@hub/shared';
 
 @Injectable()
