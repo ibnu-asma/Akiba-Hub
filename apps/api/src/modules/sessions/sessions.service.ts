@@ -84,7 +84,7 @@ export class SessionsService {
   /** Roster per session with current attendance statuses (spec §7.4). */
   async getAttendance(sessionId: string, groupId: string) {
     const roster = await this.db.db
-      .select({ userId: users.id, name: users.name })
+      .select({ userId: users.id, name: users.name, avatarUrl: users.avatarUrl })
       .from(users)
       .where(and(eq(users.groupId, groupId), eq(users.isRemoved, false), eq(users.role, ROLES.student)))
       .execute();
@@ -98,6 +98,7 @@ export class SessionsService {
     return roster.map((u) => ({
       userId: u.userId,
       name: u.name,
+      avatarUrl: u.avatarUrl,
       status: (byUser[u.userId]?.status as Status | undefined) ?? 'pending',
       checkInAt: byUser[u.userId]?.checkInAt ?? null,
       checkOutAt: byUser[u.userId]?.checkOutAt ?? null,

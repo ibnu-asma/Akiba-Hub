@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { Icon } from '@/components/icon';
+import Link from 'next/link';
 import type { Group, SessionDto, Me } from '@/lib/api';
 import { ROLE_LEVEL, type Role } from '@hub/shared';
 
@@ -298,10 +299,10 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
                         return (
                           <tr key={row.userId} className="hover:bg-slate-50/50 transition">
                             <td className="px-6 py-3 whitespace-nowrap">
-                              <div className="flex items-center gap-3">
+                              <Link href={`/profile?userId=${row.userId}`} className="flex items-center gap-3 group/link">
                                 <Avatar name={row.name} url={row.avatarUrl} />
-                                <span className="text-sm font-bold text-slate-800">{row.name}</span>
-                              </div>
+                                <span className="text-sm font-bold text-slate-800 group-hover/link:text-a2sv-600 transition">{row.name}</span>
+                              </Link>
                             </td>
                             <td className="px-6 py-3 whitespace-nowrap text-sm text-slate-500">
                               {(row.status === 'present' || row.status === 'late') && row.checkInAt ? (
