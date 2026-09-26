@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { TRACK_PHASE_LABELS, type TrackPhase } from '@hub/shared';
 import { OutlinedInput, OutlinedSelect } from '@/components/form/field';
-import { ExerciseFormModal } from '@/components/head/exercise-form-modal';
 import { Modal } from '@/components/modal';
 import type { ExerciseDto, ProblemDto, SuperGroup, TrackDto } from '@/lib/api';
+import { Icon } from '@/components/icon';
 
 const PAGE_SIZE = 10;
 const ALL = '__all__';
@@ -27,7 +27,6 @@ export function ExercisesManager({
   initialTotal,
   superGroups,
   tracks,
-  problems,
 }: {
   initial: ExerciseDto[];
   initialTotal: number;
@@ -43,24 +42,24 @@ export function ExercisesManager({
   const [superGroupId, setSuperGroupId] = useState(ALL);
   const [trackId, setTrackId] = useState(ALL);
 
-  const [addOpen, setAddOpen] = useState(false);
-  const [reassigning, setReassigning] = useState<ExerciseDto | null>(null);
-  const [reassignTarget, setReassignTarget] = useState('');
   const [error, setError] = useState<string | null>(null);
-
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const [reassigning, setReassigning] = useState<ExerciseDto | null>(null);
+  const [reassignTarget, setReassignTarget] = useState<string>('');
 
   const trackOptions = superGroupId === ALL ? tracks : tracks.filter((t) => t.superGroupId === superGroupId);
 
   const reload = useCallback(
-    async (targetPage = 1, search = q, sg = superGroupId, tk = trackId) => {
-      const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String((targetPage - 1) * PAGE_SIZE) });
-      if (search.trim()) params.set('q', search.trim());
-      if (sg !== ALL) params.set('superGroupId', sg);
-      if (tk !== ALL) params.set('trackId', tk);
-      const res = await fetch(`/api/admin/tracks/exercises?${params.toString()}`);
-      const data = (await res.json().catch(() => null)) as ListResponse | null;
-      if (res.ok && data) {
+    async (p: number) => {
+      const qs = new URLSearchParams();
+      qs.set('offset', String((p - 1) * PAGE_SIZE));
+      qs.set('limit', String(PAGE_SIZE));
+      if (q) qs.set('q', q);
+      if (superGroupId !== ALL) qs.set('superGroupId', superGroupId);
+      if (trackId !== ALL) qs.set('trackId', trackId);
+
+      const res = await fetch(`/api/admin/tracks/exercises?${qs.toString()}`);
+      if (res.ok) {
+        const data = (await res.json()) as ListResponse;
         setRows(data.rows);
         setTotal(data.total);
       }
@@ -83,6 +82,8 @@ export function ExercisesManager({
     setPage(num);
     void reload(num);
   }
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   async function removeExercise(row: ExerciseDto) {
     if (!window.confirm(`Remove "${row.problemName}" from ${row.trackName}?`)) return;
@@ -134,103 +135,112 @@ export function ExercisesManager({
           />
         </div>
         <div className="ml-auto">
-          <button type="button" className="btn-primary" onClick={() => setAddOpen(true)}>
-            + Add exercise
-          </button>
+          <a href="/exercises/new" className="btn-primary py-2 px-4 flex items-center gap-2">
+            <Icon name="plus" className="h-4 w-4" /> Add exercises
+          </a>
         </div>
       </div>
 
       {error && <p className="field-error">{error}</p>}
 
-      {rows.length === 0 ? (
-        <section className="card p-10 text-center">
-          <p className="text-3xl">💻</p>
-          <p className="mt-2 text-sm text-slate-500">No exercises found.</p>
-        </section>
-      ) : (
-        <div className="card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-400">
+      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-600">
+            <thead className="bg-slate-50 border-b border-slate-200/80 text-xs font-bold uppercase tracking-wider text-slate-500">
               <tr>
-                <th className="px-4 py-3">Problem</th>
-                <th className="px-4 py-3">Difficulty</th>
-                <th className="px-4 py-3">Platform</th>
-                <th className="px-4 py-3">Track</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-6 py-4">Problem</th>
+                <th className="px-6 py-4">Platform</th>
+                <th className="px-6 py-4">Track</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {rows.map((e) => (
-                <tr key={e.id} className="transition hover:bg-slate-50">
-                  <td className="max-w-[260px] px-4 py-3">
-                    <p className="truncate font-medium text-slate-800">{e.problemName}</p>
-                    {e.tags.length > 0 && (
-                      <div className="mt-1 flex flex-wrap gap-1">
-                        {e.tags.slice(0, 3).map((t) => (
-                          <span key={t} className="chip bg-slate-100 text-slate-600">
-                            {t}
-                          </span>
-                        ))}
+            <tbody className="divide-y divide-slate-100/80">
+              {rows.map((row) => (
+                <tr key={`${row.trackId}-${row.problemId}`} className="hover:bg-slate-50/50 transition group">
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-3">
+                        <span className={`inline-flex items-center justify-center rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-2xs ${DIFF_BADGE[row.difficulty] ?? DIFF_BADGE.medium}`}>
+                          {row.difficulty}
+                        </span>
+                        <a href={row.link} target="_blank" rel="noreferrer" className="font-bold text-slate-900 hover:text-a2sv-600 transition">
+                          {row.problemName}
+                        </a>
                       </div>
-                    )}
+                      {row.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {row.tags.slice(0, 3).map((t) => (
+                            <span key={t} className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold text-slate-500 uppercase tracking-wider">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`chip capitalize ${DIFF_BADGE[e.difficulty] ?? 'bg-slate-100 text-slate-600'}`}>{e.difficulty}</span>
+                  <td className="px-6 py-4 whitespace-nowrap capitalize text-slate-600 font-medium">
+                    {row.platform}
                   </td>
-                  <td className="px-4 py-3 capitalize text-slate-600">{e.platform}</td>
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-slate-700">{e.trackName}</p>
-                    <p className="text-xs text-slate-400">
-                      {e.superGroupName} · {TRACK_PHASE_LABELS[e.phase as TrackPhase] ?? e.phase}
-                    </p>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-xs font-semibold text-slate-500">
+                      {row.superGroupName} · <span className="text-slate-800">{TRACK_PHASE_LABELS[row.phase as TrackPhase] ?? row.phase}</span>
+                    </div>
+                    <div className="mt-0.5 text-xs text-slate-400 truncate max-w-[200px]">{row.trackName}</div>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right">
-                    {e.link && (
-                      <a href={e.link} target="_blank" rel="noreferrer" className="mr-3 text-xs font-semibold text-a2sv-600 hover:underline">
-                        Open ↗
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      className="mr-3 text-xs font-semibold text-slate-500 hover:text-slate-700"
-                      onClick={() => setReassigning(e)}
-                    >
-                      Reassign
-                    </button>
-                    <button type="button" className="text-xs font-semibold text-red-500 hover:underline" onClick={() => void removeExercise(e)}>
-                      Remove
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition">
+                      {row.link && (
+                        <a href={row.link} target="_blank" rel="noreferrer" className="p-1.5 rounded-lg text-slate-400 hover:text-a2sv-600 hover:bg-a2sv-50 transition" aria-label="Open Link">
+                          <Icon name="externalLink" className="h-4 w-4" />
+                        </a>
+                      )}
+                      <button
+                        onClick={() => {
+                          setReassigning(row);
+                          setReassignTarget(row.trackId);
+                        }}
+                        className="text-xs font-bold text-slate-400 hover:text-a2sv-600 transition"
+                      >
+                        Reassign &rarr;
+                      </button>
+                      <button
+                        onClick={() => void removeExercise(row)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+                        aria-label="Remove exercise"
+                      >
+                        <Icon name="x" className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
+              
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                    <Icon name="code" className="mx-auto h-8 w-8 text-slate-300 mb-3" />
+                    <h3 className="text-sm font-bold text-slate-900">No exercises found</h3>
+                    <p className="mt-1 text-xs">Assign problems to tracks to see them here.</p>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-      )}
-{totalPages > 1 && (
+      </div>
+
+      {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <button type="button" className="btn-ghost" disabled={page <= 1} onClick={() => go(page - 1)}>
-            ← Prev
+          <button type="button" className="btn-ghost px-3 py-1 text-sm font-semibold text-slate-500 hover:text-slate-700" disabled={page <= 1} onClick={() => go(page - 1)}>
+            &larr; Prev
           </button>
-          <span className="text-sm text-slate-500">
-            Page {page} of {totalPages} · {total} total
+          <span className="text-sm font-medium text-slate-500">
+            Page {page} of {totalPages} <span className="mx-1">·</span> {total} total
           </span>
-          <button type="button" className="btn-ghost" disabled={page >= totalPages} onClick={() => go(page + 1)}>
-            Next →
+          <button type="button" className="btn-ghost px-3 py-1 text-sm font-semibold text-slate-500 hover:text-slate-700" disabled={page >= totalPages} onClick={() => go(page + 1)}>
+            Next &rarr;
           </button>
         </div>
-      )}
-
-      {addOpen && (
-        <ExerciseFormModal
-          tracks={tracks}
-          problems={problems}
-          onClose={() => setAddOpen(false)}
-          onSaved={() => {
-            setAddOpen(false);
-            void reload(1);
-          }}
-        />
       )}
 
       {reassigning && (
@@ -252,11 +262,11 @@ export function ExercisesManager({
                   label: `${t.superGroupName} · ${TRACK_PHASE_LABELS[t.phase as TrackPhase] ?? t.phase} — ${t.name}`,
                 }))}
             />
-            <div className="flex justify-end gap-3">
-              <button type="button" className="btn-ghost" onClick={() => setReassigning(null)}>
+            <div className="flex justify-end gap-3 pt-2">
+              <button type="button" className="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg transition" onClick={() => setReassigning(null)}>
                 Cancel
               </button>
-              <button type="button" className="btn-primary" disabled={!reassignTarget} onClick={() => void doReassign()}>
+              <button type="button" className="btn-primary py-2 px-6 shadow-sm disabled:opacity-50" disabled={!reassignTarget} onClick={() => void doReassign()}>
                 Move
               </button>
             </div>
