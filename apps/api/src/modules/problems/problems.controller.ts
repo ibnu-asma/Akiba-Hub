@@ -29,6 +29,13 @@ export class ProblemsController {
 
   /** Library read — every role sees the problem cards (spec §6.3). */
   @Get()
+  /** Library read — single problem (spec §6.3). */
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.problems.findOne(id);
+  }
+
+  @Get()
   async list(@Query() query: Record<string, unknown>) {
     const { q, difficulty, tag, limit, offset } = listDto.parse(query);
     return this.problems.list({ q, difficulty, tag, limit, offset });

@@ -106,4 +106,11 @@ export class ProblemsService {
       description: `deleted the problem '${rows[0].name}'`,
     });
   }
+
+  async findOne(id: string) {
+    const row = await this.db.db.select().from(problems).where(and(eq(problems.id, id), isNull(problems.deletedAt))).execute();
+    if (!row.length) throw DomainError.notFound('Problem not found');
+    return row[0];
+  }
+
 }
