@@ -10,11 +10,13 @@ export function DailyProblemCard({
   solved,
   solvedByTeammates,
   teammateCount,
+  isHead,
 }: {
   daily: DailyProblemDto | null;
   solved: boolean;
   solvedByTeammates?: number;
   teammateCount?: number;
+  isHead?: boolean;
 }) {
   if (!daily) {
     return (
@@ -33,10 +35,16 @@ export function DailyProblemCard({
         <span className="chip bg-a2sv-500 text-white">Daily problem</span>
         <span className="chip bg-white/70 text-slate-500 capitalize">{daily.platform}</span>
         <span className="chip bg-white/70 text-slate-500 capitalize">{daily.difficulty}</span>
-        {solved && (
+        {solved && !isHead && (
           <span className="chip bg-white/80 text-a2sv-700">
             <Icon name="check" className="mr-1 h-3.5 w-3.5" />
             Solved it
+          </span>
+        )}
+        {isHead && solvedByTeammates !== undefined && (
+          <span className="chip bg-white/80 text-a2sv-700">
+            <Icon name="users" className="mr-1 h-3.5 w-3.5" />
+            {solvedByTeammates} / {teammateCount} students solved this today
           </span>
         )}
       </div>
@@ -109,7 +117,7 @@ export function TeamCompletionCard({
   const avgPct = rows.length ? Math.round(rows.reduce((a, r) => a + r.pct, 0) / rows.length) : 0;
   const solvedAvg = rows.length ? Math.round(rows.reduce((a, r) => a + r.solved, 0) / rows.length) : 0;
   const state = avgPct >= 80 ? { label: 'Good', color: 'bg-a2sv-500' } : avgPct >= 50 ? { label: 'Okay', color: 'bg-amber-400' } : { label: 'Bad', color: 'bg-red-500' };
-  const top = [...rows].sort((a, b) => b.pct - a.pct || a.name.localeCompare(b.name)).slice(0, 5);
+  
 
   return (
     <section className="card p-5">
@@ -152,27 +160,6 @@ export function TeamCompletionCard({
         </div>
       </div>
 
-      {rows.length > 0 && (
-        <div className="mt-4 border-t border-slate-100 pt-3">
-          <ul className="space-y-1.5">
-            {top.map((row) => (
-              <li key={row.userId} className="flex items-center gap-3 text-xs">
-                <span className={`w-28 shrink-0 truncate font-medium ${row.userId === myId ? 'text-a2sv-700' : 'text-slate-600'}`}>
-                  {row.name}
-                  {row.userId === myId && ' (you)'}
-                </span>
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className={`h-1.5 rounded-full ${row.userId === myId ? 'bg-a2sv-500' : 'bg-slate-300'}`}
-                    style={{ width: `${Math.min(100, row.pct)}%` }}
-                  />
-                </div>
-                <span className="w-12 shrink-0 text-right font-semibold text-slate-700">{row.pct}%</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </section>
   );
 }

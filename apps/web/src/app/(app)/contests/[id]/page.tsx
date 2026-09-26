@@ -10,12 +10,13 @@ export default async function ContestDetailPage({ params }: { params: Promise<{ 
   const me = await getMe();
   if (!me) redirect('/login');
 
-  let [contest, problems, solved, solvers, groups] = await Promise.all([
+  let [contest, problems, solved, solvers, groups, users] = await Promise.all([
     safe(hubFetch<ContestDto>(`/contests/${id}`)),
     safe(hubFetch<ContestProblemDto[]>(`/contests/${id}/problems`)),
     mySolvedSet(),
     solverMap(),
     safe(hubFetch<Group[]>('/groups')),
+    ((ROLE_LEVEL[me.role as Role] ?? 1) >= 2) ? safe(hubFetch<any[]>('/users')) : Promise.resolve(null),
   ]);
 
   if (!contest) {
@@ -37,19 +38,26 @@ export default async function ContestDetailPage({ params }: { params: Promise<{ 
     }
   }
 
-  // Resolve teammates from student's group or contest participating groups
-  const myGroup = (groups ?? []).find((g) => g.id === me.groupId);
-  let teammates = myGroup?.students && myGroup.students.length > 0 ? myGroup.students : null;
+  // Resolve teammates
+  const isHead = (ROLE_LEVEL[me.role as Role] ?? 1) >= 2;
+  let teammates: any[] = [];
+  
+  if (isHead && users) {
+    teammates = users.filter((u) => u.role === 'student').map((u) => ({ id: u.id, name: u.name, avatarUrl: u.avatarUrl }));
+  } else {
+    const myGroup = (groups ?? []).find((g) => g.id === me.groupId);
+    teammates = myGroup?.students && myGroup.students.length > 0 ? myGroup.students : [];
 
-  if (!teammates && contest.groupIds && contest.groupIds.length > 0) {
-    const contestGroup = (groups ?? []).find((g) => contest.groupIds.includes(g.id));
-    if (contestGroup?.students && contestGroup.students.length > 0) {
-      teammates = contestGroup.students;
+    if (teammates.length === 0 && contest.groupIds && contest.groupIds.length > 0) {
+      const contestGroup = (groups ?? []).find((g) => contest.groupIds.includes(g.id));
+      if (contestGroup?.students && contestGroup.students.length > 0) {
+        teammates = contestGroup.students;
+      }
     }
-  }
 
-  if (!teammates || teammates.length === 0) {
-    teammates = [{ id: me.id, name: me.name, avatarUrl: me.avatarUrl }];
+    if (teammates.length === 0) {
+      teammates = [{ id: me.id, name: me.name, avatarUrl: me.avatarUrl }];
+    }
   }
 
   return (
@@ -60,6 +68,7 @@ export default async function ContestDetailPage({ params }: { params: Promise<{ 
       solvers={solvers}
       teammates={teammates}
       myId={me.id}
+      isHead={isHead}
     />
   );
 }

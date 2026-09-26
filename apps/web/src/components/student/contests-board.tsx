@@ -14,25 +14,38 @@ export function ContestsBoard({
   solved,
   solvers,
   myId,
+  isHead,
 }: {
   contests: ContestDto[];
   problemsByContest: Map<string, ContestProblemDto[]>;
   solved: Set<string>;
   solvers: Map<string, { userId: string; name: string; avatarUrl: string | null }[]>;
   myId?: string;
+  isHead?: boolean;
 }) {
   const [open, setOpen] = useState<string | null>(contests[0]?.id ?? null);
 
   if (contests.length === 0) {
     return (
       <div className="space-y-6">
-        <header>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Contests</h1>
+        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Contests</h1>
+          </div>
+          {isHead && (
+            <div className="flex items-center gap-2 shrink-0">
+              <Link href="/contests/new" className="btn-primary py-2 px-4 text-sm shadow-sm">
+                + Add Contest
+              </Link>
+            </div>
+          )}
         </header>
         <section className="card p-10 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
           <p className="text-4xl">🏆</p>
-          <h2 className="mt-2 text-base font-bold text-slate-800">No contests for your program yet</h2>
-          <p className="mt-1 text-sm text-slate-500">Your head of education will schedule contests for your group.</p>
+          <h2 className="mt-2 text-base font-bold text-slate-800">No contests {isHead ? 'created' : 'for your program'} yet</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            {isHead ? 'Add a new contest to schedule it for your group.' : 'Your head of education will schedule contests for your group.'}
+          </p>
         </section>
       </div>
     );
@@ -40,11 +53,20 @@ export function ContestsBoard({
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Contests</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          A2SV contests and their questions — solve live, then upsolve after the standing is published.
-        </p>
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Contests</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            A2SV contests and their questions — solve live, then upsolve after the standing is published.
+          </p>
+        </div>
+        {isHead && (
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href="/contests/new" className="btn-primary py-2 px-4 text-sm shadow-sm">
+              + Add Contest
+            </Link>
+          </div>
+        )}
       </header>
 
       <ul className="space-y-3">
@@ -136,6 +158,7 @@ export function ContestsBoard({
                             letter={p.pseudo}
                             solvers={solvers.get(p.problemId) ?? []}
                             myId={myId}
+                            isHead={isHead}
                           />
                         </li>
                       ))}

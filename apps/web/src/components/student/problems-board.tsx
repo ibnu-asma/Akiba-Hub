@@ -37,11 +37,13 @@ export function ProblemsBoard({
   solved,
   solvers,
   myId,
+  isHead,
 }: {
   problems: ProblemDto[];
   solved: Set<string>;
   solvers: Map<string, Solver[]>;
   myId?: string;
+  isHead?: boolean;
 }) {
   // Filter States
   const [q, setQ] = useState('');
@@ -164,28 +166,38 @@ export function ProblemsBoard({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Problems</h1>
           <p className="mt-1 text-sm text-slate-500">
-            The shared problem library — {problems.length} problems, {solvedCount} solved by you. Open the judge link or log your solution.
+            {isHead 
+              ? `The shared problem library — ${problems.length} problems total. Curate the DSA library or browse problems.`
+              : `The shared problem library — ${problems.length} problems, ${solvedCount} solved by you. Open the judge link or log your solution.`}
           </p>
         </div>
 
-        {/* Header Stats */}
-        <div className="flex items-center gap-2">
-          <span className="chip bg-slate-100 text-slate-700 text-xs font-semibold">
-            {problems.length} total
-          </span>
-          <span className="chip bg-emerald-100 text-emerald-800 text-xs font-semibold">
-            {solvedCount} solved
-          </span>
-          {bookmarkedCount > 0 && (
-            <span className="chip bg-amber-100 text-amber-800 text-xs font-semibold">
-              {bookmarkedCount} saved
+        {/* Header Stats / Actions */}
+        {isHead ? (
+          <div className="flex items-center gap-2 shrink-0">
+            <a href="/problems/new" className="btn-primary py-2 px-4 text-sm shadow-sm">
+              + Add Problem
+            </a>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="chip bg-slate-100 text-slate-700 text-xs font-semibold">
+              {problems.length} total
             </span>
-          )}
-        </div>
+            <span className="chip bg-emerald-100 text-emerald-800 text-xs font-semibold">
+              {solvedCount} solved
+            </span>
+            {bookmarkedCount > 0 && (
+              <span className="chip bg-amber-100 text-amber-800 text-xs font-semibold">
+                {bookmarkedCount} saved
+              </span>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Modernized Search & Filtering Toolbar */}

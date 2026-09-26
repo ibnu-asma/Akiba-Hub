@@ -79,6 +79,7 @@ export function TrackDetailBoard({
   myId,
   myName,
   myAvatarUrl,
+  isHead,
 }: {
   track: TrackDto;
   problems: TrackProblem[];
@@ -88,6 +89,7 @@ export function TrackDetailBoard({
   myId: string;
   myName: string;
   myAvatarUrl: string | null;
+  isHead?: boolean;
 }) {
   const [showDetails, setShowDetails] = useState(false);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
@@ -162,7 +164,7 @@ export function TrackDetailBoard({
   return (
     <div className="space-y-6">
       {/* Top Track Header */}
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">{track.name}</h1>
@@ -171,7 +173,20 @@ export function TrackDetailBoard({
             </span>
             {track.superGroupName && <span className="chip bg-slate-100 text-slate-600 text-xs">{track.superGroupName}</span>}
           </div>
+          <p className="mt-1 text-sm text-slate-500 line-clamp-2 max-w-2xl">
+            A curated learning track for your cohort.
+          </p>
         </div>
+        {isHead && (
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href={`/tracks/${track.id}/edit`} className="btn-secondary py-1.5 px-3 text-sm">
+              Edit Track
+            </Link>
+            <Link href={`/tracks/${track.id}/problems/new`} className="btn-primary py-1.5 px-3 text-sm shadow-sm">
+              + Add Problem
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* Main Team Completion Card */}

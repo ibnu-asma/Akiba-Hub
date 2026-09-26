@@ -8,7 +8,8 @@ import { ExercisesBoard } from '@/components/student/exercises-board';
 export default async function StudentExercisesPage() {
   const me = await getMe();
   if (!me) redirect('/login');
-  if ((ROLE_LEVEL[me.role as Role] ?? 1) >= 2) redirect('/exercises/new');
+  
+  const isHead = (ROLE_LEVEL[me.role as Role] ?? 1) >= 2;
 
   const [exercises, solved, solvers] = await Promise.all([
     safe(hubFetch<ExerciseDto[]>('/tracks/exercises')),
@@ -23,6 +24,7 @@ export default async function StudentExercisesPage() {
       solvers={solvers}
       mySuperGroupId={me.superGroupId}
       myId={me.id}
+      isHead={isHead}
     />
   );
 }

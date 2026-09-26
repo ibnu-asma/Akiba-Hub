@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/icon';
 import { ProgressBar } from '@/components/student/problem-solve-card';
 import type { RoadmapDto } from '@/lib/api';
 
-export function RoadmapView({ roadmap, completedItemIds }: { roadmap: RoadmapDto; completedItemIds: string[] }) {
+export function RoadmapView({ roadmap, completedItemIds, isHead }: { roadmap: RoadmapDto; completedItemIds: string[]; isHead?: boolean }) {
   const router = useRouter();
   const [completed, setCompleted] = useState<Set<string>>(new Set(completedItemIds));
   const [busy, setBusy] = useState<Set<string>>(new Set());
@@ -62,7 +63,7 @@ export function RoadmapView({ roadmap, completedItemIds }: { roadmap: RoadmapDto
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">{roadmap.title}</h1>
@@ -74,6 +75,16 @@ export function RoadmapView({ roadmap, completedItemIds }: { roadmap: RoadmapDto
             </p>
           )}
         </div>
+        {isHead && (
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href={`/roadmaps/${roadmap.id}/edit`} className="btn-secondary py-1.5 px-3 text-sm">
+              Edit Roadmap
+            </Link>
+            <Link href={`/roadmaps/${roadmap.id}/sections/new`} className="btn-primary py-1.5 px-3 text-sm shadow-sm">
+              + Add Section
+            </Link>
+          </div>
+        )}
       </header>
 
       {/* Main Progress Card */}

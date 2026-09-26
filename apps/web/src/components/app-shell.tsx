@@ -16,7 +16,6 @@ export async function AppShell({ me, children }: { me: Me; children: React.React
       .filter((t) => t.superGroupId === me.superGroupId)
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((t) => ({ label: t.name, href: `/tracks/${t.id}` }));
-  }
 
   // 2) Contests become children of the "Contests" sidebar item (newest on top).
   // Students only see contests attached to their group or supergroup; heads see all.
@@ -50,9 +49,6 @@ export async function AppShell({ me, children }: { me: Me; children: React.React
     label: r.title,
     href: `/roadmaps/${r.id}`,
   }));
-  if (!isStudent) {
-    roadmapChildren.push({ label: '+ Add Roadmap', href: '/roadmaps/new' });
-  }
 
   const hasTrackChildren = trackChildren.length > 0;
   const hasContestChildren = contestChildren.length > 0;
@@ -80,4 +76,5 @@ export async function AppShell({ me, children }: { me: Me; children: React.React
       {children}
     </ShellFrame>
   );
+}
 }

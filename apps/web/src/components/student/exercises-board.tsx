@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { TRACK_PHASE_LABELS, type TrackPhase } from '@hub/shared';
+import Link from 'next/link';
 import { Icon } from '@/components/icon';
 import { ProblemSolveCard } from '@/components/student/problem-solve-card';
 import type { ExerciseDto } from '@/lib/api';
@@ -37,12 +38,14 @@ export function ExercisesBoard({
   solvers,
   mySuperGroupId,
   myId,
+  isHead,
 }: {
   exercises: ExerciseDto[];
   solved: Set<string>;
   solvers: Map<string, { userId: string; name: string; avatarUrl: string | null }[]>;
   mySuperGroupId: string | null;
   myId?: string;
+  isHead?: boolean;
 }) {
   // Filter States
   const [q, setQ] = useState('');
@@ -248,13 +251,20 @@ export function ExercisesBoard({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <header className="flex flex-wrap items-center justify-between gap-3">
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Exercises</h1>
           <p className="mt-1 text-sm text-slate-500">
             Browse and solve track problem sets, submit solutions, and track your team's progress.
           </p>
         </div>
+        {isHead && (
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href="/exercises/new" className="btn-primary py-2 px-4 text-sm shadow-sm">
+              + Add Exercise
+            </Link>
+          </div>
+        )}
 
         {groupedTracks.length > 0 && (
           <button

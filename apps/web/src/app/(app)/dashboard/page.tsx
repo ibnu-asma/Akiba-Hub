@@ -112,11 +112,20 @@ export default async function DashboardPage() {
   }
 
   if (level === 2) {
-    const [groups, users, sessions, submissions] = await Promise.all([
+    const [groups, users, sessions, submissions, recentSolves, daily, completion, exercise] = await Promise.all([
       safe(hubFetch<Group[]>('/groups')),
       safe(hubFetch<UserDto[]>('/users')),
       safe(hubFetch<SessionDto[]>('/sessions')),
       safe(hubFetch<SubmissionDto[]>('/submissions?limit=200')),
+      safe(hubFetch<SubmissionDto[]>('/submissions?limit=15')),
+      safe(hubFetch<DailyProblemDto[]>('/daily-problems?limit=20')),
+      safe(hubFetch<CompletionRow[]>('/summary/completion')),
+      safe(
+        hubFetch<{
+          problems: { id: string; name: string; difficulty: string }[];
+          students: { userId: string; name: string; cells: Record<string, { attempts: number; minutes: number }> }[];
+        }>('/summary/exercise'),
+      ),
     ]);
 
     const studentUsers = users?.filter((u) => u.role === 'student') ?? [];
@@ -126,6 +135,15 @@ export default async function DashboardPage() {
       studentUsers.length > 0
         ? Math.round(studentUsers.reduce((acc, u) => acc + (u.rating ?? 1200), 0) / studentUsers.length)
         : 1200;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const myDaily = (daily ?? [])
+      .filter((d) => me.superGroupId == null || d.superGroupId === me.superGroupId)
+      .sort((a, b) => (a.date < b.date ? 1 : -1))
+      .find((d) => d.date <= today);
+
+    const teammates = exercise?.students ?? [];
+    const solvedByTeammates = myDaily ? teammates.filter((s) => s.cells[myDaily.problemId]).length : undefined;
 
     return (
       <div className="space-y-6">
@@ -165,12 +183,26 @@ export default async function DashboardPage() {
             hint={`Cohort average across ${studentUsers.length} students`}
           />
         </div>
+        
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <QuickLink href="/attendance" icon="calendar" label="Take attendance" sub="Mark today's roster" />
           <QuickLink href="/sessions/new" icon="plus" label="Add session" sub="Schedule a class or event" />
           <QuickLink href="/daily-problem" icon="list" label="Daily problem" sub="Manage the challenge queue" />
           <QuickLink href="/summary" icon="chart" label="Summary" sub="Attendance · consistency · more" />
         </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <DailyProblemCard
+            daily={myDaily ?? null}
+            solved={false}
+            solvedByTeammates={solvedByTeammates}
+            teammateCount={teammates.length}
+            isHead={true}
+          />
+          <TeamCompletionCard rows={completion ?? []} myId={me.id} />
+        </div>
+
+        <RecentSolvesList submissions={recentSolves ?? []} />
       </div>
     );
   }

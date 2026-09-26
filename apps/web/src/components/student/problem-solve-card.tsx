@@ -64,6 +64,7 @@ export function ProblemSolveCard({
   myId,
   isBookmarked: externalBookmarked,
   onToggleBookmark: externalToggleBookmark,
+  isHead,
 }: {
   problem: SolveableProblem;
   solved: boolean;
@@ -73,6 +74,7 @@ export function ProblemSolveCard({
   myId?: string;
   isBookmarked?: boolean;
   onToggleBookmark?: (problemId: string) => void;
+  isHead?: boolean;
 }) {
   const [internalBookmarked, setInternalBookmarked] = useState(false);
 
@@ -167,6 +169,15 @@ export function ProblemSolveCard({
             >
               <Icon name="externalLink" className="h-3.5 w-3.5" />
             </a>
+            {isHead && (
+              <a
+                href={`/problems/${problem.id}/edit`}
+                className="text-slate-400 hover:text-a2sv-600 p-0.5 transition ml-1"
+                aria-label={`Edit ${problem.name}`}
+              >
+                <Icon name="clipboard" className="h-3.5 w-3.5" />
+              </a>
+            )}
             <button
               type="button"
               onClick={handleToggleBookmark}

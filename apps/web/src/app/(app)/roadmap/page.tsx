@@ -14,11 +14,20 @@ export default async function RoadmapLandingPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Resource Roadmaps</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Explore curated learning paths, reading materials, videos, and practice problems.
-        </p>
+      <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Resource Roadmaps</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Explore curated learning paths, reading materials, videos, and practice problems.
+          </p>
+        </div>
+        {!isStudent && (
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href="/roadmaps/new" className="btn-primary py-2 px-4 text-sm shadow-sm">
+              + Add Roadmap
+            </Link>
+          </div>
+        )}
       </header>
 
       {roadmaps.length === 0 ? (

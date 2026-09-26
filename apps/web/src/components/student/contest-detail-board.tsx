@@ -35,6 +35,7 @@ export function ContestDetailBoard({
   solvers,
   teammates,
   myId,
+  isHead,
 }: {
   contest: ContestDto;
   problems: ContestProblemDto[];
@@ -42,6 +43,7 @@ export function ContestDetailBoard({
   solvers: Map<string, Solver[]>;
   teammates: Teammate[];
   myId: string;
+  isHead?: boolean;
 }) {
   const [showDetails, setShowDetails] = useState(false);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(() => {
