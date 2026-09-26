@@ -103,70 +103,34 @@ export function SessionEditor({ groups, session }: { groups: Group[]; session?: 
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">Core Details</h2>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Session Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Intro to Dynamic Programming"
-                className={`w-full rounded-xl border ${errors.name ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-a2sv-500 focus:ring-a2sv-100'} bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 focus:ring-2 transition shadow-sm`}
-              />
-              {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Date (YYYY-MM-DD)</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className={`w-full rounded-xl border ${errors.date ? 'border-red-400 focus:ring-red-100' : 'border-slate-200 focus:border-a2sv-500 focus:ring-a2sv-100'} bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 focus:ring-2 transition shadow-sm`}
-              />
-              {errors.date && <p className="text-xs text-red-500">{errors.date}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Lecturer (Optional)</label>
-              <input
-                type="text"
-                value={lecturer}
-                onChange={(e) => setLecturer(e.target.value)}
-                placeholder="e.g. John Doe"
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100 transition shadow-sm"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Schedule & Location */}
-        <section className="space-y-6">
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">Schedule & Location</h2>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start Time</label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100 transition shadow-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">End Time</label>
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100 transition shadow-sm"
-              />
-            </div>
-            <div className="flex flex-col gap-1.5 sm:col-span-2">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Location / Meeting Link</label>
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="e.g. Zoom Link or Room 3B"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100 transition shadow-sm"
+              />
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Resource Link</label>
+              <input
+                type="url"
+                value={resourceLink}
+                onChange={(e) => setResourceLink(e.target.value)}
+                placeholder="e.g. Slides or Google Doc"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100 transition shadow-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Recording Link</label>
+              <input
+                type="url"
+                value={recordingLink}
+                onChange={(e) => setRecordingLink(e.target.value)}
+                placeholder="e.g. YouTube or Drive URL"
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none hover:border-slate-300 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100 transition shadow-sm"
               />
             </div>
