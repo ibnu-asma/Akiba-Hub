@@ -55,6 +55,8 @@ import { ComparisonService } from './modules/comparison/comparison.service.js';
 
 import { ForumController } from './modules/forum/forum.controller.js';
 import { ForumService } from './modules/forum/forum.service.js';
+import { RoadmapsController } from './modules/roadmaps/roadmaps.controller.js';
+import { RoadmapsService } from './modules/roadmaps/roadmaps.service.js';
 
 /**
  * Root composition root. Shared singletons are provided once at module root;
@@ -78,6 +80,7 @@ import { ForumService } from './modules/forum/forum.service.js';
     SummaryController,
     ComparisonController,
     ForumController,
+    RoadmapsController,
   ],
   providers: [
     // shared infra
@@ -106,6 +109,7 @@ import { ForumService } from './modules/forum/forum.service.js';
     SummaryService,
     ComparisonService,
     ForumService,
+    RoadmapsService,
   ],
 })
 export class AppModule {}

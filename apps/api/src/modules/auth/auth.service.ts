@@ -124,6 +124,7 @@ export class AuthService {
       instagram: user.instagram ?? null,
       linkedin: user.linkedin ?? null,
       github: user.github ?? null,
+      githubPat: user.githubPat ?? null,
       telegram: user.telegram ?? null,
       leetcode: user.leetcode ?? null,
       codeforces: user.codeforces ?? null,

@@ -41,7 +41,7 @@ export class SubmissionsService {
   }
 
   /** Newest-first feed joined with student + problem names (SPEC §7.13, §6.2). */
-  async list(scope: DataScope, actorId: string, limit = 100, opts: { group?: boolean } = {}) {
+  async list(scope: DataScope, actorId: string, limit: number, opts: { group?: boolean; problemId?: string } = {}) {
     let query = this.db.db
       .select({
         id: submissions.id,
@@ -52,6 +52,7 @@ export class SubmissionsService {
         problemName: problems.name,
         problemLink: problems.link,
         language: submissions.language,
+        code: submissions.code,
         timeSpentMin: submissions.timeSpentMin,
         tries: submissions.tries,
         source: submissions.source,
@@ -61,6 +62,10 @@ export class SubmissionsService {
       .innerJoin(users, eq(submissions.userId, users.id))
       .innerJoin(problems, eq(submissions.problemId, problems.id))
       .$dynamic();
+
+    if (opts.problemId) {
+      query = query.where(eq(submissions.problemId, opts.problemId));
+    }
 
     if (opts.group) {
       // Group-wide feed (student → their group, HoE → headed groups, HoA → all).

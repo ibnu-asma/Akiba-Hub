@@ -22,6 +22,7 @@ export const users = pgTable(
     instagram: varchar('instagram', { length: 120 }),
     linkedin: varchar('linkedin', { length: 320 }),
     github: varchar('github', { length: 120 }),
+    githubPat: text('github_pat'),
     telegram: varchar('telegram', { length: 120 }),
     leetcode: varchar('leetcode', { length: 120 }),
     codeforces: varchar('codeforces', { length: 120 }),
@@ -378,3 +379,33 @@ export const sessionsRelations = relations(
     sessionGroups: many(sessionGroups),
   }),
 );
+export const roadmaps = pgTable('roadmaps', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  createdBy: uuid('created_by').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+});
+
+export const roadmapSections = pgTable('roadmap_sections', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  roadmapId: uuid('roadmap_id').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+}, (t) => [index('roadmap_sections_roadmap_idx').on(t.roadmapId)]);
+
+export const roadmapItems = pgTable('roadmap_items', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  sectionId: uuid('section_id').notNull(),
+  type: varchar('type', { length: 32 }).notNull(), // video | reading | problem
+  title: varchar('title', { length: 500 }).notNull(),
+  link: varchar('link', { length: 2000 }).notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+}, (t) => [index('roadmap_items_section_idx').on(t.sectionId)]);
+
+export const roadmapProgress = pgTable('roadmap_progress', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid('user_id').notNull(),
+  itemId: uuid('item_id').notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true }).notNull().default(sql`now()`),
+}, (t) => [uniqueIndex('roadmap_progress_user_item_idx').on(t.userId, t.itemId)]);

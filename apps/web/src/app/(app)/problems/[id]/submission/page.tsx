@@ -9,8 +9,11 @@ export default async function AddSubmissionPage({ params }: { params: Promise<{ 
   if (!me) redirect('/login');
   const { id } = await params;
 
-  const problems = (await safe(hubFetch<ProblemDto[]>('/problems?limit=200'))) ?? [];
-  const problem = problems.find((p) => p.id === id);
+  const [problems, mySubmissions] = await Promise.all([
+    safe(hubFetch<ProblemDto[]>('/problems?limit=200')),
+    safe(hubFetch<any[]>(`/submissions?problemId=${id}&limit=1`))
+  ]);
+  const problem = problems?.find((p) => p.id === id);
   if (!problem) notFound();
 
   return (
@@ -30,7 +33,7 @@ export default async function AddSubmissionPage({ params }: { params: Promise<{ 
         </p>
       </header>
 
-      <AddSubmissionForm problemId={problem.id} />
+      <AddSubmissionForm problemId={problem.id} previousSubmission={mySubmissions?.[0]} />
     </div>
   );
 }

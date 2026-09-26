@@ -1,29 +1,51 @@
 import { redirect } from 'next/navigation';
 import { ROLE_LEVEL, type Role } from '@hub/shared';
-import { getMe, hubFetch, safe, type ExerciseDto, type SessionDto, type TrackDto } from '@/lib/api';
-import { mySolvedSet } from '@/lib/student';
-import { RoadmapBoard } from '@/components/student/roadmap-board';
+import { getMe, hubFetch, safe, type RoadmapDto } from '@/lib/api';
+import Link from 'next/link';
 
-/** Student Roadmap — the program timeline across the five phases (SPEC §6.9, derived). */
-export default async function StudentRoadmapPage() {
+export default async function RoadmapLandingPage() {
   const me = await getMe();
   if (!me) redirect('/login');
-  if ((ROLE_LEVEL[me.role as Role] ?? 1) >= 2) redirect('/dashboard');
+  const isStudent = (ROLE_LEVEL[me.role as Role] ?? 1) === 1;
 
-  const [tracks, exercises, sessions, solved] = await Promise.all([
-    safe(hubFetch<TrackDto[]>('/tracks')),
-    safe(hubFetch<ExerciseDto[]>('/tracks/exercises')),
-    safe(hubFetch<SessionDto[]>('/sessions')),
-    mySolvedSet(),
-  ]);
+  // fetch roadmaps
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const roadmaps = (await safe(hubFetch<any[]>('/roadmaps'))) ?? [];
 
   return (
-    <RoadmapBoard
-      tracks={(tracks ?? []).filter((t) => me.superGroupId == null || t.superGroupId === me.superGroupId)}
-      exercises={exercises ?? []}
-      sessions={sessions ?? []}
-      solved={solved}
-      mySuperGroupId={me.superGroupId}
-    />
+    <div className="mx-auto max-w-4xl space-y-6">
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Resource Roadmaps</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Explore curated learning paths, reading materials, videos, and practice problems.
+        </p>
+      </header>
+
+      {roadmaps.length === 0 ? (
+        <div className="card p-12 text-center border-dashed border-2 border-slate-200">
+          <p className="text-slate-500 mb-4">No roadmaps have been created yet.</p>
+          {!isStudent && (
+            <Link href="/roadmaps/new" className="btn-primary inline-flex">
+              + Create your first Roadmap
+            </Link>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {roadmaps.map((r) => (
+            <Link key={r.id} href={`/roadmaps/${r.id}`} className="card p-5 hover:border-a2sv-500 transition hover:shadow-md group block relative">
+              <h3 className="text-lg font-bold text-slate-900 group-hover:text-a2sv-700 transition">{r.title}</h3>
+              <p className="mt-2 text-sm text-slate-500 line-clamp-3">
+                {r.description || 'No description provided.'}
+              </p>
+              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-medium">
+                <span>{r.sections?.length || 0} Sections</span>
+                <span className="text-a2sv-600 group-hover:translate-x-1 transition-transform inline-block">Explore →</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

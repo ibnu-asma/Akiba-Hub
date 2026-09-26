@@ -33,6 +33,7 @@ export const updateProfileDto = z.object({
   instagram: z.string().max(120).nullable().optional(),
   linkedin: z.string().max(320).nullable().optional(),
   github: z.string().max(120).nullable().optional(),
+  githubPat: z.string().max(255).nullable().optional(),
   studentId: z.string().max(64).nullable().optional(),
   telegram: z.string().max(120).nullable().optional(),
   leetcode: z.string().max(120).nullable().optional(),

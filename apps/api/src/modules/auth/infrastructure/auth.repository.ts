@@ -26,6 +26,7 @@ interface UserRow {
   instagram?: string | null;
   linkedin?: string | null;
   github?: string | null;
+  githubPat?: string | null; 
   telegram?: string | null;
   leetcode?: string | null;
   codeforces?: string | null;

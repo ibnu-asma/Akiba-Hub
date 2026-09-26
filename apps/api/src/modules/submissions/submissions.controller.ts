@@ -22,10 +22,10 @@ export class SubmissionsController {
   constructor(@Inject(SubmissionsService) private readonly submissions: SubmissionsService, @Inject(ScopeService) private readonly scopes: ScopeService, ) {}
 
   @Get()
-  async list(@CurrentPrincipal() principal: Principal, @Query('limit') limit?: string, @Query('group') group?: string) {
+  async list(@CurrentPrincipal() principal: Principal, @Query('limit') limit?: string, @Query('group') group?: string, @Query('problemId') problemId?: string) {
     const scope = await this.scopes.forUser(principal.id, principal.role);
     const parsed = Number.parseInt(limit ?? '', 10);
-    return this.submissions.list(scope, principal.id, Number.isNaN(parsed) ? 100 : parsed, { group: group === '1' });
+    return this.submissions.list(scope, principal.id, Number.isNaN(parsed) ? 100 : parsed, { group: group === '1', problemId });
   }
 
   @Get('solvers')
