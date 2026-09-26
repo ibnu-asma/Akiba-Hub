@@ -31,6 +31,7 @@ export function ProblemEditor({ problem }: { problem?: ProblemDto }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   function parseTags(): string[] {
     return tags
@@ -147,24 +148,46 @@ export function ProblemEditor({ problem }: { problem?: ProblemDto }) {
       <div className="bg-slate-50/50 flex items-center justify-between border-t border-slate-100 px-8 py-5">
         <div>
           {problem && (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={async () => {
-                if (!confirm('Are you sure you want to delete this problem?')) return;
-                setBusy(true);
-                try {
-                  await fetch(`/api/admin/problems/${problem.id}`, { method: 'DELETE' });
-                  window.location.href = '/problems';
-                } catch {
-                  setError('Failed to delete problem.');
-                  setBusy(false);
-                }
-              }}
-              className="rounded-xl px-5 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:opacity-50"
-            >
-              Delete Problem
-            </button>
+            confirmDelete ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold text-slate-700">Are you sure?</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    try {
+                      await fetch(`/api/admin/problems/${problem.id}`, { method: 'DELETE' });
+                      window.location.href = '/problems';
+                    } catch {
+                      setError('Failed to delete problem.');
+                      setBusy(false);
+                      setConfirmDelete(false);
+                    }
+                  }}
+                  className="rounded-xl px-4 py-2 text-sm font-bold text-white bg-red-600 transition hover:bg-red-700 shadow-xs disabled:opacity-50"
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setConfirmDelete(false)}
+                  className="rounded-xl px-4 py-2 text-sm font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setConfirmDelete(true)}
+                className="rounded-xl px-5 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100 hover:text-red-700 disabled:opacity-50"
+              >
+                Delete Problem
+              </button>
+            )
           )}
         </div>
         <div className="flex items-center gap-3">
