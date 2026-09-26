@@ -98,7 +98,11 @@ export function RoadmapBuilder({ initialRoadmap }: { initialRoadmap?: RoadmapDto
       });
       if (!res.ok) {
         const payload = await res.json().catch(() => null);
-        throw new Error(payload?.error?.message ?? 'Failed to save roadmap');
+        let msg = payload?.error?.message ?? 'Failed to save roadmap';
+        if (payload?.error?.details?.issues) {
+          msg = payload.error.details.issues.map((i: any) => `${i.path}: ${i.message}`).join(', ');
+        }
+        throw new Error(msg);
       }
       
       router.push('/roadmap');

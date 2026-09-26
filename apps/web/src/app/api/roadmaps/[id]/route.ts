@@ -1,0 +1,12 @@
+import { proxyAction } from '@/lib/bff';
+
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const body = await req.json().catch(() => null);
+  return proxyAction(`/roadmaps/${id}`, body, 'PUT');
+}
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return proxyAction(`/roadmaps/${id}`, null, 'DELETE');
+}

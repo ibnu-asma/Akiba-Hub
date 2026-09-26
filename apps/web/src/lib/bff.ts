@@ -8,7 +8,7 @@ import { HUB_COOKIE } from './session';
  * session cookie, then relays the structured error contract back to the client
  * form. List reads stay server-side via `hubFetch`; only writes go through here.
  */
-export async function proxyAction(path: string, body: unknown, method: 'POST' | 'PATCH' | 'DELETE' = 'POST') {
+export async function proxyAction(path: string, body: unknown, method: 'POST' | 'PATCH' | 'PUT' | 'DELETE' = 'POST') {
   const jar = await cookies();
   const token = jar.get(HUB_COOKIE)?.value;
 

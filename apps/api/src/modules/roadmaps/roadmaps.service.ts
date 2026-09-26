@@ -68,6 +68,7 @@ export class RoadmapsService {
       }
 
       return r;
+    }).catch(err => { console.error("[ROADMAP CREATE ERROR]", err); throw err;
     });
   }
 
@@ -168,7 +169,10 @@ export class RoadmapsService {
         }
       }
 
-      return this.findOne(id);
+      return { success: true };
+    }).catch(err => {
+      console.error('[ROADMAP UPDATE ERROR]', err);
+      throw err;
     });
   }
 
