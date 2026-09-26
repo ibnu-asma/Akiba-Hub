@@ -38,7 +38,7 @@ export default async function SessionsPage() {
               <div className="flex items-start justify-between gap-3">
                 <h3 className="font-bold text-slate-900 leading-tight">{session.name}</h3>
                 <a
-                  href={\`/sessions/\${session.id}/edit\`}
+                  href={`/sessions/${session.id}/edit`}
                   className="text-slate-400 hover:text-a2sv-600 p-1 transition opacity-0 group-hover:opacity-100"
                   aria-label="Edit session"
                 >
@@ -46,7 +46,7 @@ export default async function SessionsPage() {
                 </a>
               </div>
               <p className="mt-2 text-xs font-medium text-slate-500">
-                {session.date} {session.startTime ? \`· \${session.startTime}\` : ''}
+                {session.date} {session.startTime ? `· ${session.startTime}` : ''}
               </p>
               {session.description && (
                 <p className="mt-3 text-sm text-slate-600 line-clamp-2 leading-relaxed">{session.description}</p>
@@ -60,7 +60,7 @@ export default async function SessionsPage() {
               </span>
               
               <a
-                href={\`/attendance?session=\${session.id}\`}
+                href={`/attendance?session=${session.id}`}
                 className="text-xs font-bold text-a2sv-600 hover:text-a2sv-700 transition"
               >
                 Take Attendance &rarr;
