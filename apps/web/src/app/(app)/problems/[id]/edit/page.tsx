@@ -4,12 +4,13 @@ import { getMe, hubFetch, safe, type ProblemDto } from '@/lib/api';
 import { ProblemEditor } from '@/components/head/problem-editor';
 
 /** HoE/HoA: problem editing (SPEC §7.5). */
-export default async function EditProblemPage({ params }: { params: { id: string } }) {
+export default async function EditProblemPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const me = await getMe();
   if (!me) redirect('/login');
   if ((ROLE_LEVEL[me.role as Role] ?? 1) < 2) redirect('/dashboard');
 
-  const problem = await safe(hubFetch<ProblemDto>(`/problems/${params.id}`));
+  const problem = await safe(hubFetch<ProblemDto>(`/problems/${id}`));
   if (!problem) redirect('/problems');
 
   return (
