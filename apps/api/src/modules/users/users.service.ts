@@ -1,6 +1,6 @@
 import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
-import { users, groups, invitations, problems, and, asc, eq, sql, isNull } from '@hub/database';
+import { users, groups, invitations, problems, and, asc, eq, sql, isNull, inArray } from '@hub/database';
 import { DomainError, ROLES } from '@hub/shared';
 import { DataScope } from '../../common/auth/scope.service.js';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -54,9 +54,10 @@ export class UsersService {
 
   /** Active users. When `limit` is provided, returns a paged result with a total count. */
   async list(scope: DataScope, opts?: ListUsersOpts): Promise<UserSummary[] | Paged<UserSummary>> {
-    // TODO(iteration 2): scope HoE to their groups via scope.groupIds.
-    void scope;
     const conditions: ReturnType<typeof sql>[] = [eq(users.isRemoved, false)];
+    if (!scope.isGlobal && scope.groupIds.length > 0) {
+      conditions.push(inArray(users.groupId, scope.groupIds));
+    }
     if (opts?.role) conditions.push(eq(users.role, opts.role));
     if (opts?.q) {
       const pattern = `%${opts.q.toLowerCase()}%`;
