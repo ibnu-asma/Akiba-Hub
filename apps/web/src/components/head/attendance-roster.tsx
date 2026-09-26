@@ -171,7 +171,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
       <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-center gap-4">
-            <span className="grid h-16 w-16 place-items-center rounded-2xl bg-indigo-500 text-white shadow-xs">
+            <span className="grid h-16 w-16 place-items-center rounded-2xl bg-a2sv-500 text-white shadow-xs">
               <Icon name="calendar" className="h-8 w-8" />
             </span>
             <div>
@@ -191,7 +191,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
           <select
             value={sessionId}
             onChange={(e) => setSessionId(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-a2sv-100 focus:border-a2sv-400 transition"
           >
             <option value="" disabled>Choose a session...</option>
             {sessions.map((s) => (
@@ -211,7 +211,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
           <select
             value={groupId}
             onChange={(e) => setGroupId(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-a2sv-100 focus:border-a2sv-400 transition"
           >
             <option value="" disabled>Choose a group...</option>
             {availableGroups.map((g) => (
@@ -358,7 +358,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
                       type="button"
                       onClick={save}
                       disabled={saving}
-                      className="rounded-xl bg-indigo-600 px-6 py-2 text-sm font-bold text-white shadow-xs transition hover:bg-indigo-700 active:scale-95 disabled:opacity-50"
+                      className="rounded-xl bg-a2sv-600 px-6 py-2 text-sm font-bold text-white shadow-xs transition hover:bg-a2sv-700 active:scale-95 disabled:opacity-50"
                     >
                       {saving ? 'Saving...' : 'Save Attendance'}
                     </button>
@@ -372,7 +372,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
             <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
               <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-6 py-4">
                 <h2 className="text-base font-bold text-slate-900">Monthly Overview</h2>
-                <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">
+                <span className="rounded-lg bg-a2sv-50 px-2.5 py-1 text-xs font-bold text-a2sv-700 border border-a2sv-100">
                   {new Date().toISOString().slice(0, 7)}
                 </span>
               </div>

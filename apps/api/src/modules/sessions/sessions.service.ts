@@ -2,7 +2,7 @@ import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { sessions, sessionGroups, attendanceRecords, users, and, asc, desc, eq, inArray, sql } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
-import { ATTENDANCE_STATUSES, DomainError, ROLE_NAMES, isHoEOrHigher } from '@hub/shared';
+import { ATTENDANCE_STATUSES, DomainError, ROLE_NAMES, isHoEOrHigher, ROLES } from '@hub/shared';
 
 type Status = (typeof ATTENDANCE_STATUSES)[keyof typeof ATTENDANCE_STATUSES];
 
@@ -86,7 +86,7 @@ export class SessionsService {
     const roster = await this.db.db
       .select({ userId: users.id, name: users.name })
       .from(users)
-      .where(and(eq(users.groupId, groupId), eq(users.isRemoved, false)))
+      .where(and(eq(users.groupId, groupId), eq(users.isRemoved, false), eq(users.role, ROLES.student)))
       .execute();
     const records = await this.db.db
       .select()
