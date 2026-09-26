@@ -24,6 +24,7 @@ interface StudentSearchItem {
   avatarUrl?: string | null;
   groupName?: string;
   isInvited?: boolean;
+  university?: string | null;
 }
 
 interface ProblemSearchItem {
@@ -205,10 +206,9 @@ export function Topbar({
     }
   }, [chatMessages, aiTyping, aiOpen]);
 
-  // Load students and problems for the search palette
-  async function loadSearchData(query = '') {
+async function loadSearchData(query = '', signal?: AbortSignal) {
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal });
       const data = await res.json().catch(() => null);
       if (data && Array.isArray(data.students)) {
         setStudents(data.students);
@@ -224,10 +224,14 @@ export function Topbar({
   // Debounced live search whenever user types
   useEffect(() => {
     if (!searchOpen) return;
+    const controller = new AbortController();
     const timer = setTimeout(() => {
-      loadSearchData(searchQuery.trim());
+      loadSearchData(searchQuery.trim(), controller.signal);
     }, 120);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [searchQuery, searchOpen]);
 
   // Navigation Items indexed from sections + standard routes
@@ -263,7 +267,7 @@ export function Topbar({
     return [...defaultPages, ...dynamicChildren];
   }, [sections]);
 
-  // Filtered search results
+// Filtered search results
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
@@ -278,7 +282,8 @@ export function Topbar({
         !q ||
         s.name.toLowerCase().includes(q) ||
         (s.email && s.email.toLowerCase().includes(q)) ||
-        (s.groupName && s.groupName.toLowerCase().includes(q)),
+        (s.groupName && s.groupName.toLowerCase().includes(q)) ||
+        (s.university && s.university.toLowerCase().includes(q)),
     );
 
     // Problems match
