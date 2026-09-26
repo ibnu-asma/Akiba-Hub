@@ -28,7 +28,6 @@ export class ProblemsController {
   constructor(@Inject(ProblemsService) private readonly problems: ProblemsService) {}
 
   /** Library read — every role sees the problem cards (spec §6.3). */
-  @Get()
   /** Library read — single problem (spec §6.3). */
   @Get(':id')
   async findOne(@Param('id') id: string) {
