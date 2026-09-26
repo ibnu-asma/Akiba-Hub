@@ -222,49 +222,6 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
         )}
       </div>
 
-      {/* Control Bar */}
-      <section className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex flex-col gap-1.5">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Session</label>
-          <select
-            value={sessionId}
-            onChange={(e) => setSessionId(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-a2sv-100 focus:border-a2sv-400 transition"
-          >
-            <option value="" disabled>Choose a session...</option>
-            {sessions.map((s) => (
-              <option key={s.id} value={s.id}>{s.name} {s.date ? `(${s.date})` : ''}</option>
-            ))}
-          </select>
-          {session && (
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-              <Icon name="clock" className="h-3.5 w-3.5" />
-              {session.startTime ?? 'Time TBD'} · {session.location ?? 'Remote'}
-            </p>
-          )}
-        </div>
-
-        <div className="flex-1 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs flex flex-col gap-1.5">
-          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Group</label>
-          <select
-            value={groupId}
-            onChange={(e) => setGroupId(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-a2sv-100 focus:border-a2sv-400 transition"
-          >
-            <option value="" disabled>Choose a group...</option>
-            {availableGroups.map((g) => (
-              <option key={g.id} value={g.id}>{g.name} {g.country ? `(${g.country})` : ''}</option>
-            ))}
-          </select>
-          {group && (
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-              <Icon name="users" className="h-3.5 w-3.5" />
-              {group.studentCount} active students
-            </p>
-          )}
-        </div>
-      </section>
-
       {ready && (
         <div className="space-y-4">
           {/* Tabs */}
