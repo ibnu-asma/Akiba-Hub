@@ -62,21 +62,26 @@ export function GroupsCatalog({
   const myCohorts = useMemo(() => groups.filter(g => g.heads.some((h) => h.id === me.id)), [groups, me.id]);
   const otherGroups = useMemo(() => groups.filter(g => !g.heads.some((h) => h.id === me.id)), [groups, me.id]);
 
+const filterGroup = (g: Group) => {
+    const query = q.trim().toLowerCase();
+    if (query) {
+      const matchName = g.name.toLowerCase().includes(query) || g.shortName.toLowerCase().includes(query);
+      const matchCountry = g.country?.toLowerCase().includes(query);
+      if (!matchName && !matchCountry) return false;
+    }
+    if (superGroupId !== ALL && g.superGroupId !== superGroupId) return false;
+    if (country !== ALL && g.country !== country) return false;
+    return true;
+  };
+
+  const filteredMyCohorts = useMemo(() => {
+    return myCohorts.filter(filterGroup).sort((a, b) => a.name.localeCompare(b.name));
+  }, [myCohorts, q, superGroupId, country]);
+
   // Apply filters to Groups (only applies to All Groups section)
   const filteredGroups = useMemo(() => {
-    const query = q.trim().toLowerCase();
     const source = isHead && !isHoA ? otherGroups : groups;
-    
-    return source.filter((g) => {
-      if (query) {
-        const matchName = g.name.toLowerCase().includes(query) || g.shortName.toLowerCase().includes(query);
-        const matchCountry = g.country?.toLowerCase().includes(query);
-        if (!matchName && !matchCountry) return false;
-      }
-      if (superGroupId !== ALL && g.superGroupId !== superGroupId) return false;
-      if (country !== ALL && g.country !== country) return false;
-      return true;
-    }).sort((a, b) => a.name.localeCompare(b.name));
+    return source.filter(filterGroup).sort((a, b) => a.name.localeCompare(b.name));
   }, [groups, otherGroups, q, superGroupId, country, isHead, isHoA]);
 
   const pagedGroups = useMemo(() => {
@@ -207,11 +212,11 @@ export function GroupsCatalog({
 
       {activeTab === 'groups' ? (
         <div className="space-y-10">
-          {isHead && !isHoA && myCohorts.length > 0 && (
+          {isHead && !isHoA && filteredMyCohorts.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">My Cohorts</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {myCohorts.map((group) => (
+                {filteredMyCohorts.map((group) => (
                   <GroupCard key={group.id} group={group} />
                 ))}
               </div>
@@ -219,7 +224,7 @@ export function GroupsCatalog({
           )}
 
           <div className="space-y-4">
-            {isHead && !isHoA && myCohorts.length > 0 && (
+            {isHead && !isHoA && filteredMyCohorts.length > 0 && (
               <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">All Groups</h2>
             )}
             
