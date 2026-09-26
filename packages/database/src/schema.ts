@@ -22,6 +22,7 @@ export const users = pgTable(
     instagram: varchar('instagram', { length: 120 }),
     linkedin: varchar('linkedin', { length: 320 }),
     github: varchar('github', { length: 120 }),
+    githubPat: text('github_pat'),
     telegram: varchar('telegram', { length: 120 }),
     leetcode: varchar('leetcode', { length: 120 }),
     codeforces: varchar('codeforces', { length: 120 }),
