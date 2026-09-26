@@ -72,8 +72,7 @@ export function ProblemEditor({ problem }: { problem?: ProblemDto }) {
         return;
       }
       
-      router.push('/problems');
-      router.refresh();
+      window.location.href = '/problems';
     } catch {
       setError('Network error. Could not save.');
     } finally {
@@ -138,7 +137,7 @@ export function ProblemEditor({ problem }: { problem?: ProblemDto }) {
                 setBusy(true);
                 try {
                   await fetch(`/api/admin/problems/${problem.id}`, { method: 'DELETE' });
-                  router.push('/problems');
+                  window.location.href = '/problems';
                   router.refresh();
                 } catch {
                   setError('Failed to delete problem.');
