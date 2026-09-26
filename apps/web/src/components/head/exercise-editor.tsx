@@ -66,7 +66,7 @@ export function ExerciseEditor({
   const missing = tracks.length === 0 || problems.length === 0;
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col overflow-hidden ">
+    <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col relative">
       <div className="p-8 space-y-8">
         <section className="space-y-6">
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">Assign Exercises</h2>
@@ -107,7 +107,7 @@ export function ExerciseEditor({
         )}
       </div>
 
-      <div className="bg-slate-50 px-8 py-5 flex items-center justify-end gap-3 border-t border-slate-100">
+      <div className="bg-slate-50 px-8 py-5 flex items-center justify-end gap-3 border-t border-slate-100 rounded-b-2xl">
         <a
           href="/exercises"
           className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition"
