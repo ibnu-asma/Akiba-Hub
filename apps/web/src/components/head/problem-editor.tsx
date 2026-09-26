@@ -15,6 +15,9 @@ const PLATFORMS = [
   { value: 'leetcode', label: 'LeetCode' },
   { value: 'codeforces', label: 'Codeforces' },
   { value: 'hackerrank', label: 'HackerRank' },
+  { value: 'codesignal', label: 'CodeSignal' },
+  { value: 'atcoder', label: 'AtCoder' },
+  { value: 'geeksforgeeks', label: 'GeeksForGeeks' },
   { value: 'other', label: 'Other' },
 ];
 

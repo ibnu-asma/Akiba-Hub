@@ -37,6 +37,9 @@ export const PROBLEM_PLATFORMS = {
   leetcode: 'leetcode',
   codeforces: 'codeforces',
   hackerrank: 'hackerrank',
+  codesignal: 'codesignal',
+  atcoder: 'atcoder',
+  geeksforgeeks: 'geeksforgeeks',
   other: 'other',
 } as const;
 export type ProblemPlatform = (typeof PROBLEM_PLATFORMS)[keyof typeof PROBLEM_PLATFORMS];
