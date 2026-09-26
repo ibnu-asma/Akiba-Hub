@@ -8,16 +8,16 @@ type Status = (typeof ATTENDANCE_STATUSES)[keyof typeof ATTENDANCE_STATUSES];
 
 export interface CreateSessionInput {
   name: string;
-  description?: string;
+  description?: string | null;
   date: string;
-  startTime?: string;
-  endTime?: string;
-  location?: string;
-  resourceLink?: string;
-  recordingLink?: string;
-  lecturer?: string;
-  fundId?: string;
-  calendarInvite?: boolean;
+  startTime?: string | null;
+  endTime?: string | null;
+  location?: string | null;
+  resourceLink?: string | null;
+  recordingLink?: string | null;
+  lecturer?: string | null;
+  fundId?: string | null;
+  calendarInvite?: boolean | null;
   groupIds: string[];
 }
 
