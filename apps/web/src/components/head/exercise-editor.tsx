@@ -54,7 +54,7 @@ export function ExerciseEditor({
         setServerError(parsed?.error?.message ?? 'Could not add the exercises.');
         return;
       }
-      window.location.href = '/exercises/manage';
+      window.location.href = '/exercises';
     } catch {
       setServerError('Network error — could not save exercises.');
     } finally {
@@ -65,7 +65,7 @@ export function ExerciseEditor({
   const missing = tracks.length === 0 || problems.length === 0;
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col overflow-hidden max-w-5xl mx-auto">
+    <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col overflow-hidden ">
       <div className="p-8 space-y-8">
         <section className="space-y-6">
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">Assign Exercises</h2>
@@ -90,6 +90,7 @@ export function ExerciseEditor({
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Problems</label>
               <SelectUser
                 label="Search problems..."
+                placeholder="Search problems..."
                 options={problemOptions}
                 value={problemIds}
                 onChange={setProblemIds}
@@ -109,7 +110,7 @@ export function ExerciseEditor({
 
       <div className="bg-slate-50 px-8 py-5 flex items-center justify-end gap-3 border-t border-slate-100">
         <a
-          href="/exercises/manage"
+          href="/exercises"
           className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition"
         >
           Cancel
