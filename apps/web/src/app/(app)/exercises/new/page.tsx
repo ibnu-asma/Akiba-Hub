@@ -11,7 +11,7 @@ export default async function AddExercisePage() {
 
   const [tracks, problems] = await Promise.all([
     safe(hubFetch<TrackDto[]>('/tracks')),
-    safe(hubFetch<{ rows: ProblemDto[]; total: number }>('/problems?limit=1000')),
+    safe(hubFetch<ProblemDto[]>('/problems?limit=200')),
   ]);
 
   return (
@@ -24,7 +24,7 @@ export default async function AddExercisePage() {
       </header>
       <ExerciseEditor
         tracks={tracks ?? []}
-        problems={problems?.rows ?? []}
+        problems={(problems as unknown as ProblemDto[]) ?? []}
       />
     </div>
   );
