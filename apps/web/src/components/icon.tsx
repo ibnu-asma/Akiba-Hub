@@ -27,6 +27,7 @@ const PATHS: Record<AllIconName, string> = {
   check: 'm5 13 4 4L19 7',
   checkCircle: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Zm-3.8 9.2 2.6 2.6 5-5.2',
   menu: 'M4 7h16M4 12h16M4 17h16',
+  chevronUp: 'm18 15-6-6-6 6',
   chevronDown: 'm6 9 6 6 6-6',
   chevronRight: 'm9 6 6 6-6 6',
   x: 'M18 6 6 18M6 6l12 12',

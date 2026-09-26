@@ -71,6 +71,107 @@ export class RoadmapsService {
     });
   }
 
+  async update(id: string, data: { title: string; description?: string | null; sections: any[] }, updatedBy: string) {
+    return this.db.db.transaction(async (tx) => {
+      // 1. Update Roadmap
+      await tx
+        .update(roadmaps)
+        .set({
+          title: data.title,
+          description: data.description ?? null,
+        })
+        .where(eq(roadmaps.id, id));
+
+      const keptSectionIds = new Set<string>();
+      const keptItemIds = new Set<string>();
+
+      // 2. Upsert Sections and Items
+      for (let i = 0; i < data.sections.length; i++) {
+        const sec = data.sections[i];
+        let sectionId = sec.id;
+
+        if (sectionId) {
+          // Update existing section
+          await tx
+            .update(roadmapSections)
+            .set({ title: sec.title, sortOrder: i })
+            .where(eq(roadmapSections.id, sectionId));
+        } else {
+          // Insert new section
+          const [s] = await tx
+            .insert(roadmapSections)
+            .values({
+              roadmapId: id,
+              title: sec.title,
+              sortOrder: i,
+            })
+            .returning();
+          sectionId = s.id;
+        }
+
+        keptSectionIds.add(sectionId);
+
+        for (let j = 0; j < sec.items.length; j++) {
+          const item = sec.items[j];
+          let itemId = item.id;
+
+          if (itemId) {
+            // Update existing item
+            await tx
+              .update(roadmapItems)
+              .set({
+                sectionId: sectionId,
+                title: item.title,
+                link: item.link,
+                type: item.type,
+                sortOrder: j,
+              })
+              .where(eq(roadmapItems.id, itemId));
+          } else {
+            // Insert new item
+            const [insertedItem] = await tx
+              .insert(roadmapItems)
+              .values({
+                sectionId: sectionId,
+                title: item.title,
+                link: item.link,
+                type: item.type,
+                sortOrder: j,
+              })
+              .returning();
+            itemId = insertedItem.id;
+          }
+          
+          keptItemIds.add(itemId);
+        }
+      }
+
+      // 3. Cleanup removed items and sections
+      const existingSections = await tx.select().from(roadmapSections).where(eq(roadmapSections.roadmapId, id));
+      const existingSectionIds = existingSections.map(s => s.id);
+      
+      if (existingSectionIds.length > 0) {
+        const existingItems = await tx.select().from(roadmapItems).where(inArray(roadmapItems.sectionId, existingSectionIds));
+        
+        // Find items to delete
+        const itemsToDelete = existingItems.filter(i => !keptItemIds.has(i.id)).map(i => i.id);
+        
+        if (itemsToDelete.length > 0) {
+          await tx.delete(roadmapProgress).where(inArray(roadmapProgress.itemId, itemsToDelete));
+          await tx.delete(roadmapItems).where(inArray(roadmapItems.id, itemsToDelete));
+        }
+
+        // Find sections to delete
+        const sectionsToDelete = existingSectionIds.filter(id => !keptSectionIds.has(id));
+        if (sectionsToDelete.length > 0) {
+          await tx.delete(roadmapSections).where(inArray(roadmapSections.id, sectionsToDelete));
+        }
+      }
+
+      return this.findOne(id);
+    });
+  }
+
   async delete(id: string) {
     await this.db.db.transaction(async (tx) => {
       const sections = await tx.select().from(roadmapSections).where(eq(roadmapSections.roadmapId, id));

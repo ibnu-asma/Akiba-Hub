@@ -25,7 +25,7 @@ export type AllIconName =
   | 'check'
   | 'checkCircle'
   | 'menu'
-  | 'chevronDown'
+  | 'chevronDown' | 'chevronUp'
   | 'chevronRight'
   | 'x'
   | 'trend'
