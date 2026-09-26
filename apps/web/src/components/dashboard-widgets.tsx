@@ -203,30 +203,51 @@ export function EventsPanel({ sessions, scopeHint }: { sessions: SessionDto[] | 
                       )}
                     </p>
 
-                    {/* Google Meet / Location action */}
-                    {meetLink ? (
-                      <div className="mt-2.5">
+                                        <div className="mt-2.5 flex items-center gap-2 flex-wrap">
+                      {meetLink && (
                         <a
                           href={meetLink}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-2xs transition-all cursor-pointer"
                         >
-                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polygon points="23 7 16 12 23 17 23 7" />
-                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                          </svg>
+                          <Icon name="externalLink" className="h-3.5 w-3.5" />
                           <span>Join Meeting</span>
-                          <Icon name="externalLink" className="h-3 w-3 opacity-80" />
                         </a>
-                      </div>
-                    ) : session.location ? (
-                      <p className="mt-1 text-xs text-slate-500 flex items-center gap-1">
-                        <Icon name="map" className="h-3 w-3 text-slate-400 shrink-0" />
-                        <span className="truncate">{session.location}</span>
-                      </p>
-                    ) : null}
-                  </div>
+                      )}
+                      
+                      {session.resourceLink && session.resourceLink !== meetLink && (
+                        <a
+                          href={session.resourceLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-700 shadow-2xs transition-all cursor-pointer"
+                        >
+                          <Icon name="file" className="h-3.5 w-3.5" />
+                          <span>Slides / Material</span>
+                        </a>
+                      )}
+                      
+                      {session.recordingLink && (
+                        <a
+                          href={session.recordingLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-700 shadow-2xs transition-all cursor-pointer"
+                        >
+                          <Icon name="externalLink" className="h-3.5 w-3.5" />
+                          <span>Recording</span>
+                        </a>
+                      )}
+                      
+                      {!meetLink && session.location && !session.location.startsWith('http') && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600">
+                          <Icon name="map" className="h-3.5 w-3.5" />
+                          <span>{session.location}</span>
+                        </span>
+                      )}
+                    </div>
+</div>
                 </div>
               </li>
             );
