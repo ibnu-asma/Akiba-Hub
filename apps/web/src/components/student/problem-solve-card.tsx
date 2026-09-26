@@ -65,6 +65,7 @@ export function ProblemSolveCard({
   isBookmarked: externalBookmarked,
   onToggleBookmark: externalToggleBookmark,
   isHead,
+  onRemove,
 }: {
   problem: SolveableProblem;
   solved: boolean;
@@ -75,6 +76,7 @@ export function ProblemSolveCard({
   isBookmarked?: boolean;
   onToggleBookmark?: (problemId: string) => void;
   isHead?: boolean;
+  onRemove?: () => void;
 }) {
   const [internalBookmarked, setInternalBookmarked] = useState(false);
 

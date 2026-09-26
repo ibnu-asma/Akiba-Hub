@@ -80,7 +80,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: 'Add problem', href: '/problems/new', icon: 'plus' },
       { label: 'Add track', href: '/tracks/new', icon: 'plus' },
       { label: 'Add contest', href: '/contests/new', icon: 'plus' },
-      { label: 'Manage exercises', href: '/exercises/manage', icon: 'code' },
+      { label: 'Add exercise', href: '/exercises/new', icon: 'plus' },
       { label: 'Sessions', href: '/sessions', icon: 'calendar' },
       { label: 'Daily problem', href: '/daily-problem', icon: 'list' },
       { label: 'Stipend & Funds', href: '/stipends', icon: 'wallet' },

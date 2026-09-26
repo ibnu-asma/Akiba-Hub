@@ -72,6 +72,17 @@ export function ExercisesBoard({
     }
   });
 
+
+  const handleRemove = async (trackId: string, problemId: string, problemName: string) => {
+    if (!window.confirm(`Are you sure you want to remove "${problemName}" from this track?`)) return;
+    try {
+      await fetch(`/api/admin/tracks/${trackId}/problems/${problemId}`, { method: 'DELETE' });
+      window.location.reload();
+    } catch {
+      alert('Failed to remove exercise');
+    }
+  };
+
   const toggleBookmark = (problemId: string) => {
     setBookmarkedIds((prev) => {
       const next = new Set(prev);
@@ -494,6 +505,8 @@ export function ExercisesBoard({
                       {group.problems.map((ex) => (
                         <ProblemSolveCard
                           key={ex.id}
+                          isHead={isHead}
+                          onRemove={isHead ? () => handleRemove(ex.trackId, ex.problemId, ex.problemName) : undefined}
                           problem={{
                             id: ex.problemId,
                             name: ex.problemName,
