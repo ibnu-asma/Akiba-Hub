@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { TRACK_PHASE_LABELS, type TrackPhase } from '@hub/shared';
 import { OutlinedSelect } from '@/components/form/field';
-import { SelectUser, type SelectUserOption } from '@/components/form/select-user';
+import { SelectProblems, type SelectProblemOption } from '@/components/form/select-problems';
 import type { ProblemDto, TrackDto } from '@/lib/api';
 
 function trackLabel(track: TrackDto): string {
@@ -24,11 +24,12 @@ export function ExerciseEditor({
   const [serverError, setServerError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const problemOptions: SelectUserOption[] = problems.map((p) => ({
+  const problemOptions: SelectProblemOption[] = problems.map((p) => ({
     id: p.id,
     name: p.name,
-    role: p.platform.charAt(0).toUpperCase() + p.platform.slice(1),
-    group: p.difficulty.charAt(0).toUpperCase() + p.difficulty.slice(1),
+    platform: p.platform,
+    difficulty: p.difficulty,
+    tags: p.tags,
   }));
 
   async function submit(event: React.FormEvent) {
@@ -88,13 +89,11 @@ export function ExerciseEditor({
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Problems</label>
-              <SelectUser
-                label="Search problems..."
+              <SelectProblems
                 placeholder="Search problems..."
                 options={problemOptions}
                 value={problemIds}
                 onChange={setProblemIds}
-                multiple={true}
               />
               <p className="mt-1 text-[11px] text-slate-400">Search by name, platform, or difficulty. You can assign multiple problems at once.</p>
             </div>
