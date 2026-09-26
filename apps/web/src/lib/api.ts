@@ -311,3 +311,29 @@ export type {
   DivisionsData,
 } from '@/components/summary/types';
 
+
+export interface RoadmapItemDto {
+  id: string;
+  sectionId: string;
+  type: string; // 'video' | 'reading' | 'problem'
+  title: string;
+  link: string;
+  sortOrder: number;
+}
+
+export interface RoadmapSectionDto {
+  id: string;
+  roadmapId: string;
+  title: string;
+  sortOrder: number;
+  items: RoadmapItemDto[];
+}
+
+export interface RoadmapDto {
+  id: string;
+  title: string;
+  description: string | null;
+  createdBy: string;
+  createdAt: string;
+  sections: RoadmapSectionDto[];
+}

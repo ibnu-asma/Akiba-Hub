@@ -42,8 +42,22 @@ export async function AppShell({ me, children }: { me: Me; children: React.React
       href: `/contests/${c.id}`,
     }));
 
+  
+  // 3) Roadmaps become children of the "Roadmap" sidebar item.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const roadmapsData = (await safe(hubFetch<any[]>('/roadmaps'))) ?? [];
+  const roadmapChildren = roadmapsData.map((r) => ({
+    label: r.title,
+    href: `/roadmaps/${r.id}`,
+  }));
+  if (!isStudent) {
+    roadmapChildren.push({ label: '+ Add Roadmap', href: '/roadmaps/new' });
+  }
+
   const hasTrackChildren = trackChildren.length > 0;
   const hasContestChildren = contestChildren.length > 0;
+  const hasRoadmapChildren = roadmapChildren.length > 0;
+
 
   const sections = sectionsFor(me.role).map((section) => ({
     ...section,
@@ -51,8 +65,11 @@ export async function AppShell({ me, children }: { me: Me; children: React.React
       if (item.href === '/tracks' && hasTrackChildren) {
         return { ...item, children: trackChildren };
       }
-      if (item.href === '/contests' && hasContestChildren) {
+            if (item.href === '/contests' && hasContestChildren) {
         return { ...item, children: contestChildren };
+      }
+      if (item.href === '/roadmap' && hasRoadmapChildren) {
+        return { ...item, children: roadmapChildren };
       }
       return item;
     }),
