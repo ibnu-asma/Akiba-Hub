@@ -1,4 +1,4 @@
-import { Inject, Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Inject, Body, Controller, Delete, Patch, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { MockRulesGuard } from '../../common/auth/roles.guard.js';
 import { AuthGuard } from '../../common/auth/auth.guard.js';
 import { CurrentPrincipal, Principal } from '../../common/auth/current-principal.js';
@@ -90,4 +90,29 @@ export class SessionsController {
     const parsed = attendanceDto.parse(body);
     await this.sessions.setAttendance(id, parsed.rows, principal.id);
   }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    if (id === 'attendance-grid' || id === 'user-attendance') throw new Error('Not found');
+    return this.sessions.findOne(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(new MockRulesGuard(2))
+  async update(@Param('id') id: string, @Body() body: unknown, @CurrentPrincipal() principal: Principal) {
+    const parsed = createDto.parse(body);
+    return this.sessions.update(
+      id,
+      { ...parsed, date: parsed.date },
+      { id: principal.id, name: principal.name, role: principal.role }
+    );
+  }
+
+  @Delete(':id')
+  @UseGuards(new MockRulesGuard(2))
+  async remove(@Param('id') id: string, @CurrentPrincipal() principal: Principal) {
+    await this.sessions.remove(id, { id: principal.id, name: principal.name, role: principal.role });
+    return { ok: true };
+  }
+
 }
