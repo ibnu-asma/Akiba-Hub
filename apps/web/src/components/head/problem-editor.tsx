@@ -12,19 +12,17 @@ const DIFF_FILTER = [
 ];
 
 const PLATFORMS = [
-  { value: 'LeetCode', label: 'LeetCode' },
-  { value: 'Codeforces', label: 'Codeforces' },
-  { value: 'HackerRank', label: 'HackerRank' },
-  { value: 'CodeSignal', label: 'CodeSignal' },
-  { value: 'AtCoder', label: 'AtCoder' },
-  { value: 'GeeksForGeeks', label: 'GeeksForGeeks' },
+  { value: 'leetcode', label: 'LeetCode' },
+  { value: 'codeforces', label: 'Codeforces' },
+  { value: 'hackerrank', label: 'HackerRank' },
+  { value: 'other', label: 'Other' },
 ];
 
 export function ProblemEditor({ problem }: { problem?: ProblemDto }) {
   const router = useRouter();
 
   const [name, setName] = useState(problem?.name ?? '');
-  const [platform, setPlatform] = useState(problem?.platform ?? 'LeetCode');
+  const [platform, setPlatform] = useState(problem?.platform ?? 'leetcode');
   const [difficulty, setDifficulty] = useState(problem?.difficulty ?? 'medium');
   const [tags, setTags] = useState((problem?.tags ?? []).join(', '));
   const [link, setLink] = useState(problem?.link ?? '');
