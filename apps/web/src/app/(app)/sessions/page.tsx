@@ -28,54 +28,70 @@ export default async function SessionsPage() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {(sessions ?? []).map((session) => (
-          <article
-            key={session.id}
-            className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between group"
-          >
-            <div>
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="font-bold text-slate-900 leading-tight">{session.name}</h3>
-                <a
-                  href={`/sessions/${session.id}/edit`}
-                  className="text-slate-400 hover:text-a2sv-600 p-1 transition opacity-0 group-hover:opacity-100"
-                  aria-label="Edit session"
-                >
-                  <Icon name="clipboard" className="h-4 w-4" />
-                </a>
-              </div>
-              <p className="mt-2 text-xs font-medium text-slate-500">
-                {session.date} {session.startTime ? `· ${session.startTime}` : ''}
-              </p>
-              {session.description && (
-                <p className="mt-3 text-sm text-slate-600 line-clamp-2 leading-relaxed">{session.description}</p>
-              )}
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                <Icon name="users" className="h-3 w-3 text-slate-400" />
-                {session.groupIds?.length ?? 0} Cohorts
-              </span>
+            <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-slate-600">
+            <thead className="bg-slate-50 border-b border-slate-200/80 text-xs font-bold uppercase tracking-wider text-slate-500">
+              <tr>
+                <th className="px-6 py-4">Session Name</th>
+                <th className="px-6 py-4">Date & Time</th>
+                <th className="px-6 py-4">Cohorts</th>
+                <th className="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100/80">
+              {(sessions ?? []).map((session) => (
+                <tr key={session.id} className="hover:bg-slate-50/50 transition group">
+                  <td className="px-6 py-4">
+                    <div className="font-bold text-slate-900">{session.name}</div>
+                    {session.description && (
+                      <div className="mt-1 text-xs text-slate-500 line-clamp-1">{session.description}</div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="font-semibold text-slate-700">{session.date}</div>
+                    {session.startTime && (
+                      <div className="mt-0.5 text-xs text-slate-400">{session.startTime} {session.endTime ? `- ${session.endTime}` : ''}</div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                      <Icon name="users" className="h-3 w-3 text-slate-400" />
+                      {session.groupIds?.length ?? 0} Cohorts
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition">
+                      <a
+                        href={`/attendance?session=${session.id}`}
+                        className="text-xs font-bold text-a2sv-600 hover:text-a2sv-700 transition"
+                      >
+                        Attendance &rarr;
+                      </a>
+                      <a
+                        href={`/sessions/${session.id}/edit`}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-a2sv-600 hover:bg-a2sv-50 transition"
+                        aria-label="Edit session"
+                      >
+                        <Icon name="clipboard" className="h-4 w-4" />
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              ))}
               
-              <a
-                href={`/attendance?session=${session.id}`}
-                className="text-xs font-bold text-a2sv-600 hover:text-a2sv-700 transition"
-              >
-                Take Attendance &rarr;
-              </a>
-            </div>
-          </article>
-        ))}
-        
-        {(!sessions || sessions.length === 0) && (
-          <div className="col-span-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 py-12 text-center">
-            <Icon name="calendar" className="mx-auto h-8 w-8 text-slate-400 mb-3" />
-            <h3 className="text-sm font-bold text-slate-900">No sessions found</h3>
-            <p className="mt-1 text-xs text-slate-500">Get started by scheduling your first session.</p>
-          </div>
-        )}
+              {(!sessions || sessions.length === 0) && (
+                <tr>
+                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
+                    <Icon name="calendar" className="mx-auto h-8 w-8 text-slate-300 mb-3" />
+                    <h3 className="text-sm font-bold text-slate-900">No sessions found</h3>
+                    <p className="mt-1 text-xs">Get started by scheduling your first session.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
