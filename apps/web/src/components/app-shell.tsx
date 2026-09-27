@@ -16,6 +16,7 @@ export async function AppShell({ me, children }: { me: Me; children: React.React
       .filter((t) => t.superGroupId === me.superGroupId)
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((t) => ({ label: t.name, href: `/tracks/${t.id}` }));
+  }
 
   // 2) Contests become children of the "Contests" sidebar item (newest on top).
   // Students only see contests attached to their group or supergroup; heads see all.
@@ -76,5 +77,4 @@ export async function AppShell({ me, children }: { me: Me; children: React.React
       {children}
     </ShellFrame>
   );
-}
 }
