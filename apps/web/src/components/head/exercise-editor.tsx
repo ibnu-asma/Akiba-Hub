@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { TRACK_PHASE_LABELS, type TrackPhase } from '@hub/shared';
-import { OutlinedSelect } from '@/components/form/field';
 import { SelectProblems, type SelectProblemOption } from '@/components/form/select-problems';
 import type { ProblemDto, TrackDto } from '@/lib/api';
 
@@ -80,12 +79,24 @@ export function ExerciseEditor({
           )}
 
           <div className="grid gap-6">
-            <OutlinedSelect
-              label="Target Curriculum Track"
-              value={trackId}
-              onChange={setTrackId}
-              options={[{ value: '', label: 'Select a track...' }, ...tracks.map((t) => ({ value: t.id, label: trackLabel(t) }))]}
-            />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="trackId" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                Target Curriculum Track
+              </label>
+              <select
+                id="trackId"
+                value={trackId}
+                onChange={(e) => setTrackId(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 focus:border-a2sv-500 focus:outline-none focus:ring-2 focus:ring-a2sv-100 transition shadow-xs"
+              >
+                <option value="">Select a track...</option>
+                {tracks.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {trackLabel(t)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Problems</label>
