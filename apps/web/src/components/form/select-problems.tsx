@@ -22,12 +22,14 @@ export function SelectProblems({
   value,
   onChange,
   placeholder = 'Search problems…',
+  multiple = true,
   error,
 }: {
   options: SelectProblemOption[];
   value: string[];
   onChange: (ids: string[]) => void;
   placeholder?: string;
+  multiple?: boolean;
   error?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -55,8 +57,14 @@ export function SelectProblems({
   }, [options, query]);
 
   function toggle(id: string) {
-    if (value.includes(id)) onChange(value.filter((v) => v !== id));
-    else onChange([...value, id]);
+    if (multiple) {
+      if (value.includes(id)) onChange(value.filter((v) => v !== id));
+      else onChange([...value, id]);
+    } else {
+      onChange([id]);
+      setOpen(false);
+      setQuery('');
+    }
   }
 
   const selectedOptions = options.filter((o) => value.includes(o.id));

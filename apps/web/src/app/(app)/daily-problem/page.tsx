@@ -13,9 +13,9 @@ export default async function DailyProblemPage() {
   const problems = ((await safe(hubFetch<ProblemDto[]>('/problems'))) ?? []);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Daily Problem</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Assign Daily Problem</h1>
         <p className="mt-1 text-sm text-slate-500">
           Assign today&apos;s 24-hour challenge for a cohort — it refreshes every 24 hours and needs to be solved today!
         </p>
