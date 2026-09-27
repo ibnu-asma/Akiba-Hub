@@ -92,10 +92,10 @@ function NavItemRow({ item, pathname, onNavigate }: { item: NavItem; pathname: s
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
-            open || childActive ? 'bg-a2sv-50 font-semibold text-a2sv-700' : 'font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+            childActive ? 'bg-a2sv-50 font-semibold text-a2sv-700' : 'font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900'
           }`}
         >
-          <Icon name={item.icon} className={`h-[18px] w-[18px] shrink-0 ${open || childActive ? 'text-a2sv-600' : 'text-slate-400'}`} />
+          <Icon name={item.icon} className={`h-[18px] w-[18px] shrink-0 ${childActive ? 'text-a2sv-600' : 'text-slate-400'}`} />
           <span className="flex-1 text-left">{item.label}</span>
           <Icon name={open ? 'chevronDown' : 'chevronRight'} className="h-4 w-4 text-slate-400" />
         </button>
