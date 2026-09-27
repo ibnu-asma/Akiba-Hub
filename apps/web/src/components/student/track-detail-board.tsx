@@ -135,7 +135,11 @@ export function TrackDetailBoard({
   const completionPct = totalExercises > 0 ? Math.round((avgSolved / totalExercises) * 100) : 0;
   const availableAverage = Math.max(0, totalExercises - avgSolved);
 
+  
   const stateLabel = completionPct >= 80 ? 'Good' : completionPct >= 50 ? 'Okay' : 'Bad';
+  const colorHex = completionPct >= 80 ? '#22c55e' : completionPct >= 50 ? '#eab308' : '#ef4444';
+  const bgColorHex = completionPct >= 80 ? '#dcfce7' : completionPct >= 50 ? '#fef3c7' : '#fee2e2';
+
 
   // Group problems by date — sorted with NEWEST date at the TOP
   const groupedProblems = useMemo(() => {
@@ -159,8 +163,7 @@ export function TrackDetailBoard({
   const radius = 34;
   const circumference = 2 * Math.PI * radius;
   const greenLength = (completionPct / 100) * circumference;
-  const okayLength = 0.09 * circumference;
-
+  
   return (
     <div className="space-y-6">
       {/* Top Track Header */}
@@ -199,10 +202,9 @@ export function TrackDetailBoard({
             </h2>
 
             {/* Thick Horizontal Progress Bar */}
-            <div className="w-full max-w-2xl h-5 bg-[#c5f2c7] rounded-full overflow-hidden p-0.5 shadow-inner">
+            <div className="w-full max-w-2xl h-5 rounded-full overflow-hidden p-0.5 shadow-inner" style={{ backgroundColor: bgColorHex }}>
               <div
-                className="h-full bg-[#22c55e] rounded-full transition-all duration-700 ease-out"
-                style={{ width: `${Math.min(100, Math.max(0, completionPct))}%` }}
+                className="h-full rounded-full transition-all duration-700 ease-out" style={{ backgroundColor: colorHex, width: `${Math.min(100, Math.max(0, completionPct))}%` }}
               />
             </div>
 
@@ -221,27 +223,16 @@ export function TrackDetailBoard({
                   cx="44"
                   cy="44"
                   r={radius}
-                  className="stroke-[#ef4444]"
+                  className="stroke-slate-100"
                   strokeWidth="8"
                   fill="transparent"
                 />
-                {/* Okay Segment (Yellow) */}
+                {/* Dynamic Progress Segment */}
                 <circle
                   cx="44"
                   cy="44"
                   r={radius}
-                  className="stroke-[#eab308]"
-                  strokeWidth="8"
-                  strokeDasharray={`${okayLength} ${circumference}`}
-                  strokeDashoffset={`-${greenLength}`}
-                  fill="transparent"
-                />
-                {/* Good Segment (Green) */}
-                <circle
-                  cx="44"
-                  cy="44"
-                  r={radius}
-                  className="stroke-[#22c55e]"
+                  stroke={colorHex}
                   strokeWidth="8"
                   strokeDasharray={`${greenLength} ${circumference}`}
                   strokeDashoffset="0"
@@ -254,7 +245,7 @@ export function TrackDetailBoard({
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
                 <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">State</span>
                 <span className="text-sm font-extrabold text-slate-800 leading-tight">{stateLabel}</span>
-                <span className="text-[11px] font-bold text-[#22c55e]">{completionPct}%</span>
+                <span className="text-[11px] font-bold" style={{ color: colorHex }}>{completionPct}%</span>
               </div>
             </div>
 
