@@ -1,6 +1,7 @@
 export interface AttendanceRow {
   userId: string;
   name: string;
+  groupId?: string | null;
   avatarUrl?: string | null;
   present: number;
   absent: number;
@@ -13,6 +14,7 @@ export interface AttendanceRow {
 export interface ConsistencyRow {
   userId: string;
   name: string;
+  groupId?: string | null;
   avatarUrl?: string | null;
   totalSolves: number;
   activeDays: number;
@@ -37,6 +39,7 @@ export interface StudentTrackCompletion {
 export interface CompletionRow {
   userId: string;
   name: string;
+  groupId?: string | null;
   avatarUrl?: string | null;
   solved: number;
   total: number;
@@ -62,7 +65,8 @@ export interface ExerciseMatrix {
   students: {
     userId: string;
     name: string;
-    avatarUrl?: string | null;
+  groupId?: string | null;
+  avatarUrl?: string | null;
     cells: Record<string, MatrixCell>;
   }[];
 }
@@ -77,7 +81,8 @@ export interface UpsolvingMatrix {
   students: {
     userId: string;
     name: string;
-    avatarUrl?: string | null;
+  groupId?: string | null;
+  avatarUrl?: string | null;
     cells: Record<string, MatrixCell>;
   }[];
 }
@@ -87,9 +92,9 @@ export interface DivisionsData {
     name: string;
     minRating: number;
     maxRating: number;
-    students: { userId: string; name: string; rating: number; avatarUrl?: string | null }[];
+    students: { userId: string; name: string; groupId?: string | null; rating: number; avatarUrl?: string | null }[];
   }[];
-  unassigned: { userId: string; name: string; rating: number; avatarUrl?: string | null }[];
+  unassigned: { userId: string; name: string; groupId?: string | null; rating: number; avatarUrl?: string | null }[];
 }
 
 export interface GroupSessionItem {

@@ -71,7 +71,7 @@ export class SummaryService {
         return {
           userId: s.id,
           name: s.name,
-          avatarUrl: s.avatarUrl ?? null,
+          avatarUrl: s.avatarUrl ?? null, groupId: s.groupId ?? null,
           present,
           absent,
           excused,
@@ -111,7 +111,7 @@ export class SummaryService {
         return {
           userId: s.id,
           name: s.name,
-          avatarUrl: s.avatarUrl ?? null,
+          avatarUrl: s.avatarUrl ?? null, groupId: s.groupId ?? null,
           totalSolves: days.reduce((sum, d) => sum + d.count, 0),
           activeDays: days.length,
           days,
@@ -198,7 +198,7 @@ export class SummaryService {
         return {
           userId: s.id,
           name: s.name,
-          avatarUrl: s.avatarUrl ?? null,
+          avatarUrl: s.avatarUrl ?? null, groupId: s.groupId ?? null,
           solved: done,
           total: totalCount,
           pct: totalCount ? Math.round((done / totalCount) * 100) : 0,
@@ -246,7 +246,7 @@ export class SummaryService {
       students: students.map((s) => ({
         userId: s.id,
         name: s.name,
-        avatarUrl: s.avatarUrl ?? null,
+        avatarUrl: s.avatarUrl ?? null, groupId: s.groupId ?? null,
         cells: Object.fromEntries([...(agg.get(s.id) ?? new Map()).entries()]),
       })),
     };
@@ -307,7 +307,7 @@ export class SummaryService {
       students: students.map((s) => ({
         userId: s.id,
         name: s.name,
-        avatarUrl: s.avatarUrl ?? null,
+        avatarUrl: s.avatarUrl ?? null, groupId: s.groupId ?? null,
         cells: Object.fromEntries([...(agg.get(s.id) ?? new Map()).entries()]),
       })),
     };

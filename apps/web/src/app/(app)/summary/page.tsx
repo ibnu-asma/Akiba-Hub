@@ -40,6 +40,7 @@ export default async function SummaryPage() {
       </header>
 
       <SummaryHub
+        groups={groups ?? []}
         attendance={attendance ?? []}
         consistency={consistency ?? []}
         completion={completion ?? []}
