@@ -14,11 +14,14 @@ function trackLabel(track: TrackDto): string {
 export function ExerciseEditor({
   tracks,
   problems,
+  initialTrackId = '',
 }: {
   tracks: TrackDto[];
   problems: ProblemDto[];
+  initialTrackId?: string;
 }) {
-  const [trackId, setTrackId] = useState('');
+
+  const [trackId, setTrackId] = useState(initialTrackId);
   const [problemIds, setProblemIds] = useState<string[]>([]);
   const [serverError, setServerError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -54,7 +57,7 @@ export function ExerciseEditor({
         setServerError(parsed?.error?.message ?? 'Could not add the exercises.');
         return;
       }
-      window.location.href = '/exercises';
+      window.location.href = initialTrackId ? `/tracks/${initialTrackId}` : '/exercises';
     } catch {
       setServerError('Network error — could not save exercises.');
     } finally {
@@ -120,7 +123,7 @@ export function ExerciseEditor({
 
       <div className="bg-slate-50 px-8 py-5 flex items-center justify-end gap-3 border-t border-slate-100 rounded-b-2xl">
         <a
-          href="/exercises"
+          href={initialTrackId ? `/tracks/${initialTrackId}` : "/exercises"}
           className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition"
         >
           Cancel

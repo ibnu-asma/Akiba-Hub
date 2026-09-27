@@ -182,8 +182,8 @@ export function TrackDetailBoard({
             <Link href={`/tracks/${track.id}/edit`} className="btn-secondary py-1.5 px-3 text-sm">
               Edit Track
             </Link>
-            <Link href={`/tracks/${track.id}/problems/new`} className="btn-primary py-1.5 px-3 text-sm shadow-sm">
-              + Add Problem
+            <Link href={`/exercises/new?trackId=${track.id}`} className="btn-primary py-1.5 px-3 text-sm shadow-sm">
+              + Assign Exercises
             </Link>
           </div>
         )}

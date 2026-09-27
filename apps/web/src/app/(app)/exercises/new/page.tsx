@@ -4,7 +4,8 @@ import { getMe, hubFetch, safe, type ProblemDto, type TrackDto } from '@/lib/api
 import { ExerciseEditor } from '@/components/head/exercise-editor';
 
 /** HoE/HoA: Add exercises page (SPEC §7.8). */
-export default async function AddExercisePage() {
+export default async function AddExercisePage({ searchParams }: { searchParams: Promise<{ trackId?: string }> }) {
+  const { trackId } = await searchParams;
   const me = await getMe();
   if (!me) redirect('/login');
   if ((ROLE_LEVEL[me.role as Role] ?? 1) < 2) redirect('/dashboard');
@@ -25,6 +26,7 @@ export default async function AddExercisePage() {
       <ExerciseEditor
         tracks={tracks ?? []}
         problems={(problems as unknown as ProblemDto[]) ?? []}
+        initialTrackId={trackId}
       />
     </div>
   );
