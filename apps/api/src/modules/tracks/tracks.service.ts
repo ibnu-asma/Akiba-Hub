@@ -223,7 +223,7 @@ export class TracksService {
         tags: problems.tags,
         link: problems.link,
         sortOrder: trackProblems.sortOrder,
-        createdAt: problems.createdAt,
+        createdAt: trackProblems.createdAt,
       })
       .from(trackProblems)
       .innerJoin(problems, eq(trackProblems.problemId, problems.id))
@@ -254,20 +254,20 @@ export class TracksService {
       superGroupId: tracks.superGroupId,
       superGroupName: superGroups.name,
       sortOrder: trackProblems.sortOrder,
-      createdAt: problems.createdAt,
+      createdAt: trackProblems.createdAt,
     };
 
     const join = (q: ReturnType<typeof this.db.db.select>) => q.from(trackProblems).innerJoin(tracks, eq(trackProblems.trackId, tracks.id)).innerJoin(superGroups, eq(tracks.superGroupId, superGroups.id)).innerJoin(problems, eq(trackProblems.problemId, problems.id)).where(where);
 
     if (opts.limit !== undefined) {
       const [rows, totalRows] = await Promise.all([
-        join(this.db.db.select(select)).orderBy(desc(problems.createdAt), asc(trackProblems.sortOrder)).limit(opts.limit).offset(opts.offset ?? 0).execute(),
+        join(this.db.db.select(select)).orderBy(desc(trackProblems.createdAt), asc(trackProblems.sortOrder)).limit(opts.limit).offset(opts.offset ?? 0).execute(),
         join(this.db.db.select({ count: sql<number>`count(*)::int` })).execute(),
       ]);
       return { rows, total: totalRows[0]?.count ?? 0 };
     }
 
-    const rows = await join(this.db.db.select(select)).orderBy(desc(problems.createdAt), asc(trackProblems.sortOrder)).limit(500).execute();
+    const rows = await join(this.db.db.select(select)).orderBy(desc(trackProblems.createdAt), asc(trackProblems.sortOrder)).limit(500).execute();
     return rows;
   }
 }

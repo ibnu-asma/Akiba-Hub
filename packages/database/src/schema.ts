@@ -86,6 +86,9 @@ export const tracks = pgTable(
     phase: varchar('phase', { length: 24 }).notNull(), // PYTHON | PHASE_I | CAMP_I | PHASE_II | CAMP_II
     name: varchar('name', { length: 160 }).notNull(),
     sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
@@ -99,6 +102,7 @@ export const trackProblems = pgTable(
     trackId: uuid('track_id').notNull(), // FK tracks.id
     problemId: uuid('problem_id').notNull(), // FK problems.id
     sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('track_problems_pk').on(t.trackId, t.problemId)],
 );
@@ -349,6 +353,7 @@ export const divisions = pgTable(
     minRating: real('min_rating').notNull(),
     maxRating: real('max_rating').notNull(),
     sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('divisions_name_idx').on(t.name)],
 );
@@ -392,6 +397,7 @@ export const roadmapSections = pgTable('roadmap_sections', {
   roadmapId: uuid('roadmap_id').notNull(),
   title: varchar('title', { length: 255 }).notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [index('roadmap_sections_roadmap_idx').on(t.roadmapId)]);
 
 export const roadmapItems = pgTable('roadmap_items', {
@@ -401,6 +407,7 @@ export const roadmapItems = pgTable('roadmap_items', {
   title: varchar('title', { length: 500 }).notNull(),
   link: varchar('link', { length: 2000 }).notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [index('roadmap_items_section_idx').on(t.sectionId)]);
 
 export const roadmapProgress = pgTable('roadmap_progress', {
