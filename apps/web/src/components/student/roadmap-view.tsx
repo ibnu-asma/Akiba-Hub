@@ -17,7 +17,10 @@ export function RoadmapView({ roadmap, completedItemIds, isHead }: { roadmap: Ro
   );
 
   const totalItems = roadmap.sections.reduce((acc, s) => acc + s.items.length, 0);
-  const progress = totalItems === 0 ? 0 : (completed.size / totalItems) * 100;
+  const roadmapCompletedCount = roadmap.sections.reduce((acc, section) => {
+    return acc + section.items.filter((item) => completed.has(item.id)).length;
+  }, 0);
+  const progress = totalItems === 0 ? 0 : (roadmapCompletedCount / totalItems) * 100;
 
   async function toggleComplete(itemId: string) {
     if (busy.has(itemId)) return;
@@ -99,10 +102,10 @@ export function RoadmapView({ roadmap, completedItemIds, isHead }: { roadmap: Ro
                 {Math.round(progress)}%
               </span>
               <div className="flex-1">
-                <ProgressBar value={completed.size} max={totalItems || 1} label="Overall Progress" />
+                <ProgressBar value={roadmapCompletedCount} max={totalItems || 1} label="Overall Progress" />
               </div>
               <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
-                {completed.size} / {totalItems}
+                {roadmapCompletedCount} / {totalItems}
               </span>
             </div>
           </div>
