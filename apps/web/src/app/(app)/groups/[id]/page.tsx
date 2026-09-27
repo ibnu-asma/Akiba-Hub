@@ -12,6 +12,6 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ id
     notFound();
   }
 
-  return <GroupProgressView progress={progress} />;
+  return <GroupProgressView progress={progress} me={me} />;
 }
 

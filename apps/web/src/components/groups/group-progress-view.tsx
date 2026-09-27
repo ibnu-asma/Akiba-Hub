@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/icon';
-import type { GroupProgressData, GroupSessionItem } from '@/lib/api';
+import type { GroupProgressData, GroupSessionItem, Me } from '@/lib/api';
+import { ROLE_LEVEL, type Role } from '@hub/shared';
 import { AttendanceDataTable } from './attendance-datatable';
 import { ConsistencyDataTable } from './consistency-datatable';
 import { CompletionDataTable } from './completion-datatable';
@@ -43,7 +44,7 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]['key'];
 
-export function GroupProgressView({ progress }: { progress: GroupProgressData }) {
+export function GroupProgressView({ progress, me }: { progress: GroupProgressData; me: Me }) {
   const [activeTab, setActiveTab] = useState<TabKey>('summary');
   const {
     group,
@@ -83,6 +84,14 @@ export function GroupProgressView({ progress }: { progress: GroupProgressData })
           <Icon name="chevronRight" className="h-4 w-4 rotate-180" />
           <span>Back to Groups</span>
         </Link>
+        {(ROLE_LEVEL[me.role as Role] ?? 1) >= 2 && (
+          <Link
+            href={`/groups/${group.id}/edit`}
+            className="btn-primary py-2 px-4 text-xs"
+          >
+            Edit Group
+          </Link>
+        )}
       </div>
 
       {/* Group Header Hero Card */}
