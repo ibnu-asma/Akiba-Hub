@@ -6,6 +6,11 @@ import { ScopeService } from '../../common/auth/scope.service.js';
 import { UsersService } from './users.service.js';
 import { z } from 'zod';
 
+
+const resetPasswordDto = z.object({
+  password: z.string().min(6),
+});
+
 const updateRoleDto = z.object({
   role: z.string(),
   groupId: z.string().uuid().nullable().optional(),
@@ -64,6 +69,19 @@ export class UsersController {
       name: principal.name,
       role: principal.role,
     });
+  }
+
+
+  @Patch(':id/password')
+  @UseGuards(AuthGuard, new MockRulesGuard(3)) // HoA only
+  async resetPassword(@Param('id') id: string, @Body() body: unknown, @CurrentPrincipal() principal: Principal) {
+    const parsed = resetPasswordDto.parse(body);
+    await this.users.resetPassword(id, parsed.password, {
+      id: principal.id,
+      name: principal.name,
+      role: principal.role,
+    });
+    return { ok: true };
   }
 
   @Delete(':id')

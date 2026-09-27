@@ -1,4 +1,6 @@
-import { Inject,  Injectable } from '@nestjs/common';
+import bcrypt from 'bcryptjs';
+import {
+  Inject, Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
 import { users, groups, invitations, problems, and, asc, eq, sql, isNull, inArray } from '@hub/database';
 import { DomainError, ROLES } from '@hub/shared';
@@ -246,6 +248,14 @@ export class UsersService {
       description: `changed ${summary.name}'s role to ${role}`,
     });
     return summary;
+  }
+
+  
+  async resetPassword(userId: string, newPassword: string, actor: ActorRef): Promise<void> {
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.db.db.update(users).set({ passwordHash }).where(eq(users.id, userId)).execute();
+    
+    
   }
 
   async softDelete(userId: string, actor: ActorRef): Promise<void> {

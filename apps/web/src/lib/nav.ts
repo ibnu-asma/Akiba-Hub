@@ -83,7 +83,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: 'Add exercise', href: '/exercises/new', icon: 'plus' },
       { label: 'Sessions', href: '/sessions', icon: 'calendar' },
       { label: 'Assign daily', href: '/daily-problem', icon: 'plus' },
-      { label: 'Stipend & Funds', href: '/stipends', icon: 'wallet' },
+      // { label: 'Stipend & Funds', href: '/stipends', icon: 'wallet' },
       { label: 'Summary', href: '/summary', icon: 'chart' },
     ],
   },
@@ -94,7 +94,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { label: 'Generate Invite', href: '/invites', icon: 'plus' },
       { label: 'Add Group', href: '/groups/new', icon: 'plus' },
-      { label: 'Roles', href: '/roles', icon: 'shield' },
+      { label: 'Users', href: '/roles', icon: 'shield' },
       { label: 'Super Groups', href: '/super-groups', icon: 'users' },
       { label: 'Recent Actions', href: '/activities', icon: 'clipboard' },
       { label: 'Reports', href: '/reports', icon: 'file' },

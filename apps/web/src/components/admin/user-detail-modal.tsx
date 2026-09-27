@@ -26,6 +26,10 @@ export function UserDetailModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [pwdBusy, setPwdBusy] = useState(false);
+  const [pwdError, setPwdError] = useState<string | null>(null);
+  const [pwdSaved, setPwdSaved] = useState(false);
 
   const groupOptions = [{ value: NO_GROUP, label: 'No group' }, ...groups.map((g) => ({ value: g.id, label: g.name }))];
 
@@ -50,6 +54,36 @@ export function UserDetailModal({
       setError('Network error — is the API running?');
     } finally {
       setBusy(false);
+    }
+  }
+
+  
+  async function resetPassword() {
+    if (newPassword.length < 6) {
+      setPwdError('Password must be at least 6 characters.');
+      return;
+    }
+    if (!window.confirm('Are you sure you want to forcibly reset this user\'s password?')) return;
+    
+    setPwdBusy(true);
+    setPwdError(null);
+    setPwdSaved(false);
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      if (!res.ok) {
+        setPwdError('Could not reset password.');
+        return;
+      }
+      setPwdSaved(true);
+      setNewPassword('');
+    } catch {
+      setPwdError('Network error — is the API running?');
+    } finally {
+      setPwdBusy(false);
     }
   }
 
@@ -86,6 +120,33 @@ export function UserDetailModal({
         </section>
 
         {error && <p className="field-error">{error}</p>}
+
+        <section className="space-y-3 pt-5 border-t border-slate-100">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Security</h3>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-slate-700">Force Reset Password</label>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New password..."
+                className="field-input flex-1 py-2 text-sm"
+              />
+              <button 
+                type="button" 
+                onClick={resetPassword} 
+                disabled={pwdBusy || !newPassword}
+                className="btn-primary px-4 py-2 text-sm bg-slate-800 hover:bg-slate-700 disabled:opacity-50"
+              >
+                {pwdBusy ? 'Resetting...' : 'Reset'}
+              </button>
+            </div>
+            {pwdError && <p className="text-xs text-red-600 font-medium mt-1">{pwdError}</p>}
+            {pwdSaved && <p className="text-xs text-emerald-600 font-medium mt-1">Password reset successfully ✓</p>}
+          </div>
+        </section>
+
 
         <section className="border-t border-slate-100 pt-5">
           <button
