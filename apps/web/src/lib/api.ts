@@ -71,17 +71,11 @@ export interface UserAttendanceRecord {
   userId: string;
   sessionId: string;
   sessionName: string;
-  status: string;
-  checkInAt?: string | null;
-  markedBy?: string | null;
-  startAt: string;
-  endAt: string | null;
-  sessionId: string;
-  sessionName: string;
   startAt: string;
   endAt: string | null;
   status: 'present' | 'absent' | 'late' | 'excused';
   checkInAt: string | null;
+  markedBy?: string | null;
 }
 
 export type UserDto = Me;

@@ -378,7 +378,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
                       <th className="px-6 py-4 font-bold">Student</th>
                       {grid.sessions.map((s) => (
                         <th key={s.id} className="px-2 py-4 text-center font-bold" title={s.name}>
-                          {s.startAt.slice(8)}
+                          {s.date ? s.date.slice(8) : ''}
                         </th>
                       ))}
                     </tr>
