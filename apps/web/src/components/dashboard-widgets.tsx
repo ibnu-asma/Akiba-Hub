@@ -123,6 +123,32 @@ function extractMeetingLink(session: SessionDto): string | null {
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /** Events card — nearest upcoming/ongoing events on top, filters out ended sessions, clickable meet links. */
+
+function formatEatTime(isoString: string) {
+  if (!isoString) return '';
+  const d = new Date(isoString);
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Africa/Addis_Ababa',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).format(d) + ' EAT';
+}
+
+function getEatDate(isoString: string) {
+  if (!isoString) return { monthStr: 'Date', dayNum: 1 };
+  const d = new Date(isoString);
+  const eatFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Africa/Addis_Ababa',
+    month: 'short',
+    day: 'numeric',
+  });
+  const parts = eatFormatter.formatToParts(d);
+  const monthStr = parts.find(p => p.type === 'month')?.value || 'Date';
+  const dayNum = parseInt(parts.find(p => p.type === 'day')?.value || '1', 10);
+  return { monthStr, dayNum };
+}
+
 export function EventsPanel({ sessions, scopeHint }: { sessions: SessionDto[] | null; scopeHint?: string }) {
   const now = new Date();
 
@@ -160,8 +186,7 @@ export function EventsPanel({ sessions, scopeHint }: { sessions: SessionDto[] | 
             const endTime = getSessionEndTime(session);
             const isLive = startTime <= now && endTime >= now;
             const meetLink = extractMeetingLink(session);
-            const monthStr = MONTH_NAMES[startTime.getMonth()] ?? 'Date';
-            const dayNum = startTime.getDate();
+            const { monthStr, dayNum } = getEatDate(session.startAt);
 
             return (
               <li
@@ -195,7 +220,7 @@ export function EventsPanel({ sessions, scopeHint }: { sessions: SessionDto[] | 
                     <p className="mt-1 text-xs text-slate-500 flex items-center gap-1.5 flex-wrap">
                       <span className="inline-flex items-center gap-1">
                         <Icon name="clock" className="h-3 w-3 text-slate-400" />
-                        {timeString || 'TBD'}
+                        {formatEatTime(session.startAt) || 'TBD'}
                       </span>
                       {session.lecturer && (
                         <span className="text-slate-400">· {session.lecturer}</span>
