@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TRACK_PHASE_LABELS, TRACK_PHASES, type TrackPhase } from '@hub/shared';
+import { Modal } from '@/components/modal';
 import type { SuperGroup, TrackDto } from '@/lib/api';
 
 /** Full-page editor to create or edit a curriculum track (SPEC §7.6). */
@@ -23,6 +24,7 @@ export function TrackEditor({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   function onPhaseChange(value: string) {
     setPhase(value);
@@ -68,7 +70,7 @@ export function TrackEditor({
   }
 
   async function remove() {
-    if (!isEditing || !window.confirm('Are you sure you want to delete this track? This cannot be undone.')) return;
+    if (!isEditing) return;
     setBusy(true);
     try {
       const res = await fetch(`/api/admin/tracks/${initialTrack!.id}`, { method: 'DELETE' });
@@ -95,7 +97,7 @@ export function TrackEditor({
             {isEditing && (
               <button
                 type="button"
-                onClick={remove}
+                onClick={() => setIsDeleting(true)}
                 disabled={busy}
                 className="text-xs font-bold text-red-500 hover:text-red-700 transition"
               >
@@ -189,6 +191,41 @@ export function TrackEditor({
           )}
         </button>
       </div>
+    
+      {isDeleting && (
+        <Modal title={<h3 className="text-lg font-bold text-red-600">Delete Track</h3>} onClose={() => setIsDeleting(false)}>
+          <div className="space-y-6">
+            <p className="text-sm text-slate-600">
+              Are you sure you want to completely delete the <span className="font-bold text-slate-900">{name}</span> track?
+            </p>
+            <p className="text-sm font-semibold text-red-500">
+              This action cannot be undone. All exercises and curriculum progress tied strictly to this track may be affected.
+            </p>
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setIsDeleting(false)}
+                disabled={busy}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-primary bg-red-600 hover:bg-red-700 shadow-sm flex items-center gap-2"
+                onClick={remove}
+                disabled={busy}
+              >
+                {busy ? (
+                  <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  'Yes, delete track'
+                )}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </form>
   );
 }
