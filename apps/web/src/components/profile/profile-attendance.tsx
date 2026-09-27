@@ -59,7 +59,7 @@ export function ProfileAttendance({
   // Filter records by selected year
   const yearRecords = useMemo(() => {
     return records.filter((r) => {
-      const yr = new Date(r.date).getFullYear();
+      const yr = new Date(r.startAt).getFullYear();
       return yr === selectedYear;
     });
   }, [records, selectedYear]);
@@ -88,10 +88,10 @@ export function ProfileAttendance({
   const attendanceDayMap = useMemo(() => {
     const map = new Map<string, { status: string; record: UserAttendanceRecord }>();
     for (const r of yearRecords) {
-      const existing = map.get(r.date);
+      const existing = map.get(r.startAt);
       // Priority: absent > late > excused > present
       if (!existing || r.status === 'absent' || (r.status === 'late' && existing.status === 'present')) {
-        map.set(r.date, { status: r.status, record: r });
+        map.set(r.startAt, { status: r.status, record: r });
       }
     }
     return map;
@@ -160,7 +160,7 @@ export function ProfileAttendance({
   const monthlyBreakdown = useMemo(() => {
     const map = new Map<number, { present: number; total: number }>();
     for (const r of yearRecords) {
-      const m = new Date(r.date).getMonth();
+      const m = new Date(r.startAt).getMonth();
       const curr = map.get(m) ?? { present: 0, total: 0 };
       curr.total++;
       if (r.status === 'present' || r.status === 'late') curr.present++;
@@ -293,7 +293,7 @@ export function ProfileAttendance({
                         const isToday = cell.dateStr === todayStr;
                         const hasSession = !!cell.status;
                         const timeText = cell.record
-                          ? formatCheckIn(cell.record.checkInAt || cell.record.startTime, cell.dateStr)
+                          ? formatCheckIn(cell.record.checkInAt || cell.record.startAt, cell.dateStr)
                           : '';
 
                         return (
@@ -386,11 +386,11 @@ export function ProfileAttendance({
               <div className="overflow-x-auto pb-2">
                 <div className="flex flex-wrap gap-1.5 max-h-[460px] overflow-y-auto p-1">
                   {yearRecords.map((r) => {
-                    const dateObj = new Date(r.date);
+                    const dateObj = new Date(r.startAt);
                     const dayNum = String(dateObj.getDate()).padStart(2, '0');
                     const monthStr = MONTH_NAMES[dateObj.getMonth()] ?? '';
                     const yearShort = String(dateObj.getFullYear()).slice(2);
-                    const checkInTime = formatCheckIn(r.checkInAt || r.startTime, r.date);
+                    const checkInTime = formatCheckIn(r.checkInAt || r.startAt, r.startAt);
 
                     // Color theme per status
                     let bgClass = 'bg-emerald-500 text-white';
@@ -410,7 +410,7 @@ export function ProfileAttendance({
                     return (
                       <div
                         key={r.id}
-                        title={`${r.sessionName} — ${r.date} (${r.status})`}
+                        title={`${r.sessionName} — ${r.startAt} (${r.status})`}
                         className={`group relative flex flex-col justify-between w-[52px] h-[52px] rounded-lg shadow-2xs overflow-hidden transition hover:scale-105 cursor-pointer ${bgClass}`}
                       >
                         {/* Top: Day number + Month/Year badge */}

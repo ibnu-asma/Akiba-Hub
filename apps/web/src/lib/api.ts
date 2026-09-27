@@ -68,11 +68,18 @@ export interface Me {
 
 export interface UserAttendanceRecord {
   id: string;
+  userId: string;
   sessionId: string;
   sessionName: string;
-  date: string;
-  startTime: string | null;
-  endTime: string | null;
+  status: string;
+  checkInAt?: string | null;
+  markedBy?: string | null;
+  startAt: string;
+  endAt: string | null;
+  sessionId: string;
+  sessionName: string;
+  startAt: string;
+  endAt: string | null;
   status: 'present' | 'absent' | 'late' | 'excused';
   checkInAt: string | null;
 }
@@ -132,9 +139,8 @@ export interface SessionDto {
   id: string;
   name: string;
   description: string | null;
-  date: string;
-  startTime: string | null;
-  endTime: string | null;
+  startAt: string;
+  endAt: string | null;
   location: string | null;
   lecturer: string | null;
   resourceLink?: string | null;

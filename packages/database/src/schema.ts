@@ -180,9 +180,8 @@ export const sessions = pgTable(
     id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     name: varchar('name', { length: 200 }).notNull(),
     description: text('description'),
-    date: date('date').notNull(),
-    startTime: varchar('start_time', { length: 16 }), // e.g. "8:00 PM"
-    endTime: varchar('end_time', { length: 16 }), // e.g. "11:00 PM"
+                startAt: timestamp('start_at', { withTimezone: true }).notNull().defaultNow(),
+    endAt: timestamp('end_at', { withTimezone: true }),
     location: varchar('location', { length: 200 }),
     resourceLink: varchar('resource_link', { length: 500 }),
     recordingLink: varchar('recording_link', { length: 500 }),
@@ -192,7 +191,7 @@ export const sessions = pgTable(
     createdBy: uuid('created_by').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
-  (t) => [index('sessions_date_idx').on(t.date)],
+  (t) => [index('sessions_start_at_idx').on(t.startAt)],
 );
 
 /** M2M: sessions span multiple groups (SPEC §7.3 multi-select). */

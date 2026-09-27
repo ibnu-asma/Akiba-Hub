@@ -79,16 +79,16 @@ function parseTimeString(timeStr?: string | null): { hours: number; minutes: num
 }
 
 function getSessionEndTime(session: SessionDto): Date {
-  const dateStr = session.date.slice(0, 10);
+  const dateStr = session.startAt.slice(0, 10);
   const [y, m, d] = dateStr.split('-').map(Number);
-  if (session.endTime) {
-    const t = parseTimeString(session.endTime);
+  if (session.endAt) {
+    const t = parseTimeString(session.endAt);
     if (t) {
       return new Date(y!, m! - 1, d!, t.hours, t.minutes, 0);
     }
   }
-  if (session.startTime) {
-    const t = parseTimeString(session.startTime);
+  if (session.startAt) {
+    const t = parseTimeString(session.startAt);
     if (t) {
       return new Date(y!, m! - 1, d!, t.hours + 2, t.minutes, 0);
     }
@@ -97,10 +97,10 @@ function getSessionEndTime(session: SessionDto): Date {
 }
 
 function getSessionStartTime(session: SessionDto): Date {
-  const dateStr = session.date.slice(0, 10);
+  const dateStr = session.startAt.slice(0, 10);
   const [y, m, d] = dateStr.split('-').map(Number);
-  if (session.startTime) {
-    const t = parseTimeString(session.startTime);
+  if (session.startAt) {
+    const t = parseTimeString(session.startAt);
     if (t) {
       return new Date(y!, m! - 1, d!, t.hours, t.minutes, 0);
     }
@@ -195,8 +195,7 @@ export function EventsPanel({ sessions, scopeHint }: { sessions: SessionDto[] | 
                     <p className="mt-1 text-xs text-slate-500 flex items-center gap-1.5 flex-wrap">
                       <span className="inline-flex items-center gap-1">
                         <Icon name="clock" className="h-3 w-3 text-slate-400" />
-                        {session.startTime ?? 'TBD'}
-                        {session.endTime ? ` – ${session.endTime}` : ''}
+                        {timeString || 'TBD'}
                       </span>
                       {session.lecturer && (
                         <span className="text-slate-400">· {session.lecturer}</span>

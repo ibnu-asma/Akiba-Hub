@@ -10,9 +10,8 @@ import { z } from 'zod';
 const createDto = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(4000).nullable().optional(),
-  date: z.string().min(1),
-  startTime: z.string().nullable().optional(),
-  endTime: z.string().nullable().optional(),
+  startAt: z.string().datetime().optional().nullable(),
+  endAt: z.string().datetime().optional().nullable(),
   location: z.string().max(200).nullable().optional(),
   resourceLink: z.string().url().nullable().optional().or(z.literal('')),
   recordingLink: z.string().url().nullable().optional().or(z.literal('')),
@@ -51,9 +50,8 @@ export class SessionsController {
       {
         name: parsed.name,
         description: parsed.description,
-        date: parsed.date,
-        startTime: parsed.startTime,
-        endTime: parsed.endTime,
+        startAt: parsed.startAt ? new Date(parsed.startAt) : new Date(),
+        endAt: parsed.endAt ? new Date(parsed.endAt) : null,
         location: parsed.location,
         resourceLink: parsed.resourceLink,
         recordingLink: parsed.recordingLink,
@@ -103,7 +101,7 @@ export class SessionsController {
     const parsed = createDto.parse(body);
     return this.sessions.update(
       id,
-      { ...parsed, date: parsed.date },
+      { ...parsed, startAt: parsed.startAt ? new Date(parsed.startAt) : new Date(), endAt: parsed.endAt ? new Date(parsed.endAt) : null },
       { id: principal.id, name: principal.name, role: principal.role }
     );
   }

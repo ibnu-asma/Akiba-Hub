@@ -49,9 +49,9 @@ export default async function SessionsPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-semibold text-slate-700">{session.date}</div>
-                    {session.startTime && (
-                      <div className="mt-0.5 text-xs text-slate-400">{session.startTime} {session.endTime ? `- ${session.endTime}` : ''}</div>
+                    <div className="font-semibold text-slate-700">{session.startAt.slice(0, 10)}</div>
+                    {session.startAt && (
+                      <div className="mt-0.5 text-xs text-slate-400">{session.startAt} {session.endAt ? `- ${session.endAt}` : ''}</div>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

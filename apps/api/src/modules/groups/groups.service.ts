@@ -286,14 +286,13 @@ export class GroupsService {
       .select({
         id: sessions.id,
         name: sessions.name,
-        date: sql<string>`to_char(${sessions.date}, 'YYYY-MM-DD')`,
-        startTime: sessions.startTime,
-        endTime: sessions.endTime,
+        startAt: sessions.startAt,
+        endAt: sessions.endAt,
       })
       .from(sessions)
       .innerJoin(sessionGroups, eq(sessions.id, sessionGroups.sessionId))
       .where(eq(sessionGroups.groupId, id))
-      .orderBy(desc(sessions.date), desc(sessions.createdAt))
+      .orderBy(desc(sessions.startAt), desc(sessions.createdAt))
       .limit(30)
       .execute();
 
@@ -319,9 +318,8 @@ export class GroupsService {
     const attendanceSessions = sessionRows.map((s) => ({
       id: s.id,
       name: s.name,
-      date: s.date,
-      startTime: s.startTime,
-      endTime: s.endTime,
+      startAt: s.startAt,
+      endAt: s.endAt,
     }));
 
     // Stats calculations

@@ -7,9 +7,8 @@ export interface SessionDto {
   id?: string;
   name: string;
   description?: string | null;
-  date: string;
-  startTime?: string | null;
-  endTime?: string | null;
+  startAt: string;
+  endAt?: string | null;
   location?: string | null;
   resourceLink?: string | null;
   recordingLink?: string | null;
@@ -20,11 +19,28 @@ export interface SessionDto {
 }
 
 export function SessionEditor({ groups, session }: { groups: Group[]; session?: SessionDto }) {
+
+  // Convert EAT UTC to YYYY-MM-DD and HH:MM
+  function parseEat(isoStr?: string | null) {
+    if (!isoStr) return { d: '', t: '' };
+    const date = new Date(isoStr);
+    // EAT is UTC+3
+    const eatOffsetMs = 3 * 60 * 60 * 1000;
+    const eatDate = new Date(date.getTime() + eatOffsetMs);
+    const d = eatDate.toISOString().slice(0, 10);
+    const t = eatDate.toISOString().slice(11, 16);
+    return { d, t };
+  }
+  
+  const initStart = parseEat(session?.startAt);
+  const initEnd = parseEat(session?.endAt);
+
   const [name, setName] = useState(session?.name ?? '');
   const [description, setDescription] = useState(session?.description ?? '');
-  const [date, setDate] = useState(session?.date ?? '');
-  const [startTime, setStartTime] = useState(session?.startTime ?? '');
-  const [endTime, setEndTime] = useState(session?.endTime ?? '');
+  const [date, setDate] = useState(initStart.d);
+  const [startTime, setStartTime] = useState(initStart.t);
+  const [endTime, setEndTime] = useState(initEnd.t);
+
   const [location, setLocation] = useState(session?.location ?? '');
   const [resourceLink, setResourceLink] = useState(session?.resourceLink ?? '');
   const [recordingLink, setRecordingLink] = useState(session?.recordingLink ?? '');
@@ -53,6 +69,29 @@ export function SessionEditor({ groups, session }: { groups: Group[]; session?: 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+
+    const eatOffsetMs = 3 * 60 * 60 * 1000;
+    let startAtIso = undefined;
+    if (date) {
+      const [y, m, d] = date.split('-').map(Number);
+      let h = 0, min = 0;
+      if (startTime) {
+        const [hr, mr] = startTime.split(':').map(Number);
+        h = hr; min = mr;
+      }
+      // Create date as UTC, then subtract 3 hours to represent the EAT time in true UTC
+      const utcTime = Date.UTC(y, m - 1, d, h, min, 0);
+      startAtIso = new Date(utcTime - eatOffsetMs).toISOString();
+    }
+    
+    let endAtIso = undefined;
+    if (date && endTime) {
+      const [y, m, d] = date.split('-').map(Number);
+      const [hr, mr] = endTime.split(':').map(Number);
+      const utcTime = Date.UTC(y, m - 1, d, hr, mr, 0);
+      endAtIso = new Date(utcTime - eatOffsetMs).toISOString();
+    }
+
     setBusy(true);
     setServerError(null);
 
@@ -60,9 +99,8 @@ export function SessionEditor({ groups, session }: { groups: Group[]; session?: 
       const payload = {
         name,
         description,
-        date,
-        startTime: startTime || null,
-        endTime: endTime || null,
+        startAt: startAtIso,
+        endAt: endAtIso || null,
         location: location || null,
         resourceLink: resourceLink || null,
         recordingLink: recordingLink || null,
@@ -143,7 +181,7 @@ export function SessionEditor({ groups, session }: { groups: Group[]; session?: 
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">Schedule & Location</h2>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start Time</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start Time (EAT)</label>
               <input
                 type="time"
                 value={startTime}
@@ -152,7 +190,7 @@ export function SessionEditor({ groups, session }: { groups: Group[]; session?: 
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">End Time</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">End Time (EAT)</label>
               <input
                 type="time"
                 value={endTime}

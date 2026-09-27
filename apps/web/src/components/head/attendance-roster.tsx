@@ -188,7 +188,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
           >
             <option value="" disabled>Choose a session...</option>
             {sessions.map((s) => (
-              <option key={s.id} value={s.id}>{s.name} {s.date ? `(${s.date})` : ''}</option>
+              <option key={s.id} value={s.id}>{s.name} {s.startAt ? `(${s.startAt})` : ''}</option>
             ))}
           </select>
 
@@ -209,7 +209,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
             {session && (
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
                 <Icon name="clock" className="h-3.5 w-3.5 text-slate-400" />
-                {session.startTime ?? 'Time TBD'} · {session.location ?? 'Remote'}
+                {session.startAt ?? 'Time TBD'} · {session.location ?? 'Remote'}
               </span>
             )}
             {group && (
@@ -378,7 +378,7 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
                       <th className="px-6 py-4 font-bold">Student</th>
                       {grid.sessions.map((s) => (
                         <th key={s.id} className="px-2 py-4 text-center font-bold" title={s.name}>
-                          {s.date.slice(8)}
+                          {s.startAt.slice(8)}
                         </th>
                       ))}
                     </tr>

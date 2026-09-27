@@ -9,9 +9,8 @@ type Status = (typeof ATTENDANCE_STATUSES)[keyof typeof ATTENDANCE_STATUSES];
 export interface CreateSessionInput {
   name: string;
   description?: string | null;
-  date: string;
-  startTime?: string | null;
-  endTime?: string | null;
+  startAt: Date;
+  endAt?: Date | null;
   location?: string | null;
   resourceLink?: string | null;
   recordingLink?: string | null;
@@ -33,9 +32,8 @@ export class SessionsService {
       .values({
         name: input.name,
         description: input.description ?? null,
-        date: input.date,
-        startTime: input.startTime ?? null,
-        endTime: input.endTime ?? null,
+        startAt: input.startAt,
+        endAt: input.endAt ?? null,
         location: input.location ?? null,
         resourceLink: input.resourceLink ?? null,
         recordingLink: input.recordingLink ?? null,
@@ -68,7 +66,7 @@ export class SessionsService {
   /** Sessions visible to the actor's scope (all for HoA; by groupIds otherwise). */
   async list(groupIds: string[], all: boolean) {
     if (all) {
-      return this.db.db.select().from(sessions).orderBy(desc(sessions.date)).execute();
+      return this.db.db.select().from(sessions).orderBy(desc(sessions.startAt)).execute();
     }
     if (groupIds.length === 0) return [];
     const links = await this.db.db
@@ -78,7 +76,7 @@ export class SessionsService {
       .execute();
     const ids = links.map((r) => r.sessionId);
     if (ids.length === 0) return [];
-    return this.db.db.select().from(sessions).where(inArray(sessions.id, ids)).orderBy(desc(sessions.date)).execute();
+    return this.db.db.select().from(sessions).where(inArray(sessions.id, ids)).orderBy(desc(sessions.startAt)).execute();
   }
 
   /** Roster per session with current attendance statuses (spec §7.4). */
@@ -97,9 +95,8 @@ export class SessionsService {
       .set({
         name: input.name,
         description: input.description ?? null,
-        date: input.date,
-        startTime: input.startTime ?? null,
-        endTime: input.endTime ?? null,
+        startAt: input.startAt,
+        endAt: input.endAt ?? null,
         location: input.location ?? null,
         resourceLink: input.resourceLink ?? null,
         recordingLink: input.recordingLink ?? null,
@@ -217,11 +214,11 @@ export class SessionsService {
     const end = `${String(next[0]).padStart(4, '0')}-${String(next[1]).padStart(2, '0')}-01`;
 
     const sessionRows = await this.db.db
-      .select({ id: sessions.id, name: sessions.name, date: sessions.date })
+      .select({ id: sessions.id, name: sessions.name, date: sessions.startAt })
       .from(sessions)
       .innerJoin(sessionGroups, eq(sessions.id, sessionGroups.sessionId))
-      .where(and(eq(sessionGroups.groupId, groupId), sql`${sessions.date} >= ${start}::date`, sql`${sessions.date} < ${end}::date`))
-      .orderBy(asc(sessions.date))
+      .where(and(eq(sessionGroups.groupId, groupId), sql`${sessions.startAt} >= ${start}::date`, sql`${sessions.startAt} < ${end}::date`))
+      .orderBy(asc(sessions.startAt))
       .execute();
 
     const students = await this.db.db
@@ -254,16 +251,15 @@ export class SessionsService {
         id: attendanceRecords.id,
         sessionId: attendanceRecords.sessionId,
         sessionName: sessions.name,
-        date: sessions.date,
-        startTime: sessions.startTime,
-        endTime: sessions.endTime,
+        startAt: sessions.startAt,
+        endAt: sessions.endAt,
         status: attendanceRecords.status,
         checkInAt: attendanceRecords.checkInAt,
       })
       .from(attendanceRecords)
       .innerJoin(sessions, eq(attendanceRecords.sessionId, sessions.id))
       .where(eq(attendanceRecords.userId, userId))
-      .orderBy(desc(sessions.date))
+      .orderBy(desc(sessions.startAt))
       .execute();
   }
 }

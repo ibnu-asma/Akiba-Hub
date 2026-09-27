@@ -43,6 +43,20 @@
       "when": 1790491308317,
       "tag": "0005_acoustic_madripoor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790521851715,
+      "tag": "0006_known_captain_universe",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790522054613,
+      "tag": "0007_complete_the_spike",
+      "breakpoints": true
     }
   ]
 }
