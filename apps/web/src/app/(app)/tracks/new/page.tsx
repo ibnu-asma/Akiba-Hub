@@ -13,7 +13,7 @@ export default async function NewTrackPage() {
 
   return (
     <div className="space-y-6">
-      <header className="max-w-3xl mx-auto">
+      <header>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Add Track</h1>
         <p className="mt-1 text-sm text-slate-500">
           Create a new curriculum phase for a super group cohort.

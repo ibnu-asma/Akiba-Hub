@@ -85,7 +85,7 @@ export function TrackEditor({
   }
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col relative max-w-3xl mx-auto">
+    <form onSubmit={submit} className="rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col relative">
       <div className="p-8 space-y-8">
         <section className="space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">

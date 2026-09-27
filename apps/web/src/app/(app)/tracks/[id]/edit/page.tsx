@@ -20,7 +20,7 @@ export default async function EditTrackPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="space-y-6">
-      <header className="max-w-3xl mx-auto">
+      <header>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Edit Track</h1>
         <p className="mt-1 text-sm text-slate-500">
           Modify the properties of {track.name}.
