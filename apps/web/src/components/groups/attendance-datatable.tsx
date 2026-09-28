@@ -5,6 +5,23 @@ import Link from 'next/link';
 import { Icon } from '@/components/icon';
 import type { AttendanceRow, GroupSessionItem, GroupProgressSummary } from '@/lib/api';
 
+
+function getEatDateString(iso: string) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const eatOffsetMs = 3 * 60 * 60 * 1000;
+  const eatDate = new Date(d.getTime() + eatOffsetMs);
+  return eatDate.toISOString().slice(0, 10);
+}
+
+function getEatTime(iso: string) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const eatOffsetMs = 3 * 60 * 60 * 1000;
+  const eatDate = new Date(d.getTime() + eatOffsetMs);
+  return eatDate.toISOString().slice(11, 16);
+}
+
 function initials(name: string): string {
   return name
     .split(/\s+/)
@@ -74,9 +91,9 @@ export function AttendanceDataTable({
   const monthOptions = useMemo(() => {
     const months = new Map<string, string>();
     for (const s of attendanceSessions) {
-      const yearMonth = s.date.slice(0, 7); // '2026-10'
+      const yearMonth = getEatDateString(s.startAt).slice(0, 7); // '2026-10'
       if (!months.has(yearMonth)) {
-        const d = new Date(s.date);
+        const d = new Date(s.startAt);
         const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
         months.set(yearMonth, label);
       }
@@ -91,7 +108,7 @@ export function AttendanceDataTable({
   const filteredSessions = useMemo(() => {
     return attendanceSessions.filter((s) => {
       // Month filter
-      if (selectedMonth !== 'all' && !s.date.startsWith(selectedMonth)) {
+      if (selectedMonth !== 'all' && !getEatDateString(s.startAt).startsWith(selectedMonth)) {
         return false;
       }
       // Track filter
@@ -309,15 +326,15 @@ export function AttendanceDataTable({
                   <th className="py-2.5 px-4 text-center text-slate-400">No sessions match current filter</th>
                 ) : (
                   visibleSessions.map((s) => {
-                    const d = s.date.slice(5).replace('-', '.');
+                    const d = getEatDateString(s.startAt).slice(5).replace('-', '.');
                     return (
                       <th
                         key={s.id}
                         className="py-2 px-1 text-center min-w-[54px] max-w-[64px] border-r border-slate-100 font-medium"
-                        title={`${s.name} (${s.date})`}
+                        title={`${s.name} (${getEatDateString(s.startAt)})`}
                       >
                         <div className="text-[10px] font-bold text-slate-800 leading-tight">{d}</div>
-                        <div className="text-[9px] text-slate-400 font-mono">{s.startTime ?? '09:00'}</div>
+                        <div className="text-[9px] text-slate-400 font-mono">{getEatTime(s.startAt) || '09:00'}</div>
                       </th>
                     );
                   })
@@ -376,7 +393,7 @@ export function AttendanceDataTable({
                             <td key={s.id} className="py-2 px-1 text-center border-r border-slate-100/60">
                               <span
                                 className={`inline-block h-3.5 w-10 rounded-xs shadow-2xs transition-transform group-hover:scale-105 cursor-pointer ${bg}`}
-                                title={`${student.name} - ${s.name} (${s.date} ${s.startTime || ''}): ${title}`}
+                                title={`${student.name} - ${s.name} (${getEatDateString(s.startAt)} ${getEatTime(s.startAt) || ''}): ${title}`}
                               />
                             </td>
                           );

@@ -100,9 +100,8 @@ export interface DivisionsData {
 export interface GroupSessionItem {
   id: string;
   name: string;
-  date: string;
-  startTime: string | null;
-  endTime: string | null;
+  startAt: string;
+  endAt: string | null;
 }
 
 export interface GroupProgressSummary {
