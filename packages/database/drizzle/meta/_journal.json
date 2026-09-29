@@ -64,6 +64,13 @@
       "when": 1790666169105,
       "tag": "0008_blue_phantom_reporter",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790693805926,
+      "tag": "0009_green_shriek",
+      "breakpoints": true
     }
   ]
 }
