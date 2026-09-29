@@ -38,21 +38,6 @@ const STATUS_META: Record<StatusKey, { label: string; active: string }> = {
 
 const STATUS_ORDER: StatusKey[] = ['present', 'excused', 'late', 'absent'];
 
-function formatSessionDate(isoStr?: string | null): string {
-  if (!isoStr) return '';
-  const d = new Date(isoStr);
-  if (isNaN(d.getTime())) return '';
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Africa/Addis_Ababa',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  }).format(d) + ' EAT';
-}
-
 function initials(name: string): string {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]!.toUpperCase()).join('');
 }
@@ -77,26 +62,6 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
     if (isHoA) return groups.sort((a,b) => a.name.localeCompare(b.name));
     return groups.filter(g => g.heads.some(h => h.id === me.id)).sort((a,b) => a.name.localeCompare(b.name));
   }, [groups, me, isHoA]);
-
-  // Categorize sessions into Active/Upcoming and Past (Ended)
-  const { activeSessions, pastSessions } = useMemo(() => {
-    const now = new Date();
-    const active: SessionDto[] = [];
-    const past: SessionDto[] = [];
-    for (const s of sessions) {
-      if (!s.startAt) continue;
-      const start = new Date(s.startAt);
-      const end = s.endAt ? new Date(s.endAt) : new Date(start.getTime() + 2 * 60 * 60 * 1000);
-      if (end < now) {
-        past.push(s);
-      } else {
-        active.push(s);
-      }
-    }
-    active.sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
-    past.sort((a, b) => new Date(b.startAt).getTime() - new Date(a.startAt).getTime());
-    return { activeSessions: active, pastSessions: past };
-  }, [sessions]);
 
   const [sessionId, setSessionId] = useState<string>('');
   const [groupId, setGroupId] = useState<string>('');
@@ -222,31 +187,9 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none hover:border-slate-300 focus:border-a2sv-500 focus:ring-2 focus:ring-a2sv-100 transition shadow-sm"
           >
             <option value="" disabled>Choose a session...</option>
-            {activeSessions.length > 0 && (
-              <optgroup label="Active & Upcoming">
-                {activeSessions.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({formatSessionDate(s.startAt)})
-                  </option>
-                ))}
-              </optgroup>
-            )}
-            {pastSessions.length > 0 && (
-              <optgroup label="Past Sessions (Ended)">
-                {pastSessions.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({formatSessionDate(s.startAt)})
-                  </option>
-                ))}
-              </optgroup>
-            )}
-            {activeSessions.length === 0 && pastSessions.length === 0 && (
-              sessions.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.startAt ? `(${formatSessionDate(s.startAt)})` : ''}
-                </option>
-              ))
-            )}
+            {sessions.map((s) => (
+              <option key={s.id} value={s.id}>{s.name} {s.startAt ? `(${s.startAt})` : ''}</option>
+            ))}
           </select>
 
           <select
@@ -264,17 +207,10 @@ export function AttendanceRoster({ sessions, groups, me }: { sessions: SessionDt
         {ready && (
           <div className="flex flex-wrap items-center gap-3">
             {session && (
-              <>
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
-                  <Icon name="clock" className="h-3.5 w-3.5 text-slate-400" />
-                  {formatSessionDate(session.startAt) || 'Time TBD'} · {session.location ?? 'Remote'}
-                </span>
-                {new Date(session.endAt || session.startAt) < new Date() && (
-                  <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 border border-amber-200/60 px-2.5 py-1 text-xs font-bold text-amber-800">
-                    Past Session (Retroactive Attendance)
-                  </span>
-                )}
-              </>
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
+                <Icon name="clock" className="h-3.5 w-3.5 text-slate-400" />
+                {session.startAt ?? 'Time TBD'} · {session.location ?? 'Remote'}
+              </span>
             )}
             {group && (
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">

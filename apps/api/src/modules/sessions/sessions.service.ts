@@ -180,15 +180,6 @@ export class SessionsService {
     rows: { userId: string; status: string }[],
     markedBy: string,
   ): Promise<void> {
-    const sessionRows = await this.db.db
-      .select({ id: sessions.id, startAt: sessions.startAt, endAt: sessions.endAt })
-      .from(sessions)
-      .where(eq(sessions.id, sessionId))
-      .execute();
-    const session = sessionRows[0];
-    const now = new Date();
-    const isPastSession = session ? new Date(session.endAt || session.startAt) < now : false;
-
     for (const r of rows) {
       if (!(Object.values(ATTENDANCE_STATUSES) as string[]).includes(r.status)) {
         throw DomainError.validation(`Invalid status: ${r.status}`);
@@ -199,9 +190,7 @@ export class SessionsService {
         .from(attendanceRecords)
         .where(and(eq(attendanceRecords.sessionId, sessionId), eq(attendanceRecords.userId, r.userId)))
         .execute();
-      
-      const defaultCheckIn = session && isPastSession ? new Date(session.startAt) : now;
-      const checkInAt = arriving ? (existing[0]?.checkInAt ?? defaultCheckIn) : null;
+      const checkInAt = arriving ? (existing[0]?.checkInAt ?? new Date()) : null;
       if (existing[0]) {
         await this.db.db
           .update(attendanceRecords)
