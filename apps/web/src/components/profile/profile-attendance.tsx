@@ -10,9 +10,13 @@ const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 function getEatDateString(isoStr?: string | null): string {
   if (!isoStr) return '';
   const d = new Date(isoStr);
-  const eatOffsetMs = 3 * 60 * 60 * 1000;
-  const eatDate = new Date(d.getTime() + eatOffsetMs);
-  return eatDate.toISOString().slice(0, 10);
+  if (isNaN(d.getTime())) return '';
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Africa/Addis_Ababa',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d);
 }
 
 function formatCheckIn(timeStr?: string | null): string {
@@ -31,11 +35,12 @@ function formatCheckIn(timeStr?: string | null): string {
 }
 
 function getAttendanceStatusDotClass(status?: string): string {
-  if (!status) return 'bg-slate-100 hover:bg-slate-200';
-  if (status === 'present') return 'bg-emerald-500 hover:bg-emerald-600';
-  if (status === 'late') return 'bg-blue-500 hover:bg-blue-600';
-  if (status === 'excused') return 'bg-amber-500 hover:bg-amber-600';
-  if (status === 'absent') return 'bg-red-500 hover:bg-red-600';
+  const s = status?.toLowerCase().trim();
+  if (!s) return 'bg-slate-100 hover:bg-slate-200';
+  if (s === 'present') return 'bg-emerald-500 hover:bg-emerald-600';
+  if (s === 'late') return 'bg-blue-500 hover:bg-blue-600';
+  if (s === 'excused') return 'bg-amber-500 hover:bg-amber-600';
+  if (s === 'absent') return 'bg-red-500 hover:bg-red-600';
   return 'bg-slate-100 hover:bg-slate-200';
 }
 
@@ -88,10 +93,13 @@ export function ProfileAttendance({
     const map = new Map<string, { status: string; record: UserAttendanceRecord }>();
     for (const r of yearRecords) {
       const dayKey = getEatDateString(r.startAt);
+      if (!dayKey) continue;
       const existing = map.get(dayKey);
+      const s = r.status?.toLowerCase().trim();
+      const existingS = existing?.status?.toLowerCase().trim();
       // Priority: absent > late > excused > present
-      if (!existing || r.status === 'absent' || (r.status === 'late' && existing.status === 'present')) {
-        map.set(dayKey, { status: r.status, record: r });
+      if (!existing || s === 'absent' || (s === 'late' && existingS === 'present')) {
+        map.set(dayKey, { status: s, record: r });
       }
     }
     return map;
@@ -99,8 +107,8 @@ export function ProfileAttendance({
 
   // Generate 52-53 weeks for the calendar heatmap (Consistency Style)
   const { weeks, monthHeaders } = useMemo(() => {
-    const start = new Date(selectedYear, 0, 1);
-    const end = new Date(selectedYear, 11, 31);
+    const start = new Date(selectedYear, 0, 1, 12, 0, 0);
+    const end = new Date(selectedYear, 11, 31, 12, 0, 0);
 
     const startOffset = start.getDay();
     const curr = new Date(start);
