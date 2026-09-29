@@ -37,7 +37,11 @@ export const users = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
-  (t) => [uniqueIndex('users_email_idx').on(t.email)],
+  (t) => [
+    uniqueIndex('users_email_idx').on(t.email),
+    index('users_group_id_idx').on(t.groupId),
+    index('users_role_idx').on(t.role),
+  ],
 );
 
 export const superGroups = pgTable(
@@ -201,7 +205,10 @@ export const sessionGroups = pgTable(
     sessionId: uuid('session_id').notNull(),
     groupId: uuid('group_id').notNull(),
   },
-  (t) => [uniqueIndex('session_groups_pk').on(t.sessionId, t.groupId)],
+  (t) => [
+    uniqueIndex('session_groups_pk').on(t.sessionId, t.groupId),
+    index('session_groups_group_id_idx').on(t.groupId),
+  ],
 );
 
 export const attendanceRecords = pgTable(

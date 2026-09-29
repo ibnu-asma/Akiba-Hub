@@ -17,7 +17,7 @@ import {
 } from '@hub/database';
 import { DataScope } from '../../common/auth/scope.service.js';
 
-type Student = { id: string; name: string; groupId: string | null; rating: number; avatarUrl: string | null };
+export type Student = { id: string; name: string; groupId: string | null; rating: number; avatarUrl: string | null };
 type SQLFragment = ReturnType<typeof sql>;
 
 /**
@@ -34,7 +34,8 @@ export class SummaryService {
     return scope.isGlobal ? sql`true` : inArray(users.groupId, scope.groupIds);
   }
 
-  private async students(scope: DataScope): Promise<Student[]> {
+  async students(scope: DataScope, preloaded?: Student[]): Promise<Student[]> {
+    if (preloaded) return preloaded;
     return this.db.db
       .select({ id: users.id, name: users.name, groupId: users.groupId, rating: users.rating, avatarUrl: users.avatarUrl })
       .from(users)
@@ -44,7 +45,7 @@ export class SummaryService {
   }
 
   /** Attendance — per-student counts + present % (SPEC §7.10.1). */
-  async attendance(scope: DataScope) {
+  async attendance(scope: DataScope, preloadedStudents?: Student[]) {
     const rows = await this.db.db
       .select({ userId: attendanceRecords.userId, status: attendanceRecords.status })
       .from(attendanceRecords)
@@ -52,7 +53,7 @@ export class SummaryService {
       .where(sql`${users.role} = 'student' AND (${this.scoped(scope)})`)
       .execute();
 
-    const students = await this.students(scope);
+    const students = await this.students(scope, preloadedStudents);
     const byUser = new Map<string, Record<string, number>>();
     for (const row of rows) {
       const bucket = byUser.get(row.userId) ?? {};
@@ -84,7 +85,7 @@ export class SummaryService {
   }
 
   /** Consistency — daily solve counts per student (SPEC §7.10.2). */
-  async consistency(scope: DataScope) {
+  async consistency(scope: DataScope, preloadedStudents?: Student[]) {
     const rows = await this.db.db
       .select({
         userId: submissions.userId,
@@ -97,7 +98,7 @@ export class SummaryService {
       .groupBy(submissions.userId, sql`to_char(${submissions.createdAt}, 'YYYY-MM-DD')`)
       .execute();
 
-    const students = await this.students(scope);
+    const students = await this.students(scope, preloadedStudents);
     const byUser = new Map<string, { day: string; count: number }[]>();
     for (const row of rows) {
       const list = byUser.get(row.userId) ?? [];
@@ -121,7 +122,7 @@ export class SummaryService {
   }
 
   /** Completion — % of assigned track problems solved, per student (SPEC §7.10.3). */
-  async completion(scope: DataScope) {
+  async completion(scope: DataScope, preloadedStudents?: Student[]) {
     let superGroupFilter: SQLFragment;
     if (scope.isGlobal) {
       superGroupFilter = sql`true`;
@@ -166,7 +167,7 @@ export class SummaryService {
       .where(sql`${users.role} = 'student' AND (${this.scoped(scope)})`)
       .execute();
 
-    const students = await this.students(scope);
+    const students = await this.students(scope, preloadedStudents);
     const solvedSet = new Map<string, Set<string>>();
     for (const row of solved) {
       const set = solvedSet.get(row.userId) ?? new Set<string>();
@@ -209,9 +210,9 @@ export class SummaryService {
   }
 
   /** Exercise matrix — problems × students, cell = attempts | minutes (SPEC §7.10.4). */
-  async exercise(scope: DataScope) {
+  async exercise(scope: DataScope, preloadedStudents?: Student[]) {
     const problemRows = await this.db.db.select().from(problems).orderBy(problems.createdAt).execute();
-    const students = await this.students(scope);
+    const students = await this.students(scope, preloadedStudents);
     const rows = await this.db.db
       .select({
         userId: submissions.userId,
@@ -253,7 +254,7 @@ export class SummaryService {
   }
 
   /** Upsolving — contest problems × students matrix (SPEC §7.10.5). */
-  async upsolving(scope: DataScope) {
+  async upsolving(scope: DataScope, preloadedStudents?: Student[]) {
     const contestsRows = await this.db.db
       .select({ id: contests.id, name: contests.name, date: contests.date })
       .from(contests)
@@ -270,7 +271,7 @@ export class SummaryService {
       .from(contestProblems)
       .leftJoin(problems, eq(contestProblems.problemId, problems.id))
       .execute();
-    const students = await this.students(scope);
+    const students = await this.students(scope, preloadedStudents);
     const rows = await this.db.db
       .select({
         userId: submissions.userId,
@@ -314,9 +315,9 @@ export class SummaryService {
   }
 
   /** Divisions — bucket students by rating thresholds (SPEC §7.10.6). */
-  async divisions(scope: DataScope) {
+  async divisions(scope: DataScope, preloadedStudents?: Student[]) {
     const divs = await this.db.db.select().from(divisions).orderBy(divisions.sortOrder).execute();
-    const students = await this.students(scope);
+    const students = await this.students(scope, preloadedStudents);
     return {
       divisions: divs.map((d) => ({
         name: d.name,

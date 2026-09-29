@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/icon';
 import { GroupCard } from './group-card';
@@ -40,6 +40,23 @@ export function GroupsCatalog({
 }) {
   const [activeTab, setActiveTab] = useState<'groups' | 'users'>('groups');
   
+  const [userList, setUserList] = useState<UserSummaryDto[]>(users ?? []);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'users' && userList.length === 0 && !loadingUsers) {
+      setLoadingUsers(true);
+      fetch('/api/admin/users')
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          if (Array.isArray(data)) setUserList(data);
+          else if (data && Array.isArray(data.rows)) setUserList(data.rows);
+        })
+        .catch(() => {})
+        .finally(() => setLoadingUsers(false));
+    }
+  }, [activeTab, userList.length, loadingUsers]);
+
   const [q, setQ] = useState('');
   const [superGroupId, setSuperGroupId] = useState(ALL);
   const [country, setCountry] = useState(ALL);
@@ -92,9 +109,9 @@ const filterGroup = (g: Group) => {
   // Apply filters to Users
 
   const filteredUsers = useMemo(() => {
-    if (!users) return [];
+    if (!userList || userList.length === 0) return [];
     const query = q.trim().toLowerCase();
-    return users.filter(u => {
+    return userList.filter(u => {
       if (query) {
         if (!u.name.toLowerCase().includes(query) && !u.email.toLowerCase().includes(query)) return false;
       }
@@ -104,28 +121,28 @@ const filterGroup = (g: Group) => {
       if (userUnivFilter !== ALL && (u.university ?? '') !== userUnivFilter) return false;
       return true;
     }).sort((a, b) => a.name.localeCompare(b.name));
-  }, [users, q, userGroupFilter, userRoleFilter, userCountryFilter, userUnivFilter]);
+  }, [userList, q, userGroupFilter, userRoleFilter, userCountryFilter, userUnivFilter]);
 
   const userGroups = useMemo(() => {
-    if (!users) return [];
-    const ids = new Set(users.map(u => u.groupId).filter(Boolean) as string[]);
+    if (!userList) return [];
+    const ids = new Set(userList.map(u => u.groupId).filter(Boolean) as string[]);
     return groups.filter(g => ids.has(g.id)).sort((a,b) => a.name.localeCompare(b.name));
-  }, [users, groups]);
+  }, [userList, groups]);
   
   const userCountries = useMemo(() => {
-    if (!users) return [];
-    return Array.from(new Set(users.map(u => u.country).filter(Boolean) as string[])).sort();
-  }, [users]);
+    if (!userList) return [];
+    return Array.from(new Set(userList.map(u => u.country).filter(Boolean) as string[])).sort();
+  }, [userList]);
   
   const userUnivs = useMemo(() => {
-    if (!users) return [];
-    return Array.from(new Set(users.map(u => u.university).filter(Boolean) as string[])).sort();
-  }, [users]);
+    if (!userList) return [];
+    return Array.from(new Set(userList.map(u => u.university).filter(Boolean) as string[])).sort();
+  }, [userList]);
   
   const userRoles = useMemo(() => {
-    if (!users) return [];
-    return Array.from(new Set(users.map(u => u.role))).sort();
-  }, [users]);
+    if (!userList) return [];
+    return Array.from(new Set(userList.map(u => u.role))).sort();
+  }, [userList]);
 
 
   const pagedUsers = useMemo(() => {
@@ -275,7 +292,21 @@ const filterGroup = (g: Group) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-200">
-              {pagedUsers.length === 0 ? (
+              {loadingUsers && userList.length === 0 ? (
+                [1, 2, 3, 4, 5, 6].map((i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-slate-200" />
+                        <div className="h-4 w-32 bg-slate-200 rounded" />
+                      </div>
+                    </td>
+                    <td className="px-6 py-4"><div className="h-4 w-40 bg-slate-100 rounded" /></td>
+                    <td className="px-6 py-4"><div className="h-4 w-24 bg-slate-100 rounded" /></td>
+                    <td className="px-6 py-4"><div className="h-5 w-16 bg-slate-100 rounded-full" /></td>
+                  </tr>
+                ))
+              ) : pagedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-slate-500 text-sm">
                     No users found matching your search.

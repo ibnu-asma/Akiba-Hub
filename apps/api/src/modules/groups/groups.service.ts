@@ -272,13 +272,16 @@ export class GroupsService {
     const group = await this.getById(id);
     const scope = { role: 'head_of_education', isGlobal: false, groupIds: [id] };
 
+    // Preload students once so all 6 summary aggregations reuse it without 6 duplicate DB queries
+    const preloadedStudents = await this.summary.students(scope);
+
     const [attendance, consistency, completion, exercise, upsolving, divisions] = await Promise.all([
-      this.summary.attendance(scope),
-      this.summary.consistency(scope),
-      this.summary.completion(scope),
-      this.summary.exercise(scope),
-      this.summary.upsolving(scope),
-      this.summary.divisions(scope),
+      this.summary.attendance(scope, preloadedStudents),
+      this.summary.consistency(scope, preloadedStudents),
+      this.summary.completion(scope, preloadedStudents),
+      this.summary.exercise(scope, preloadedStudents),
+      this.summary.upsolving(scope, preloadedStudents),
+      this.summary.divisions(scope, preloadedStudents),
     ]);
 
     // Query recent sessions for this group
