@@ -7,29 +7,27 @@ import type { UserAttendanceRecord } from '@/lib/api';
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 
-function formatCheckIn(timeStr?: string | null, dateStr?: string): string {
+function getEatDateString(isoStr?: string | null): string {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  const eatOffsetMs = 3 * 60 * 60 * 1000;
+  const eatDate = new Date(d.getTime() + eatOffsetMs);
+  return eatDate.toISOString().slice(0, 10);
+}
+
+function formatCheckIn(timeStr?: string | null): string {
   if (timeStr) {
-    if (timeStr.includes(':')) {
-      const parts = timeStr.trim().split(/[: ]/);
-      let h = parseInt(parts[0]!, 10);
-      const m = parts[1] ?? '00';
-      const ampm = timeStr.toLowerCase().includes('pm')
-        ? 'PM'
-        : timeStr.toLowerCase().includes('am')
-          ? 'AM'
-          : h >= 12
-            ? 'PM'
-            : 'AM';
-      if (h > 12) h -= 12;
-      if (h === 0) h = 12;
-      return `${h}:${m} ${ampm}`;
-    }
     const d = new Date(timeStr);
     if (!isNaN(d.getTime())) {
-      return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      return new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Africa/Addis_Ababa',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      }).format(d);
     }
   }
-  return '4:15 PM';
+  return '';
 }
 
 function getAttendanceStatusDotClass(status?: string): string {
@@ -59,7 +57,8 @@ export function ProfileAttendance({
   // Filter records by selected year
   const yearRecords = useMemo(() => {
     return records.filter((r) => {
-      const yr = new Date(r.startAt).getFullYear();
+      const eatDate = getEatDateString(r.startAt);
+      const yr = parseInt(eatDate.slice(0, 4), 10);
       return yr === selectedYear;
     });
   }, [records, selectedYear]);
@@ -88,10 +87,11 @@ export function ProfileAttendance({
   const attendanceDayMap = useMemo(() => {
     const map = new Map<string, { status: string; record: UserAttendanceRecord }>();
     for (const r of yearRecords) {
-      const existing = map.get(r.startAt);
+      const dayKey = getEatDateString(r.startAt);
+      const existing = map.get(dayKey);
       // Priority: absent > late > excused > present
       if (!existing || r.status === 'absent' || (r.status === 'late' && existing.status === 'present')) {
-        map.set(r.startAt, { status: r.status, record: r });
+        map.set(dayKey, { status: r.status, record: r });
       }
     }
     return map;
@@ -160,7 +160,8 @@ export function ProfileAttendance({
   const monthlyBreakdown = useMemo(() => {
     const map = new Map<number, { present: number; total: number }>();
     for (const r of yearRecords) {
-      const m = new Date(r.startAt).getMonth();
+      const eatDate = getEatDateString(r.startAt);
+      const m = parseInt(eatDate.slice(5, 7), 10) - 1;
       const curr = map.get(m) ?? { present: 0, total: 0 };
       curr.total++;
       if (r.status === 'present' || r.status === 'late') curr.present++;
@@ -293,7 +294,7 @@ export function ProfileAttendance({
                         const isToday = cell.dateStr === todayStr;
                         const hasSession = !!cell.status;
                         const timeText = cell.record
-                          ? formatCheckIn(cell.record.checkInAt || cell.record.startAt, cell.dateStr)
+                          ? formatCheckIn(cell.record.checkInAt || cell.record.startAt)
                           : '';
 
                         return (
@@ -386,11 +387,12 @@ export function ProfileAttendance({
               <div className="overflow-x-auto pb-2">
                 <div className="flex flex-wrap gap-1.5 max-h-[460px] overflow-y-auto p-1">
                   {yearRecords.map((r) => {
-                    const dateObj = new Date(r.startAt);
-                    const dayNum = String(dateObj.getDate()).padStart(2, '0');
-                    const monthStr = MONTH_NAMES[dateObj.getMonth()] ?? '';
-                    const yearShort = String(dateObj.getFullYear()).slice(2);
-                    const checkInTime = formatCheckIn(r.checkInAt || r.startAt, r.startAt);
+                    const dateStr = getEatDateString(r.startAt);
+                    const [y, m, d] = dateStr.split('-').map(Number);
+                    const dayNum = String(d || 1).padStart(2, '0');
+                    const monthStr = MONTH_NAMES[(m ?? 1) - 1] ?? '';
+                    const yearShort = String(y || 2026).slice(2);
+                    const checkInTime = formatCheckIn(r.checkInAt || r.startAt);
 
                     // Color theme per status
                     let bgClass = 'bg-emerald-500 text-white';
@@ -410,7 +412,7 @@ export function ProfileAttendance({
                     return (
                       <div
                         key={r.id}
-                        title={`${r.sessionName} — ${r.startAt} (${r.status})`}
+                        title={`${r.sessionName} — ${dateStr} (${r.status})`}
                         className={`group relative flex flex-col justify-between w-[52px] h-[52px] rounded-lg shadow-2xs overflow-hidden transition hover:scale-105 cursor-pointer ${bgClass}`}
                       >
                         {/* Top: Day number + Month/Year badge */}
@@ -432,7 +434,7 @@ export function ProfileAttendance({
                             ? 'Absent'
                             : r.status === 'excused'
                               ? 'Excused'
-                              : checkInTime}
+                              : checkInTime || 'Present'}
                         </div>
                       </div>
                     );
