@@ -37,12 +37,6 @@ jobs:
           NODE_ENV: production
           API_URL: https://api.akibatech.com
 
-      - name: Run Database Migrations
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        if: ${{ env.DATABASE_URL != '' }}
-        run: pnpm db:migrate
-
       - name: Prepare Web Deployment Package
         run: |
           mkdir -p deploy-web
@@ -71,6 +65,39 @@ jobs:
       - name: Prepare API Deployment Package
         run: |
           mkdir -p deploy-api
+          cp -r packages/database/drizzle deploy-api/drizzle
+
+          cat << 'EOF' > deploy-api/migrate.js
+          import { drizzle } from 'drizzle-orm/node-postgres';
+          import { migrate } from 'drizzle-orm/node-postgres/migrator';
+          import pg from 'pg';
+          import path from 'path';
+          import { fileURLToPath } from 'url';
+
+          const __dirname = path.dirname(fileURLToPath(import.meta.url));
+          const url = process.env.DATABASE_URL;
+          if (!url) {
+            console.error('[migrate] ERROR: DATABASE_URL environment variable is not set.');
+            process.exit(1);
+          }
+
+          const client = new pg.Client({ connectionString: url });
+          async function main() {
+            console.log('[migrate] Connecting to database...');
+            await client.connect();
+            const db = drizzle(client);
+            console.log('[migrate] Running pending migrations from ./drizzle...');
+            await migrate(db, { migrationsFolder: path.join(__dirname, 'drizzle') });
+            console.log('[migrate] All migrations applied successfully!');
+            await client.end();
+          }
+
+          main().catch((err) => {
+            console.error('[migrate] Migration failed:', err);
+            process.exit(1);
+          });
+          EOF
+
           pnpm exec esbuild apps/api/dist/main.js \
             --bundle \
             --platform=node \
@@ -99,6 +126,10 @@ jobs:
               version: '1.0.0',
               type: 'module',
               main: 'server.js',
+              scripts: {
+                start: 'node server.js',
+                migrate: 'node migrate.js'
+              },
               dependencies: deps
             };
             fs.writeFileSync('deploy-api/package.json', JSON.stringify(pkg, null, 2));

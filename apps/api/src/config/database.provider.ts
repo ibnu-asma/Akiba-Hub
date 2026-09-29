@@ -1,5 +1,5 @@
-import { Injectable, Scope } from '@nestjs/common';
-import { createDb, DB } from '@hub/database';
+import { Injectable, Scope, OnModuleInit } from '@nestjs/common';
+import { createDb, autoMigrate, DB } from '@hub/database';
 import { env } from './env.js';
 
 /**
@@ -7,7 +7,7 @@ import { env } from './env.js';
  * Registered once (Scope.DEFAULT) in AppModule.
  */
 @Injectable({ scope: Scope.DEFAULT })
-export class DatabaseProvider {
+export class DatabaseProvider implements OnModuleInit {
   readonly db: DB['db'];
   readonly pool: DB['pool'];
 
@@ -21,6 +21,10 @@ export class DatabaseProvider {
     const { db, pool } = createDb(env.DATABASE_URL);
     this.db = db;
     this.pool = pool;
+  }
+
+  async onModuleInit(): Promise<void> {
+    await autoMigrate(this.db);
   }
 
   /** Gracefully close the pool on shutdown. */
