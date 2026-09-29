@@ -49,7 +49,6 @@ export function GroupCard({ group }: { group: Group }) {
 
             <Link
               href={`/groups/${group.id}`}
-              prefetch={false}
               className="text-sm font-bold text-slate-900 group-hover:text-emerald-600 transition truncate"
               title={group.name}
             >
@@ -59,7 +58,6 @@ export function GroupCard({ group }: { group: Group }) {
 
           <Link
             href={`/groups/${group.id}`}
-            prefetch={false}
             className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition shrink-0 group-hover:translate-x-0.5"
           >
             <span>Progress</span>
@@ -122,7 +120,6 @@ export function GroupCard({ group }: { group: Group }) {
 
         <Link
           href={`/groups/${group.id}`}
-          prefetch={false}
           className="rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition"
         >
           View details

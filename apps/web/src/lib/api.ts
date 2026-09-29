@@ -32,7 +32,7 @@ export async function hubFetch<T>(path: string, init?: RequestInit): Promise<T> 
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
-    cache: init?.cache ?? 'no-store',
+    cache: 'no-store',
   });
 
   if (!res.ok) {
