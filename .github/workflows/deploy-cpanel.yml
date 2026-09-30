@@ -71,13 +71,29 @@ jobs:
           import { drizzle } from 'drizzle-orm/node-postgres';
           import { migrate } from 'drizzle-orm/node-postgres/migrator';
           import pg from 'pg';
+          import fs from 'fs';
           import path from 'path';
           import { fileURLToPath } from 'url';
 
           const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+          // Load from .env if DATABASE_URL is not set in environment
+          if (!process.env.DATABASE_URL && fs.existsSync('.env')) {
+            const lines = fs.readFileSync('.env', 'utf8').split('\n');
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+                const [k, ...v] = trimmed.split('=');
+                if (k.trim() === 'DATABASE_URL') {
+                  process.env.DATABASE_URL = v.join('=').trim().replace(/^['"]|['"]$/g, '');
+                }
+              }
+            }
+          }
+
           const url = process.env.DATABASE_URL;
           if (!url) {
-            console.error('[migrate] ERROR: DATABASE_URL environment variable is not set.');
+            console.error('[migrate] ERROR: DATABASE_URL environment variable is not set and not found in .env.');
             process.exit(1);
           }
 
