@@ -37,7 +37,11 @@ export const users = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
-  (t) => [uniqueIndex('users_email_idx').on(t.email)],
+  (t) => [
+    uniqueIndex('users_email_idx').on(t.email),
+    index('users_group_id_idx').on(t.groupId),
+    index('users_role_idx').on(t.role),
+  ],
 );
 
 export const superGroups = pgTable(
@@ -63,7 +67,10 @@ export const groups = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
   },
-  (t) => [uniqueIndex('groups_short_name_idx').on(t.shortName)],
+  (t) => [
+    uniqueIndex('groups_short_name_idx').on(t.shortName),
+    index('groups_super_group_idx').on(t.superGroupId),
+  ],
 );
 
 /** M2M: which heads (users with role head_of_education|head_of_academy) lead a group. */
@@ -74,7 +81,10 @@ export const groupHeads = pgTable(
     userId: uuid('user_id').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
-  (t) => [uniqueIndex('group_heads_pk').on(t.groupId, t.userId)],
+  (t) => [
+    uniqueIndex('group_heads_pk').on(t.groupId, t.userId),
+    index('group_heads_user_idx').on(t.userId),
+  ],
 );
 
 /** Curriculum phases per SuperGroup (SPEC §10 Track). */
@@ -101,7 +111,10 @@ export const trackProblems = pgTable(
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('track_problems_pk').on(t.trackId, t.problemId)],
+  (t) => [
+    uniqueIndex('track_problems_pk').on(t.trackId, t.problemId),
+    index('track_problems_problem_idx').on(t.problemId),
+  ],
 );
 
 export const problems = pgTable(
@@ -160,7 +173,10 @@ export const contestGroups = pgTable(
     contestId: uuid('contest_id').notNull(),
     groupId: uuid('group_id').notNull(),
   },
-  (t) => [uniqueIndex('contest_groups_pk').on(t.contestId, t.groupId)],
+  (t) => [
+    uniqueIndex('contest_groups_pk').on(t.contestId, t.groupId),
+    index('contest_groups_group_idx').on(t.groupId),
+  ],
 );
 
 export const contestProblems = pgTable(
@@ -171,7 +187,10 @@ export const contestProblems = pgTable(
     pseudo: varchar('pseudo', { length: 4 }).notNull(), // A | B | C ...
     problemId: uuid('problem_id').notNull(),
   },
-  (t) => [uniqueIndex('contest_problems_pk').on(t.contestId, t.pseudo)],
+  (t) => [
+    uniqueIndex('contest_problems_pk').on(t.contestId, t.pseudo),
+    index('contest_problems_problem_idx').on(t.problemId),
+  ],
 );
 
 export const sessions = pgTable(
@@ -201,7 +220,10 @@ export const sessionGroups = pgTable(
     sessionId: uuid('session_id').notNull(),
     groupId: uuid('group_id').notNull(),
   },
-  (t) => [uniqueIndex('session_groups_pk').on(t.sessionId, t.groupId)],
+  (t) => [
+    uniqueIndex('session_groups_pk').on(t.sessionId, t.groupId),
+    index('session_groups_group_id_idx').on(t.groupId),
+  ],
 );
 
 export const attendanceRecords = pgTable(
@@ -233,7 +255,12 @@ export const submissions = pgTable(
     contestProblemId: uuid('contest_problem_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
-  (t) => [index('submissions_user_idx').on(t.userId), index('submissions_problem_idx').on(t.problemId), index('submissions_created_idx').on(t.createdAt)],
+  (t) => [
+    index('submissions_user_idx').on(t.userId),
+    index('submissions_problem_idx').on(t.problemId),
+    index('submissions_created_idx').on(t.createdAt),
+    index('submissions_contest_problem_idx').on(t.contestProblemId),
+  ],
 );
 
 export const funds = pgTable(
