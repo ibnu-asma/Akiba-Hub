@@ -10,9 +10,9 @@ async function bootstrap(): Promise<void> {
     cors: { origin: env.WEB_ORIGIN.split(' ') },
   });
 
-  // Support base64 profile pictures and rich payloads up to 10MB
-  app.useBodyParser('json', { limit: '10mb' });
-  app.useBodyParser('urlencoded', { limit: '10mb', extended: true });
+  // Support base64 profile pictures and rich payloads up to 1MB
+  app.useBodyParser('json', { limit: '1mb' });
+  app.useBodyParser('urlencoded', { limit: '1mb', extended: true });
 
   const db = app.get(DatabaseProvider);
 

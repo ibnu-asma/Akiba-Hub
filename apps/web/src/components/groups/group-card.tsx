@@ -44,13 +44,13 @@ export function GroupCard({ group }: { group: Group }) {
             </Link>
           </div>
 
-          <Link
+          {/* <Link
             href={`/groups/${group.id}`}
             className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition shrink-0 group-hover:translate-x-0.5"
           >
             <span>Progress</span>
             <Icon name="chevronRight" className="h-3.5 w-3.5" />
-          </Link>
+          </Link> */}
         </div>
 
         {/* Middle Metadata: Heads + Country + Description */}
