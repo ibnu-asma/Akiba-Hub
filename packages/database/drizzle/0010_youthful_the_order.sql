@@ -6,3 +6,4 @@ CREATE INDEX IF NOT EXISTS "submissions_contest_problem_idx" ON "submissions" US
 CREATE INDEX IF NOT EXISTS "track_problems_problem_idx" ON "track_problems" USING btree ("problem_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "users_group_id_idx" ON "users" USING btree ("group_id");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "users_role_idx" ON "users" USING btree ("role");
+CREATE INDEX IF NOT EXISTS "track_problems_problem_idx" ON "track_problems" USING btree ("problem_id");
