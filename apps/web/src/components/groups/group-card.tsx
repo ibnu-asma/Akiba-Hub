@@ -13,19 +13,7 @@ function initials(name: string): string {
     .join('');
 }
 
-function Avatar({ name, url, size = 'h-6 w-6 text-[10px]' }: { name: string; url: string | null; size?: string }) {
-  if (url) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={url} alt={name} className={`${size} shrink-0 rounded-full object-cover border border-white shadow-xs`} />;
-  }
-  return (
-    <span
-      className={`${size} grid shrink-0 place-items-center rounded-full bg-emerald-100 font-bold text-emerald-700 border border-white shadow-xs`}
-    >
-      {initials(name)}
-    </span>
-  );
-}
+import { Avatar } from '@/components/avatar';
 
 export function GroupCard({ group }: { group: Group }) {
   const visibleStudents = group.students.slice(0, 4);

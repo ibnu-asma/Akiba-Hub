@@ -14,7 +14,8 @@
     "db:migrate": "pnpm --filter @hub/database db:migrate",
     "db:push": "pnpm --filter @hub/database db:push",
     "db:seed": "pnpm --filter @hub/database db:seed",
-    "db:studio": "pnpm --filter @hub/database db:studio"
+    "db:studio": "pnpm --filter @hub/database db:studio",
+    "migrate:avatars": "node scripts/migrate-avatars-to-cloudinary.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",

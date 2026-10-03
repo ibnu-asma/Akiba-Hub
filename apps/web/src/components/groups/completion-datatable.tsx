@@ -14,19 +14,7 @@ function initials(name: string): string {
     .join('');
 }
 
-function Avatar({ name, url, size = 'h-7 w-7 text-xs' }: { name: string; url?: string | null; size?: string }) {
-  if (url) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={url} alt={name} className={`${size} shrink-0 rounded-full object-cover border border-white shadow-xs`} />;
-  }
-  return (
-    <span
-      className={`${size} grid shrink-0 place-items-center rounded-full bg-emerald-100 font-bold text-emerald-800 border border-white shadow-xs`}
-    >
-      {initials(name)}
-    </span>
-  );
-}
+import { Avatar } from '@/components/avatar';
 
 const SORT_OPTIONS = [
   { value: 'pct_desc', label: 'Highest Completion %' },

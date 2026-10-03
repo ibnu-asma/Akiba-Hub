@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/icon';
+import { getOptimizedAvatarUrl } from '@/lib/avatar';
 
 const ACCEPTED_AVATAR = ['image/jpeg', 'image/png', 'image/gif'];
 const MAX_AVATAR_BYTES = 3.1 * 1024 * 1024;
@@ -40,29 +41,45 @@ export function ProfileAvatarSection({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const dataUri = String(reader.result);
-      setAvatar(dataUri);
-      setSaving(true);
-      try {
-        const res = await fetch('/api/auth/me', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ avatarUrl: dataUri }),
-        });
-        if (!res.ok) {
-          setError('Failed to save profile photo.');
-        } else {
-          router.refresh();
-        }
-      } catch {
-        setError('Network error saving avatar.');
-      } finally {
-        setSaving(false);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dfvpmuh7y';
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'hub_avatars_unsigned';
+
+    setSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+
+      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!cloudRes.ok) {
+        const errJson = await cloudRes.json().catch(() => ({}));
+        throw new Error(errJson?.error?.message || 'Failed to upload photo to Cloudinary.');
       }
-    };
-    reader.readAsDataURL(file);
+
+      const cloudData = await cloudRes.json();
+      const cdnUrl = cloudData.secure_url;
+      setAvatar(cdnUrl);
+
+      const res = await fetch('/api/auth/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatarUrl: cdnUrl }),
+      });
+      if (!res.ok) {
+        setError('Failed to save profile photo.');
+      } else {
+        router.refresh();
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Network error saving avatar.';
+      setError(msg);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleRemove() {
@@ -93,7 +110,7 @@ export function ProfileAvatarSection({
         <div className="h-24 w-24 overflow-hidden rounded-full ring-4 ring-white shadow-md">
           {avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatar} alt={name} className="h-full w-full object-cover" />
+            <img src={getOptimizedAvatarUrl(avatar, 192) ?? avatar} alt={name} className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-a2sv-600 via-teal-600 to-emerald-600 text-white font-bold text-2xl flex items-center justify-center">
               {initials}

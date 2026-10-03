@@ -1,3 +1,5 @@
+import { getOptimizedAvatarUrl } from '@/lib/avatar';
+
 export interface AvatarPerson {
   id: string;
   name: string;
@@ -31,7 +33,7 @@ export function AvatarStack({ people, max = 5 }: { people: AvatarPerson[]; max?:
           >
             {p.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.avatarUrl} alt={p.name} className="h-full w-full object-cover" />
+              <img src={getOptimizedAvatarUrl(p.avatarUrl, 72) ?? p.avatarUrl} alt={p.name} className="h-full w-full object-cover" />
             ) : (
               initials(p.name)
             )}
