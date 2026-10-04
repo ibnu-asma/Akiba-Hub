@@ -327,7 +327,7 @@ export class GroupsService {
     const totalAbsent = attendance.reduce((sum, r) => sum + r.absent, 0);
     const totalExcused = attendance.reduce((sum, r) => sum + r.excused, 0);
     const totalLate = attendance.reduce((sum, r) => sum + r.late, 0);
-    const totalRecords = totalPresent + totalAbsent + totalExcused + totalLate;
+    const totalRecords = totalPresent + totalAbsent + totalLate;
     const overallPresentPct = totalRecords ? Math.round((totalPresent / totalRecords) * 100) : 100;
 
     const totalSolves = consistency.reduce((sum, r) => sum + r.totalSolves, 0);

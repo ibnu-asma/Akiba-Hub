@@ -44,7 +44,7 @@ export function ProfileView({
   const effectiveMode = isViewingSelf ? viewMode : 'public';
 
   // Overall attendance rate
-  const totalAtt = attendanceRecords.length;
+  const totalAtt = attendanceRecords.filter((r) => r.status !== 'excused').length;
   const presentAtt = attendanceRecords.filter((r) => r.status === 'present' || r.status === 'late').length;
   
   const attRate = totalAtt > 0 ? Math.round((presentAtt / totalAtt) * 100) : 100;

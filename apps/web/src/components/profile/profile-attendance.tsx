@@ -78,7 +78,8 @@ export function ProfileAttendance({
     }
 
     const total = present + absent + excused + late;
-    const rate = total > 0 ? Math.round(((present + late) / total) * 100) : 0;
+    const accountableTotal = total - excused;
+    const rate = accountableTotal > 0 ? Math.round(((present + late) / accountableTotal) * 100) : 100;
 
     return { present, absent, excused, late, total, rate };
   }, [yearRecords]);

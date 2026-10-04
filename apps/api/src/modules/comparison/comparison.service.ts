@@ -45,13 +45,14 @@ export class ComparisonService {
     const c: Record<string, number> = { present: 0, absent: 0, excused: 0, late: 0 };
     for (const r of rows) c[r.status] = (c[r.status] ?? 0) + 1;
     const total = c['present'] + c['absent'] + c['excused'] + c['late'];
+    const accountable = c['present'] + c['absent'] + c['late'];
     return {
       present: c['present'],
       absent: c['absent'],
       excused: c['excused'],
       late: c['late'],
       attTotal: total,
-      presentPct: total ? Math.round((c['present'] / total) * 100) : 0,
+      presentPct: accountable ? Math.round(((c['present'] + c['late']) / accountable) * 100) : 100,
     };
   }
 

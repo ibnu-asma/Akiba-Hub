@@ -68,6 +68,7 @@ export class SummaryService {
         const excused = b['excused'] ?? 0;
         const late = b['late'] ?? 0;
         const total = present + absent + excused + late;
+        const accountable = present + absent + late;
         return {
           userId: s.id,
           name: s.name,
@@ -77,7 +78,7 @@ export class SummaryService {
           excused,
           late,
           total,
-          presentPct: total ? Math.round((present / total) * 100) : 100,
+          presentPct: accountable ? Math.round(((present + late) / accountable) * 100) : 100,
         };
       })
       .sort((a, b) => b.presentPct - a.presentPct || a.name.localeCompare(b.name));
