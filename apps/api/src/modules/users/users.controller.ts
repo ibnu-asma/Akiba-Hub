@@ -6,7 +6,6 @@ import { ScopeService } from '../../common/auth/scope.service.js';
 import { UsersService } from './users.service.js';
 import { z } from 'zod';
 
-
 const resetPasswordDto = z.object({
   password: z.string().min(6),
 });
@@ -60,6 +59,12 @@ export class UsersController {
     return this.users.getById(id);
   }
 
+  @Get(':id/stats')
+  @UseGuards(AuthGuard)
+  async getStats(@Param('id') id: string) {
+    return this.users.getStats(id);
+  }
+
   @Patch(':id/role')
   @UseGuards(AuthGuard, new MockRulesGuard(3)) // HoA only
   async updateRole(@Param('id') id: string, @Body() body: unknown, @CurrentPrincipal() principal: Principal) {
@@ -70,7 +75,6 @@ export class UsersController {
       role: principal.role,
     });
   }
-
 
   @Patch(':id/password')
   @UseGuards(AuthGuard, new MockRulesGuard(3)) // HoA only

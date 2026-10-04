@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import {
   Inject, Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
-import { users, groups, invitations, problems, and, asc, eq, sql, isNull, inArray } from '@hub/database';
+import { users, groups, invitations, problems, submissions, and, asc, eq, sql, isNull, inArray } from '@hub/database';
 import { DomainError, ROLES } from '@hub/shared';
 import { DataScope } from '../../common/auth/scope.service.js';
 import { AuditService } from '../../common/audit/audit.service.js';
@@ -296,5 +296,25 @@ export class UsersService {
 
     const rows = await this.db.db.select().from(users).where(where).orderBy(asc(users.name)).execute();
     return rows.map(toSummary);
+  }
+
+  async getStats(userId: string) {
+    const rows = await this.db.db
+      .select({
+        solvedCount: sql<number>`count(distinct ${submissions.problemId})::int`,
+        totalMinutes: sql<number>`coalesce(sum(${submissions.timeSpentMin}), 0)::int`,
+        totalTries: sql<number>`coalesce(sum(${submissions.tries}), 0)::int`,
+        totalSubmissions: sql<number>`count(*)::int`,
+      })
+      .from(submissions)
+      .where(eq(submissions.userId, userId))
+      .execute();
+
+    return rows[0] ?? {
+      solvedCount: 0,
+      totalMinutes: 0,
+      totalTries: 0,
+      totalSubmissions: 0,
+    };
   }
 }

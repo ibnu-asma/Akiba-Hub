@@ -331,5 +331,27 @@ export class SummaryService {
         .map((s) => ({ userId: s.id, name: s.name, rating: s.rating, avatarUrl: s.avatarUrl ?? null })),
     };
   }
+
+  /** Scoped stats for HoE/HoA dashboard (distinct solutions, total minutes, total submissions). */
+  async dashboardStats(scope: DataScope) {
+    const rows = await this.db.db
+      .select({
+        distinctSolutions: sql<number>`count(distinct ${submissions.problemId})::int`,
+        totalMinutes: sql<number>`coalesce(sum(${submissions.timeSpentMin}), 0)::int`,
+        totalTries: sql<number>`coalesce(sum(${submissions.tries}), 0)::int`,
+        totalSubmissions: sql<number>`count(*)::int`,
+      })
+      .from(submissions)
+      .innerJoin(users, eq(submissions.userId, users.id))
+      .where(sql`${users.role} = 'student' AND (${this.scoped(scope)})`)
+      .execute();
+
+    return rows[0] ?? {
+      distinctSolutions: 0,
+      totalMinutes: 0,
+      totalTries: 0,
+      totalSubmissions: 0,
+    };
+  }
 }
 

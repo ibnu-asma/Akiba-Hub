@@ -44,4 +44,9 @@ export class SummaryController {
   async divisions(@CurrentPrincipal() principal: Principal) {
     return this.summary.divisions(await this.scope(principal));
   }
+
+  @Get('stats')
+  async stats(@CurrentPrincipal() principal: Principal) {
+    return this.summary.dashboardStats(await this.scope(principal));
+  }
 }

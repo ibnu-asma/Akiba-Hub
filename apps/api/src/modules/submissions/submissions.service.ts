@@ -40,8 +40,18 @@ export class SubmissionsService {
     return rows[0]!;
   }
 
+  /** All distinct problem IDs solved by the given user. */
+  async solvedProblemIds(userId: string): Promise<string[]> {
+    const rows = await this.db.db
+      .selectDistinct({ problemId: submissions.problemId })
+      .from(submissions)
+      .where(eq(submissions.userId, userId))
+      .execute();
+    return rows.map((r) => r.problemId);
+  }
+
   /** Newest-first feed joined with student + problem names (SPEC §7.13, §6.2). */
-  async list(scope: DataScope, actorId: string, limit: number, opts: { group?: boolean; problemId?: string } = {}) {
+  async list(scope: DataScope, actorId: string, limit: number, opts: { group?: boolean; problemId?: string; userId?: string } = {}) {
     let query = this.db.db
       .select({
         id: submissions.id,
@@ -67,7 +77,12 @@ export class SubmissionsService {
       query = query.where(eq(submissions.problemId, opts.problemId));
     }
 
-    if (opts.group) {
+    if (opts.userId) {
+      if (opts.userId !== actorId && !scope.isGlobal) {
+        query = query.where(inArray(users.groupId, scope.groupIds));
+      }
+      query = query.where(eq(submissions.userId, opts.userId));
+    } else if (opts.group) {
       // Group-wide feed (student → their group, HoE → headed groups, HoA → all).
       if (!scope.isGlobal) query = query.where(inArray(users.groupId, scope.groupIds));
     } else if (scope.role === ROLES.headOfEducation) {

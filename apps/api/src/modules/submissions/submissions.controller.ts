@@ -21,11 +21,26 @@ const createDto = z.object({
 export class SubmissionsController {
   constructor(@Inject(SubmissionsService) private readonly submissions: SubmissionsService, @Inject(ScopeService) private readonly scopes: ScopeService, ) {}
 
+  @Get('solved-set')
+  async solvedSet(@CurrentPrincipal() principal: Principal) {
+    return this.submissions.solvedProblemIds(principal.id);
+  }
+
   @Get()
-  async list(@CurrentPrincipal() principal: Principal, @Query('limit') limit?: string, @Query('group') group?: string, @Query('problemId') problemId?: string) {
+  async list(
+    @CurrentPrincipal() principal: Principal,
+    @Query('limit') limit?: string,
+    @Query('group') group?: string,
+    @Query('problemId') problemId?: string,
+    @Query('userId') userId?: string,
+  ) {
     const scope = await this.scopes.forUser(principal.id, principal.role);
     const parsed = Number.parseInt(limit ?? '', 10);
-    return this.submissions.list(scope, principal.id, Number.isNaN(parsed) ? 100 : parsed, { group: group === '1', problemId });
+    return this.submissions.list(scope, principal.id, Number.isNaN(parsed) ? 100 : parsed, {
+      group: group === '1',
+      problemId,
+      userId,
+    });
   }
 
   @Get('solvers')

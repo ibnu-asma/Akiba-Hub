@@ -88,6 +88,20 @@ export interface UserSummaryDto extends Me {
   avatarUrl: string | null;
 }
 
+export interface UserStatsDto {
+  solvedCount: number;
+  totalMinutes: number;
+  totalTries: number;
+  totalSubmissions: number;
+}
+
+export interface SummaryStatsDto {
+  distinctSolutions: number;
+  totalMinutes: number;
+  totalTries: number;
+  totalSubmissions: number;
+}
+
 /** /auth/me — request-deduped so layout and pages share a single upstream call. */
 export const getMe = cache(async (): Promise<Me | null> => {
   try {

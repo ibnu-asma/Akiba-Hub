@@ -7,10 +7,10 @@ import {
   type Me,
   type SubmissionDto,
   type UserAttendanceRecord,
+  type UserStatsDto,
 } from '@/lib/api';
 import { ProfileView } from '@/components/profile/profile-view';
 import type { ConsistencyRow } from '@/components/summary/types';
-
 
 export default async function ProfilePage({
   searchParams,
@@ -22,12 +22,14 @@ export default async function ProfilePage({
 
   const { userId } = (await searchParams) ?? {};
   const isViewingSelf = !userId || userId === me.id;
+  const targetUserId = userId || me.id;
 
   // Parallel fetches for profile and metrics
-  const [groups, submissions, dbAttendance, consistencySummary] = await Promise.all([
+  const [groups, stats, userSubmissions, dbAttendance, consistencySummary] = await Promise.all([
     safe(hubFetch<Group[]>('/groups')),
-    safe(hubFetch<SubmissionDto[]>('/submissions?limit=200')),
-    safe(hubFetch<UserAttendanceRecord[]>(`/sessions/user-attendance?userId=${userId || me.id}`)),
+    safe(hubFetch<UserStatsDto>(`/users/${targetUserId}/stats`)),
+    safe(hubFetch<SubmissionDto[]>(`/submissions?userId=${targetUserId}&limit=100`)),
+    safe(hubFetch<UserAttendanceRecord[]>(`/sessions/user-attendance?userId=${targetUserId}`)),
     safe(hubFetch<ConsistencyRow[]>('/summary/consistency')),
   ]);
 
@@ -60,27 +62,24 @@ export default async function ProfilePage({
     }
   }
 
-  // Calculate solved count and minutes
-  const mySubmissions = (submissions ?? []).filter((s) => s.userId === targetUser.id);
-  const distinctProblems = new Set(mySubmissions.map((s) => s.problemId));
-  const solvedCount = distinctProblems.size;
-  const totalMinutes = mySubmissions.reduce((sum, s) => sum + (s.timeSpentMin || 0), 0);
+  // Calculate solved count and minutes (use unpaginated DB stats with fallback)
+  const distinctProblems = new Set((userSubmissions ?? []).map((s) => s.problemId));
+  const solvedCount = stats?.solvedCount ?? distinctProblems.size;
+  const totalMinutes = stats?.totalMinutes ?? (userSubmissions ?? []).reduce((sum, s) => sum + (s.timeSpentMin || 0), 0);
 
-  // Group solves by day for consistency heatmap
+  // Group solves by day for consistency heatmap without double-counting
   const solvesMap = new Map<string, number>();
-  for (const s of mySubmissions) {
-    const day = s.createdAt.slice(0, 10);
-    solvesMap.set(day, (solvesMap.get(day) ?? 0) + 1);
-  }
-
-  // Add historical consistency from summary if present
   const userConsistency = consistencySummary?.find((c) => c.userId === targetUser.id);
-  if (userConsistency?.days) {
+  if (userConsistency?.days && userConsistency.days.length > 0) {
     for (const d of userConsistency.days) {
-      solvesMap.set(d.day, (solvesMap.get(d.day) ?? 0) + d.count);
+      solvesMap.set(d.day, d.count);
+    }
+  } else {
+    for (const s of userSubmissions ?? []) {
+      const day = s.createdAt.slice(0, 10);
+      solvesMap.set(day, (solvesMap.get(day) ?? 0) + 1);
     }
   }
-
 
   const consistencySolves = Array.from(solvesMap.entries()).map(([day, count]) => ({
     day,

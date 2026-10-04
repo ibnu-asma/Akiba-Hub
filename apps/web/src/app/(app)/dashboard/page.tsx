@@ -10,6 +10,7 @@ import {
   type Group,
   type SessionDto,
   type SubmissionDto,
+  type SummaryStatsDto,
   type SuperGroup,
   type UserDto,
 } from '@/lib/api';
@@ -51,18 +52,19 @@ export default async function DashboardPage() {
 
   // Scope-gated fetches — each degrades to null on failure (dashboard never crashes).
   if (level >= 3) {
-    const [superGroups, groups, users, sessions, activities, submissions] = await Promise.all([
+    const [superGroups, groups, users, sessions, activities, summaryStats] = await Promise.all([
       safe(hubFetch<SuperGroup[]>('/super-groups')),
       safe(hubFetch<Group[]>('/groups')),
       safe(hubFetch<UserDto[]>('/users')),
       safe(hubFetch<SessionDto[]>('/sessions?all=1')),
       safe(hubFetch<Activity[]>('/activities?limit=8')),
-      safe(hubFetch<SubmissionDto[]>('/submissions?limit=200')),
+      safe(hubFetch<SummaryStatsDto>('/summary/stats')),
     ]);
 
     const studentUsers = users?.filter((u) => u.role === 'student') ?? [];
-    const distinctSolutions = new Set((submissions ?? []).map((s) => s.problemId)).size;
-    const totalMinutes = (submissions ?? []).reduce((acc, s) => acc + (s.timeSpentMin || 0), 0);
+    const distinctSolutions = summaryStats?.distinctSolutions ?? 0;
+    const totalMinutes = summaryStats?.totalMinutes ?? 0;
+    const totalSubmissions = summaryStats?.totalSubmissions ?? 0;
     const avgRating =
       studentUsers.length > 0
         ? Math.round(studentUsers.reduce((acc, u) => acc + (u.rating ?? 1200), 0) / studentUsers.length)
@@ -85,7 +87,7 @@ export default async function DashboardPage() {
             accent="green"
             hint={
               distinctSolutions > 0
-                ? `${submissions?.length ?? 0} total submissions logged`
+                ? `${totalSubmissions} total submissions logged`
                 : `${superGroups?.length ?? 0} super groups active`
             }
           />
@@ -112,11 +114,11 @@ export default async function DashboardPage() {
   }
 
   if (level === 2) {
-    const [groups, users, sessions, submissions, recentSolves, daily, completion, exercise] = await Promise.all([
+    const [groups, users, sessions, summaryStats, recentSolves, daily, completion, exercise] = await Promise.all([
       safe(hubFetch<Group[]>('/groups')),
       safe(hubFetch<UserDto[]>('/users')),
       safe(hubFetch<SessionDto[]>('/sessions')),
-      safe(hubFetch<SubmissionDto[]>('/submissions?limit=200')),
+      safe(hubFetch<SummaryStatsDto>('/summary/stats')),
       safe(hubFetch<SubmissionDto[]>('/submissions?limit=15')),
       safe(hubFetch<DailyProblemDto[]>('/daily-problems?limit=20')),
       safe(hubFetch<CompletionRow[]>('/summary/completion')),
@@ -129,8 +131,9 @@ export default async function DashboardPage() {
     ]);
 
     const studentUsers = users?.filter((u) => u.role === 'student') ?? [];
-    const distinctSolutions = new Set((submissions ?? []).map((s) => s.problemId)).size;
-    const totalMinutes = (submissions ?? []).reduce((acc, s) => acc + (s.timeSpentMin || 0), 0);
+    const distinctSolutions = summaryStats?.distinctSolutions ?? 0;
+    const totalMinutes = summaryStats?.totalMinutes ?? 0;
+    const totalSubmissions = summaryStats?.totalSubmissions ?? 0;
     const avgRating =
       studentUsers.length > 0
         ? Math.round(studentUsers.reduce((acc, u) => acc + (u.rating ?? 1200), 0) / studentUsers.length)
@@ -162,7 +165,7 @@ export default async function DashboardPage() {
             accent="green"
             hint={
               distinctSolutions > 0
-                ? `${submissions?.length ?? 0} cohort submissions logged`
+                ? `${totalSubmissions} cohort submissions logged`
                 : `${studentUsers.length} students in cohort`
             }
           />
