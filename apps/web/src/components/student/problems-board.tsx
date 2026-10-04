@@ -117,8 +117,9 @@ export function ProblemsBoard({
         }
 
         // Status filter
-        if (status === 'solved' && !solved.has(p.id)) return false;
-        if (status === 'unsolved' && solved.has(p.id)) return false;
+        const isProbSolved = solved.has(p.id) || (Boolean(isHead) && (solvers.get(p.id)?.length ?? 0) > 0);
+        if (status === 'solved' && !isProbSolved) return false;
+        if (status === 'unsolved' && isProbSolved) return false;
         if (status === 'bookmarked' && !bookmarkedIds.has(p.id)) return false;
 
         // Platform filter
@@ -135,7 +136,7 @@ export function ProblemsBoard({
         if (timeB !== timeA) return timeB - timeA;
         return a.name.localeCompare(b.name);
       });
-  }, [problems, q, diff, status, platform, solved, bookmarkedIds]);
+  }, [problems, q, diff, status, platform, solved, solvers, bookmarkedIds, isHead]);
 
   // Pagination calculations
   const totalCount = filteredProblems.length;
@@ -149,7 +150,7 @@ export function ProblemsBoard({
     return filteredProblems.slice(start, start + sizeNum);
   }, [filteredProblems, safePage, sizeNum, pageSize]);
 
-  const solvedCount = problems.filter((p) => solved.has(p.id)).length;
+  const solvedCount = problems.filter((p) => solved.has(p.id) || (Boolean(isHead) && (solvers.get(p.id)?.length ?? 0) > 0)).length;
   const bookmarkedCount = problems.filter((p) => bookmarkedIds.has(p.id)).length;
 
   const hasActiveFilters = q.trim() !== '' || diff !== ALL || status !== ALL || platform !== ALL;

@@ -361,8 +361,8 @@ export function TrackDetailBoard({
             {/* 2-Column Problem Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {probs.map((prob) => {
-                const isSolved = solved.has(prob.id);
                 const probSolvers = solvers.get(prob.id) ?? [];
+                const isSolved = solved.has(prob.id) || (Boolean(isHead) && probSolvers.length > 0);
                 const diffClass = DIFF_STYLES[prob.difficulty.toLowerCase()] ?? DIFF_STYLES.easy;
                 const isBookmarked = bookmarkedIds.has(prob.id);
 

@@ -151,8 +151,9 @@ export function ExercisesBoard({
         }
 
         // Status filter
-        if (status === 'solved' && !solved.has(ex.problemId)) return false;
-        if (status === 'unsolved' && solved.has(ex.problemId)) return false;
+        const isProbSolved = solved.has(ex.problemId) || (Boolean(isHead) && (solvers.get(ex.problemId)?.length ?? 0) > 0);
+        if (status === 'solved' && !isProbSolved) return false;
+        if (status === 'unsolved' && isProbSolved) return false;
 
         // Platform filter
         if (platform !== ALL && ex.platform.toLowerCase() !== platform.toLowerCase()) {
@@ -173,7 +174,7 @@ export function ExercisesBoard({
         if (timeB !== timeA) return timeB - timeA;
         return b.sortOrder - a.sortOrder;
       });
-  }, [exercises, q, diff, status, platform, trackFilter, solved]);
+  }, [exercises, q, diff, status, platform, trackFilter, solved, solvers, isHead]);
 
   // Pagination calculations
   const totalCount = filteredExercises.length;
@@ -221,11 +222,12 @@ export function ExercisesBoard({
     for (const ex of exercises) {
       const curr = counts.get(ex.trackId) ?? { total: 0, solved: 0 };
       curr.total += 1;
-      if (solved.has(ex.problemId)) curr.solved += 1;
+      const isProbSolved = solved.has(ex.problemId) || (Boolean(isHead) && (solvers.get(ex.problemId)?.length ?? 0) > 0);
+      if (isProbSolved) curr.solved += 1;
       counts.set(ex.trackId, curr);
     }
     return counts;
-  }, [exercises, solved]);
+  }, [exercises, solved, solvers, isHead]);
 
   // Toggle single track collapse
   const toggleTrack = (trackId: string) => {

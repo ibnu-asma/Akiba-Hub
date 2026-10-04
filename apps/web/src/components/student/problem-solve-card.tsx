@@ -116,11 +116,12 @@ export function ProblemSolveCard({
   };
 
   const diffClass = DIFF[problem.difficulty.toLowerCase()] ?? DIFF.easy;
+  const isEffectiveSolved = solved || (Boolean(isHead) && solvers.length > 0);
 
   return (
     <article
       className={`rounded-xl transition-all p-4 flex flex-col justify-between shadow-xs hover:shadow-md ${
-        solved
+        isEffectiveSolved
           ? 'bg-[#f0fdf4] border-2 border-[#86efac]/90'
           : 'bg-white border border-slate-200/80'
       }`}
@@ -137,7 +138,7 @@ export function ProblemSolveCard({
             <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md shrink-0 capitalize ${diffClass}`}>
               {problem.difficulty}
             </span>
-            {solved && (
+            {isEffectiveSolved && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 bg-emerald-100/90 rounded-md shrink-0">
                 <Icon name="check" className="h-3 w-3" />
                 Solved

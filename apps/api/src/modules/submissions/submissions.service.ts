@@ -40,13 +40,30 @@ export class SubmissionsService {
     return rows[0]!;
   }
 
-  /** All distinct problem IDs solved by the given user. */
-  async solvedProblemIds(userId: string): Promise<string[]> {
-    const rows = await this.db.db
+  /**
+   * All distinct problem IDs solved within the caller's scope:
+   * - Student: problems solved by this student
+   * - HoE: problems solved by any student in their supervised groups
+   * - HoA: problems solved across the academy
+   */
+  async solvedProblemIds(scope: DataScope, actorId: string): Promise<string[]> {
+    let query = this.db.db
       .selectDistinct({ problemId: submissions.problemId })
       .from(submissions)
-      .where(eq(submissions.userId, userId))
-      .execute();
+      .$dynamic();
+
+    if (scope.role === ROLES.headOfAcademy || scope.isGlobal) {
+      // Platform-wide distinct solved problems
+    } else if (scope.role === ROLES.headOfEducation) {
+      if (scope.groupIds.length === 0) return [];
+      query = query
+        .innerJoin(users, eq(submissions.userId, users.id))
+        .where(inArray(users.groupId, scope.groupIds));
+    } else {
+      query = query.where(eq(submissions.userId, actorId));
+    }
+
+    const rows = await query.execute();
     return rows.map((r) => r.problemId);
   }
 

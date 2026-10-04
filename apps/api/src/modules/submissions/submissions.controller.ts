@@ -23,7 +23,8 @@ export class SubmissionsController {
 
   @Get('solved-set')
   async solvedSet(@CurrentPrincipal() principal: Principal) {
-    return this.submissions.solvedProblemIds(principal.id);
+    const scope = await this.scopes.forUser(principal.id, principal.role);
+    return this.submissions.solvedProblemIds(scope, principal.id);
   }
 
   @Get()
