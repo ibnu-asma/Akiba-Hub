@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { getMe, hubFetch, safe, type ProblemDto } from '@/lib/api';
+import { getMe, hubFetch, safe, type ProblemDto, type SubmissionDto } from '@/lib/api';
 import { AddSubmissionForm } from '@/components/add-submission-form';
 
 /** Add Submission — solve + submit against a specific problem (SPEC §6.4). */
@@ -9,11 +9,10 @@ export default async function AddSubmissionPage({ params }: { params: Promise<{ 
   if (!me) redirect('/login');
   const { id } = await params;
 
-  const [problems, mySubmissions] = await Promise.all([
-    safe(hubFetch<ProblemDto[]>('/problems?limit=200')),
-    safe(hubFetch<any[]>(`/submissions?problemId=${id}&limit=1`))
+  const [problem, mySubmissions] = await Promise.all([
+    safe(hubFetch<ProblemDto>(`/problems/${id}`)),
+    safe(hubFetch<SubmissionDto[]>(`/submissions?problemId=${id}&userId=${me.id}&limit=1`)),
   ]);
-  const problem = problems?.find((p) => p.id === id);
   if (!problem) notFound();
 
   return (

@@ -1,6 +1,6 @@
 import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
-import { desc, eq, inArray, problems, sql, submissions, users } from '@hub/database';
+import { and, desc, eq, inArray, problems, sql, submissions, users } from '@hub/database';
 import { ROLES } from '@hub/shared';
 import { DataScope } from '../../common/auth/scope.service.js';
 
@@ -90,22 +90,28 @@ export class SubmissionsService {
       .innerJoin(problems, eq(submissions.problemId, problems.id))
       .$dynamic();
 
+    const conditions = [];
+
     if (opts.problemId) {
-      query = query.where(eq(submissions.problemId, opts.problemId));
+      conditions.push(eq(submissions.problemId, opts.problemId));
     }
 
     if (opts.userId) {
       if (opts.userId !== actorId && !scope.isGlobal) {
-        query = query.where(inArray(users.groupId, scope.groupIds));
+        conditions.push(inArray(users.groupId, scope.groupIds));
       }
-      query = query.where(eq(submissions.userId, opts.userId));
+      conditions.push(eq(submissions.userId, opts.userId));
     } else if (opts.group) {
       // Group-wide feed (student → their group, HoE → headed groups, HoA → all).
-      if (!scope.isGlobal) query = query.where(inArray(users.groupId, scope.groupIds));
+      if (!scope.isGlobal) conditions.push(inArray(users.groupId, scope.groupIds));
     } else if (scope.role === ROLES.headOfEducation) {
-      query = query.where(inArray(users.groupId, scope.groupIds));
+      conditions.push(inArray(users.groupId, scope.groupIds));
     } else if (scope.role !== ROLES.headOfAcademy) {
-      query = query.where(eq(submissions.userId, actorId));
+      conditions.push(eq(submissions.userId, actorId));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
 
     return query.orderBy(desc(submissions.createdAt)).limit(Math.min(Math.max(limit, 1), 200)).execute();
