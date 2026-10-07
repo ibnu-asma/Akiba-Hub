@@ -29,22 +29,50 @@ export function AddSubmissionForm({ problemId, previousSubmission }: { problemId
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.timeSpentMin) setTimeSpentMin(parsed.timeSpentMin);
-        if (parsed.tries) setTries(parsed.tries);
+        const previousSubmissionTime = previousSubmission?.createdAt
+          ? new Date(previousSubmission.createdAt).getTime()
+          : 0;
+
+        // If a submission exists on the server and the draft is older than it (or legacy draft), discard it
+        if (previousSubmission && (!parsed.savedAt || parsed.savedAt <= previousSubmissionTime)) {
+          localStorage.removeItem(`draft-submission-${problemId}`);
+          return;
+        }
+
+        if (parsed.timeSpentMin != null) setTimeSpentMin(parsed.timeSpentMin);
+        if (parsed.tries != null) setTries(parsed.tries);
         if (parsed.language) setLanguage(parsed.language);
-        if (parsed.code) setCode(parsed.code);
+        if (parsed.code != null) setCode(parsed.code);
       } catch {}
     }
-  }, [problemId]);
+  }, [problemId, previousSubmission]);
 
   useEffect(() => {
+    const isUntouched =
+      timeSpentMin === (previousSubmission?.timeSpentMin?.toString() ?? '') &&
+      tries === (previousSubmission?.tries?.toString() ?? '1') &&
+      language === (previousSubmission?.language ?? '') &&
+      code === (previousSubmission?.code ?? '');
+
+    // Don't auto-save if untouched or if all fields are empty
+    if (isUntouched || (!timeSpentMin && !code && !language)) {
+      return;
+    }
+
     const timer = setTimeout(() => {
-      localStorage.setItem(`draft-submission-${problemId}`, JSON.stringify({
-        timeSpentMin, tries, language, code
-      }));
+      localStorage.setItem(
+        `draft-submission-${problemId}`,
+        JSON.stringify({
+          timeSpentMin,
+          tries,
+          language,
+          code,
+          savedAt: Date.now(),
+        }),
+      );
     }, 500);
     return () => clearTimeout(timer);
-  }, [timeSpentMin, tries, language, code, problemId]);
+  }, [timeSpentMin, tries, language, code, problemId, previousSubmission]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
