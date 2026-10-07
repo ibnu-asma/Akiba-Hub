@@ -18,6 +18,7 @@ const listDto = z.object({
   q: z.string().max(120).optional(),
   difficulty: z.enum(Object.values(PROBLEM_DIFFICULTIES) as [string, ...string[]]).optional(),
   tag: z.string().max(40).optional(),
+  link: z.string().trim().max(500).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional(),
   offset: z.coerce.number().int().min(0).optional(),
 });
@@ -36,8 +37,8 @@ export class ProblemsController {
 
   @Get()
   async list(@Query() query: Record<string, unknown>) {
-    const { q, difficulty, tag, limit, offset } = listDto.parse(query);
-    return this.problems.list({ q, difficulty, tag, limit, offset });
+    const { q, difficulty, tag, limit, offset, link } = listDto.parse(query);
+    return this.problems.list({ q, difficulty, tag, limit, offset, link });
   }
 
   /** HoE/HoA: add a DSA problem for the students (spec §7.5). */

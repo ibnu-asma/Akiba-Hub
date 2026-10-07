@@ -1,6 +1,6 @@
 import { Inject,  Injectable } from '@nestjs/common';
 import { DatabaseProvider } from '../../config/database.provider.js';
-import { problems, and, desc, eq, isNull, sql } from '@hub/database';
+import { problems, and, desc, eq, isNull, or, sql } from '@hub/database';
 import { AuditService } from '../../common/audit/audit.service.js';
 import { DomainError } from '@hub/shared';
 
@@ -16,6 +16,7 @@ export interface ListProblemOptions {
   q?: string;
   difficulty?: string;
   tag?: string;
+  link?: string;
   limit?: number;
   offset?: number;
 }
@@ -114,3 +115,32 @@ export class ProblemsService {
   }
 
 }
+
+/**
+ * Normalizes a problem URL for consistent matching:
+ * - Lowercases hostname and path
+ * - Strips protocol (http/https) and www.
+ * - Strips query parameters (?...) and hash fragments (#...)
+ * - Strips trailing LeetCode '/description' path
+ * - Strips trailing slashes
+ */
+function normalizeProblemUrl(rawUrl: string): string {
+  try {
+    let url = rawUrl.trim();
+    if (!/^https?:\/\//i.test(url)) {
+      url = `https://${url}`;
+    }
+    const parsed = new URL(url);
+    const host = parsed.host.replace(/^www\./i, '').toLowerCase();
+    let pathname = parsed.pathname.toLowerCase();
+    // Handle common platform sub-paths (e.g. LeetCode /description)
+    pathname = pathname.replace(/\/description\/?$/i, '');
+    pathname = pathname.replace(/\/+$/, '');
+    return `${host}${pathname}`;
+  } catch {
+    return rawUrl.trim().toLowerCase().replace(/\/+$/, '');
+  }
+}
+
+
+
